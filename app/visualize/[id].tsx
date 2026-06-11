@@ -1,3 +1,5 @@
+// app/visualize/[id].tsx
+
 import React, { useMemo } from "react";
 import { View, StyleSheet, useWindowDimensions, Text } from "react-native";
 import { useLocalSearchParams } from "expo-router";

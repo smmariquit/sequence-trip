@@ -1,3 +1,5 @@
+// src/visualizations/CollatzTree.web.tsx
+
 import React, { useMemo, useCallback } from "react";
 import { useWebCanvas, hslString } from "./useWebCanvas";
 import { collatzSequence } from "../sequences/generators";

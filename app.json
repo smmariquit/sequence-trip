@@ -14,15 +14,15 @@
       "backgroundColor": "#07060E"
     },
     "android": {
-      "package": "com.sequencetrip.app",
+      "package": "dev.stimmie.oeisvisualizations",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#07060E"
       },
-      "versionCode": 1
+      "versionCode": 2
     },
     "ios": {
-      "bundleIdentifier": "com.sequencetrip.app",
+      "bundleIdentifier": "dev.stimmie.oeisvisualizations",
       "supportsTablet": true
     },
     "web": {
@@ -34,14 +34,24 @@
     "plugins": [
       "expo-router",
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          }
+        }
+      ]
     ],
     "extra": {
       "router": {
         "origin": false
       },
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "28780a86-7afa-41d4-ba7b-6b0cd6c8e730"
       }
     }
   }

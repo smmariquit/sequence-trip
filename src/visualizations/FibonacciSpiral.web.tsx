@@ -1,3 +1,5 @@
+// src/visualizations/FibonacciSpiral.web.tsx
+
 import React, { useMemo, useCallback } from "react";
 import { useWebCanvas, hslString } from "./useWebCanvas";
 

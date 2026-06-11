@@ -1,3 +1,5 @@
+// src/sequences/generators.ts
+
 export function fibonacci(count: number): number[] {
   const seq = [0, 1];
   for (let i = 2; i < count; i++) {

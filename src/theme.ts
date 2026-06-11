@@ -1,3 +1,5 @@
+// src/theme.ts
+
 export const colors = {
   bg: "#07060E",
   bgCard: "#110F1B",

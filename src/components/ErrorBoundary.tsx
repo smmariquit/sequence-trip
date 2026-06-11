@@ -1,3 +1,5 @@
+// src/components/ErrorBoundary.tsx
+
 import React, { Component } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { colors } from "../theme";

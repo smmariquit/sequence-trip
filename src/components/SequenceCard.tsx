@@ -1,3 +1,5 @@
+// src/components/SequenceCard.tsx
+
 import React, { useCallback } from "react";
 import {
   View,

@@ -1,3 +1,5 @@
+// src/visualizations/useWebCanvas.ts
+
 import { useRef, useEffect, useCallback } from "react";
 
 type DrawFn = (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => void;

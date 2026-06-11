@@ -1,3 +1,5 @@
+// src/sequences/types.ts
+
 export interface OEISSequence {
   id: string;
   oeis: string;

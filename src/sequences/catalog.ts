@@ -1,3 +1,5 @@
+// src/sequences/catalog.ts
+
 import type { OEISSequence, VizType } from "./types";
 import * as gen from "./generators";
 

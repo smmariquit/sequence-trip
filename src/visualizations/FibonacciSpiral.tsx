@@ -1,3 +1,5 @@
+// src/visualizations/FibonacciSpiral.tsx
+
 import React, { useMemo, useEffect } from "react";
 import {
   Canvas,

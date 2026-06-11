@@ -1,3 +1,5 @@
+// src/visualizations/DigitFlow.web.tsx
+
 import React, { useMemo, useCallback } from "react";
 import { useWebCanvas, hslString } from "./useWebCanvas";
 import { piDigits } from "../sequences/generators";
