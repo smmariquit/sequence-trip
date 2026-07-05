@@ -13,3 +13,5 @@ web-build/
 google-services.json
 ios/
 android/
+assets/oeis.db
+scripts/.oeis-data/

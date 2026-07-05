@@ -1,9 +1,17 @@
 // app/visualize/[id].tsx
 
-import React, { useMemo } from "react";
-import { View, StyleSheet, useWindowDimensions, Text } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  useWindowDimensions,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { getSequence } from "../../src/sequences/catalog";
+import * as oeis from "../../src/oeis/db";
+import type { OEISSequence } from "../../src/sequences/types";
 import Controls from "../../src/components/Controls";
 import { PlaybackProvider } from "../../src/playback/PlaybackContext";
 import { colors } from "../../src/theme";
@@ -16,8 +24,16 @@ import {
   DigitFlow,
 } from "../../src/visualizations";
 
-function FullViz({ vizType, width, height }: { vizType: string; width: number; height: number }) {
-  switch (vizType) {
+function FullViz({
+  seq,
+  width,
+  height,
+}: {
+  seq: OEISSequence;
+  width: number;
+  height: number;
+}) {
+  switch (seq.vizType) {
     case "recaman-arcs":
       return <RecamanArcs width={width} height={height} count={80} />;
     case "fibonacci-spiral":
@@ -31,9 +47,12 @@ function FullViz({ vizType, width, height }: { vizType: string; width: number; h
     case "digit-flow":
       return <DigitFlow width={width} height={height} count={500} />;
     default:
+      // ponytail: generic visualizations land in Phase 2; terms readout until then
       return (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Unknown visualization</Text>
+        <View style={styles.placeholder}>
+          <Text style={styles.placeholderTerms} numberOfLines={12}>
+            {seq.terms?.join(", ")}
+          </Text>
         </View>
       );
   }
@@ -42,7 +61,29 @@ function FullViz({ vizType, width, height }: { vizType: string; width: number; h
 export default function VisualizeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { width: W, height: H } = useWindowDimensions();
-  const seq = useMemo(() => getSequence(id ?? ""), [id]);
+  const [dbSeq, setDbSeq] = useState<OEISSequence | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const catalogSeq = useMemo(() => getSequence(id ?? ""), [id]);
+
+  useEffect(() => {
+    if (catalogSeq || !id) return;
+    setLoading(true);
+    oeis
+      .getById(id)
+      .then(setDbSeq)
+      .finally(() => setLoading(false));
+  }, [id, catalogSeq]);
+
+  const seq = catalogSeq ?? dbSeq;
+
+  if (loading) {
+    return (
+      <View style={styles.errorContainer}>
+        <ActivityIndicator color={colors.accent} />
+      </View>
+    );
+  }
 
   if (!seq) {
     return (
@@ -55,7 +96,7 @@ export default function VisualizeScreen() {
   return (
     <PlaybackProvider>
       <View style={styles.container}>
-        <FullViz vizType={seq.vizType ?? ""} width={W} height={H} />
+        <FullViz seq={seq} width={W} height={H} />
         <Controls title={seq.name} oeis={seq.anum} />
       </View>
     </PlaybackProvider>
@@ -76,5 +117,18 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.textDim,
     fontSize: 16,
+  },
+  placeholder: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 32,
+  },
+  placeholderTerms: {
+    color: colors.textDim,
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: "center",
+    fontVariant: ["tabular-nums"],
   },
 });

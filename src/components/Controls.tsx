@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Pressable,
   Platform,
+  Linking,
 } from "react-native";
 import { router } from "expo-router";
 import { colors } from "../theme";
@@ -41,7 +42,9 @@ export default function Controls({ title, oeis }: Props) {
         </Pressable>
         <View style={styles.titleArea}>
           <Text style={styles.title} numberOfLines={1}>{title}</Text>
-          <Text style={styles.oeis}>{oeis}</Text>
+          <Pressable onPress={() => Linking.openURL(`https://oeis.org/${oeis}`)}>
+            <Text style={styles.oeis}>{oeis} ↗</Text>
+          </Pressable>
         </View>
         <Pressable onPress={cycleSpeed} style={styles.speedBtn}>
           <Text style={styles.speedText}>{SPEEDS[speedIdx]}x</Text>
