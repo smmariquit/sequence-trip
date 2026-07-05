@@ -5,6 +5,11 @@ import { View, Text, StyleSheet, Pressable } from "react-native";
 import { router } from "expo-router";
 import type { OEISSequence } from "../sequences/types";
 import { colors } from "../theme";
+import ErrorBoundary from "./ErrorBoundary";
+import VizPreview from "./VizPreview";
+
+const PREVIEW_W = 80;
+const PREVIEW_H = 52;
 
 export default function ResultRow({ sequence }: { sequence: OEISSequence }) {
   return (
@@ -24,6 +29,11 @@ export default function ResultRow({ sequence }: { sequence: OEISSequence }) {
             {sequence.terms.slice(0, 12).join(", ")}…
           </Text>
         )}
+      </View>
+      <View style={styles.previewWrap}>
+        <ErrorBoundary fallbackText="">
+          <VizPreview sequence={sequence} width={PREVIEW_W} height={PREVIEW_H} />
+        </ErrorBoundary>
       </View>
     </Pressable>
   );
@@ -58,6 +68,7 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+    marginRight: 10,
   },
   name: {
     color: colors.text,
@@ -70,5 +81,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 3,
     fontVariant: ["tabular-nums"],
+  },
+  previewWrap: {
+    width: PREVIEW_W,
+    height: PREVIEW_H,
+    borderRadius: 8,
+    overflow: "hidden",
+    backgroundColor: colors.bg,
   },
 });

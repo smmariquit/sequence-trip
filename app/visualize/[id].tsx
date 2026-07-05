@@ -11,71 +11,54 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import { getSequence } from "../../src/sequences/catalog";
 import * as oeis from "../../src/oeis/db";
+import { fetchMoreTerms } from "../../src/oeis/bfile";
 import type { OEISSequence } from "../../src/sequences/types";
 import Controls from "../../src/components/Controls";
 import { PlaybackProvider } from "../../src/playback/PlaybackContext";
 import { colors } from "../../src/theme";
-import {
-  RecamanArcs,
-  FibonacciSpiral,
-  UlamSpiral,
-  CollatzTree,
-  PascalFractal,
-  DigitFlow,
-} from "../../src/visualizations";
-
-function FullViz({
-  seq,
-  width,
-  height,
-}: {
-  seq: OEISSequence;
-  width: number;
-  height: number;
-}) {
-  switch (seq.vizType) {
-    case "recaman-arcs":
-      return <RecamanArcs width={width} height={height} count={80} />;
-    case "fibonacci-spiral":
-      return <FibonacciSpiral width={width} height={height} count={500} />;
-    case "ulam-spiral":
-      return <UlamSpiral width={width} height={height} count={3000} />;
-    case "collatz-tree":
-      return <CollatzTree width={width} height={height} count={60} />;
-    case "pascal-fractal":
-      return <PascalFractal width={width} height={height} count={160} />;
-    case "digit-flow":
-      return <DigitFlow width={width} height={height} count={500} />;
-    default:
-      // ponytail: generic visualizations land in Phase 2; terms readout until then
-      return (
-        <View style={styles.placeholder}>
-          <Text style={styles.placeholderTerms} numberOfLines={12}>
-            {seq.terms?.join(", ")}
-          </Text>
-        </View>
-      );
-  }
-}
+import VizPreview from "../../src/components/VizPreview";
 
 export default function VisualizeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { width: W, height: H } = useWindowDimensions();
-  const [dbSeq, setDbSeq] = useState<OEISSequence | null>(null);
+  const [seq, setSeq] = useState<OEISSequence | null>(null);
   const [loading, setLoading] = useState(false);
 
   const catalogSeq = useMemo(() => getSequence(id ?? ""), [id]);
 
   useEffect(() => {
-    if (catalogSeq || !id) return;
+    if (catalogSeq) {
+      setSeq(catalogSeq);
+      return;
+    }
+    if (!id) {
+      setSeq(null);
+      return;
+    }
+
+    let cancelled = false;
     setLoading(true);
+    setSeq(null);
+
     oeis
       .getById(id)
-      .then(setDbSeq)
-      .finally(() => setLoading(false));
-  }, [id, catalogSeq]);
+      .then((hit) => {
+        if (cancelled) return;
+        setSeq(hit);
+        if (!hit?.terms?.length || hit.vizType) return;
+        fetchMoreTerms(hit.anum).then((more) => {
+          if (cancelled || !more || more.length <= hit.terms!.length) return;
+          setSeq((prev) => (prev?.anum === hit.anum ? { ...prev, terms: more } : prev));
+        });
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
-  const seq = catalogSeq ?? dbSeq;
+    return () => {
+      cancelled = true;
+    };
+  }, [id, catalogSeq]);
 
   if (loading) {
     return (
@@ -96,7 +79,7 @@ export default function VisualizeScreen() {
   return (
     <PlaybackProvider>
       <View style={styles.container}>
-        <FullViz seq={seq} width={W} height={H} />
+        <VizPreview sequence={seq} width={W} height={H} preview={false} />
         <Controls title={seq.name} oeis={seq.anum} />
       </View>
     </PlaybackProvider>
@@ -117,18 +100,5 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.textDim,
     fontSize: 16,
-  },
-  placeholder: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 32,
-  },
-  placeholderTerms: {
-    color: colors.textDim,
-    fontSize: 14,
-    lineHeight: 22,
-    textAlign: "center",
-    fontVariant: ["tabular-nums"],
   },
 });

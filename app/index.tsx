@@ -86,7 +86,7 @@ export default function HomeScreen() {
         <View style={styles.heroSection}>
           <Text style={styles.logo}>✦ Sequence Trip</Text>
           <Text style={styles.subtitle}>
-            Trippy visualizations of all {`≈`}400,000 OEIS integer sequences
+            Visualizations of all 397,167 OEIS integer sequences
           </Text>
         </View>
 

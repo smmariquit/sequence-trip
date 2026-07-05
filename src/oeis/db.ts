@@ -3,9 +3,11 @@
 // Bundled OEIS dataset (assets/oeis.db, built by scripts/build-db.mjs).
 // Schema: seq(anum, name, terms)  +  seq_fts(name) FTS5 over names.
 
-import { openDatabaseAsync, type SQLiteDatabase } from "expo-sqlite";
-import { Asset } from "expo-asset";
-import { File, Directory, Paths } from "expo-file-system";
+import {
+  importDatabaseFromAssetAsync,
+  openDatabaseAsync,
+  type SQLiteDatabase,
+} from "expo-sqlite";
 import type { OEISSequence } from "../sequences/types";
 
 interface Row {
@@ -21,15 +23,8 @@ function toSequence(r: Row): OEISSequence {
 let dbPromise: Promise<SQLiteDatabase> | null = null;
 
 async function open(): Promise<SQLiteDatabase> {
-  const dir = new Directory(Paths.document, "SQLite");
-  const dest = new File(dir, "oeis.db");
-  if (!dest.exists) {
-    // one-time copy of the bundled asset into the SQLite directory
-    const asset = Asset.fromModule(require("../../assets/oeis.db"));
-    await asset.downloadAsync();
-    if (!dir.exists) dir.create({ intermediates: true });
-    new File(asset.localUri!).copy(dest);
-  }
+  // no-op if already imported (native file copy or web OPFS import)
+  await importDatabaseFromAssetAsync("oeis.db", { assetId: require("../../assets/oeis.db") });
   return openDatabaseAsync("oeis.db");
 }
 

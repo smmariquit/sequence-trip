@@ -12,35 +12,9 @@ import { router } from "expo-router";
 import type { OEISSequence } from "../sequences/types";
 import { colors } from "../theme";
 import ErrorBoundary from "./ErrorBoundary";
-import {
-  RecamanArcs,
-  FibonacciSpiral,
-  UlamSpiral,
-  CollatzTree,
-  PascalFractal,
-  DigitFlow,
-} from "../visualizations";
+import VizPreview from "./VizPreview";
 
 const PREVIEW_H = 180;
-
-function VizPreview({ vizType, width, height }: { vizType: string; width: number; height: number }) {
-  switch (vizType) {
-    case "recaman-arcs":
-      return <RecamanArcs width={width} height={height} preview />;
-    case "fibonacci-spiral":
-      return <FibonacciSpiral width={width} height={height} preview />;
-    case "ulam-spiral":
-      return <UlamSpiral width={width} height={height} preview />;
-    case "collatz-tree":
-      return <CollatzTree width={width} height={height} preview />;
-    case "pascal-fractal":
-      return <PascalFractal width={width} height={height} preview />;
-    case "digit-flow":
-      return <DigitFlow width={width} height={height} preview />;
-    default:
-      return null;
-  }
-}
 
 interface Props {
   sequence: OEISSequence;
@@ -66,7 +40,7 @@ export default function SequenceCard({ sequence, index }: Props) {
     >
       <View style={[styles.previewContainer, { width: cardW }]}>
         <ErrorBoundary fallbackText={`Preview: ${sequence.name}`}>
-          <VizPreview vizType={sequence.vizType ?? ""} width={cardW} height={PREVIEW_H} />
+          <VizPreview sequence={sequence} width={cardW} height={PREVIEW_H} />
         </ErrorBoundary>
         <View style={styles.previewOverlay} />
       </View>
