@@ -16,6 +16,7 @@ import {
   Easing,
 } from "react-native-reanimated";
 import { hslToHex } from "../theme";
+import { usePlayback } from "../playback/PlaybackContext";
 
 const GOLDEN_ANGLE = 137.508;
 
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export default function FibonacciSpiral({ width, height, count = 300, preview }: Props) {
+  const { speed } = usePlayback();
   const n = preview ? 120 : count;
   const cx = width / 2;
   const cy = height / 2;
@@ -38,21 +40,21 @@ export default function FibonacciSpiral({ width, height, count = 300, preview }:
 
   useEffect(() => {
     rotation.value = withRepeat(
-      withTiming(Math.PI * 2, { duration: 20000, easing: Easing.linear }),
+      withTiming(Math.PI * 2, { duration: 20000 / speed, easing: Easing.linear }),
       -1,
       false
     );
     hueShift.value = withRepeat(
-      withTiming(360, { duration: 6000, easing: Easing.linear }),
+      withTiming(360, { duration: 6000 / speed, easing: Easing.linear }),
       -1,
       false
     );
     pulse.value = withRepeat(
-      withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.sin) }),
+      withTiming(1, { duration: 2000 / speed, easing: Easing.inOut(Easing.sin) }),
       -1,
       true
     );
-  }, []);
+  }, [speed]);
 
   const points = useMemo(() => {
     return Array.from({ length: n }, (_, i) => {

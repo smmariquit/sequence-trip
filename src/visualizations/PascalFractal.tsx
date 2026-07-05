@@ -14,6 +14,7 @@ import {
   Easing,
 } from "react-native-reanimated";
 import { hslToHex } from "../theme";
+import { usePlayback } from "../playback/PlaybackContext";
 
 interface Props {
   width: number;
@@ -37,6 +38,7 @@ function computePascalMod(rows: number, mod: number): number[][] {
 }
 
 export default function PascalFractal({ width, height, count = 128, preview }: Props) {
+  const { speed } = usePlayback();
   const rows = preview ? 64 : count;
   const mod = 2;
 
@@ -45,16 +47,16 @@ export default function PascalFractal({ width, height, count = 128, preview }: P
 
   useEffect(() => {
     hueShift.value = withRepeat(
-      withTiming(360, { duration: 7000, easing: Easing.linear }),
+      withTiming(360, { duration: 7000 / speed, easing: Easing.linear }),
       -1,
       false
     );
     brightness.value = withRepeat(
-      withTiming(1, { duration: 2500, easing: Easing.inOut(Easing.sin) }),
+      withTiming(1, { duration: 2500 / speed, easing: Easing.inOut(Easing.sin) }),
       -1,
       true
     );
-  }, []);
+  }, [speed]);
 
   const cells = useMemo(() => {
     const tri = computePascalMod(rows, mod);

@@ -5,6 +5,7 @@ import { View, StyleSheet, useWindowDimensions, Text } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { getSequence } from "../../src/sequences/catalog";
 import Controls from "../../src/components/Controls";
+import { PlaybackProvider } from "../../src/playback/PlaybackContext";
 import { colors } from "../../src/theme";
 import {
   RecamanArcs,
@@ -52,10 +53,12 @@ export default function VisualizeScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <FullViz vizType={seq.vizType} width={W} height={H} />
-      <Controls title={seq.name} oeis={seq.oeis} />
-    </View>
+    <PlaybackProvider>
+      <View style={styles.container}>
+        <FullViz vizType={seq.vizType ?? ""} width={W} height={H} />
+        <Controls title={seq.name} oeis={seq.anum} />
+      </View>
+    </PlaybackProvider>
   );
 }
 

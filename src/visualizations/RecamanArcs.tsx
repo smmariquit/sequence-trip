@@ -18,6 +18,7 @@ import {
 } from "react-native-reanimated";
 import { useEffect } from "react";
 import { hslToHex } from "../theme";
+import { usePlayback } from "../playback/PlaybackContext";
 
 interface Props {
   width: number;
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export default function RecamanArcs({ width, height, count = 64, preview }: Props) {
+  const { speed } = usePlayback();
   const n = preview ? 28 : count;
 
   const seq = useMemo(() => {
@@ -47,16 +49,16 @@ export default function RecamanArcs({ width, height, count = 64, preview }: Prop
 
   useEffect(() => {
     hueOffset.value = withRepeat(
-      withTiming(360, { duration: 8000, easing: Easing.linear }),
+      withTiming(360, { duration: 8000 / speed, easing: Easing.linear }),
       -1,
       false
     );
     breathe.value = withRepeat(
-      withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.sin) }),
+      withTiming(1, { duration: 3000 / speed, easing: Easing.inOut(Easing.sin) }),
       -1,
       true
     );
-  }, []);
+  }, [speed]);
 
   const arcs = useMemo(() => {
     const pad = preview ? 8 : 20;

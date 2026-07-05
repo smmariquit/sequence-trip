@@ -11,23 +11,23 @@ import {
 import { router } from "expo-router";
 import { colors } from "../theme";
 import * as Haptics from "expo-haptics";
+import { usePlayback } from "../playback/PlaybackContext";
 
 interface Props {
   title: string;
   oeis: string;
-  onSpeedChange?: (speed: number) => void;
 }
 
 const SPEEDS = [0.5, 1, 2, 4];
 
-export default function Controls({ title, oeis, onSpeedChange }: Props) {
+export default function Controls({ title, oeis }: Props) {
   const [speedIdx, setSpeedIdx] = useState(1);
-  const [showInfo, setShowInfo] = useState(false);
+  const { setSpeed } = usePlayback();
 
   const cycleSpeed = () => {
     const next = (speedIdx + 1) % SPEEDS.length;
     setSpeedIdx(next);
-    onSpeedChange?.(SPEEDS[next]);
+    setSpeed(SPEEDS[next]);
     if (Platform.OS !== "web") {
       Haptics.selectionAsync();
     }

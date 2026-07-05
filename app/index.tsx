@@ -26,7 +26,7 @@ export default function HomeScreen() {
           </Text>
         </View>
         {sequences.map((seq, i) => (
-          <SequenceCard key={seq.id} sequence={seq} index={i} />
+          <SequenceCard key={seq.anum} sequence={seq} index={i} />
         ))}
         <View style={styles.footer}>
           <Text style={styles.footerText}>

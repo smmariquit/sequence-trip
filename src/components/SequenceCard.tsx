@@ -52,8 +52,8 @@ export default function SequenceCard({ sequence, index }: Props) {
   const cardW = Math.min(screenW - 32, 600);
 
   const handlePress = useCallback(() => {
-    router.push(`/visualize/${sequence.id}`);
-  }, [sequence.id]);
+    router.push(`/visualize/${sequence.anum}`);
+  }, [sequence.anum]);
 
   return (
     <Pressable
@@ -66,7 +66,7 @@ export default function SequenceCard({ sequence, index }: Props) {
     >
       <View style={[styles.previewContainer, { width: cardW }]}>
         <ErrorBoundary fallbackText={`Preview: ${sequence.name}`}>
-          <VizPreview vizType={sequence.vizType} width={cardW} height={PREVIEW_H} />
+          <VizPreview vizType={sequence.vizType ?? ""} width={cardW} height={PREVIEW_H} />
         </ErrorBoundary>
         <View style={styles.previewOverlay} />
       </View>
@@ -74,7 +74,7 @@ export default function SequenceCard({ sequence, index }: Props) {
         <View style={styles.header}>
           <Text style={styles.name}>{sequence.name}</Text>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{sequence.oeis}</Text>
+            <Text style={styles.badgeText}>{sequence.anum}</Text>
           </View>
         </View>
         <Text style={styles.description} numberOfLines={2}>

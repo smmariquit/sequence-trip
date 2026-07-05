@@ -1,6 +1,7 @@
 // src/visualizations/useWebCanvas.ts
 
 import { useRef, useEffect, useCallback } from "react";
+import { usePlayback } from "../playback/PlaybackContext";
 
 type DrawFn = (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => void;
 
@@ -11,7 +12,8 @@ export function useWebCanvas(
 ) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number>(0);
-  const startRef = useRef<number>(0);
+  const speedRef = useRef(1);
+  speedRef.current = usePlayback().speed;
 
   const setRef = useCallback((el: HTMLCanvasElement | null) => {
     canvasRef.current = el;
@@ -28,12 +30,16 @@ export function useWebCanvas(
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.scale(dpr, dpr);
-    startRef.current = performance.now();
+
+    // accumulate speed-scaled time so speed changes don't jump the animation
+    let elapsed = 0;
+    let last = performance.now();
 
     const loop = (now: number) => {
-      const t = (now - startRef.current) / 1000;
+      elapsed += ((now - last) / 1000) * speedRef.current;
+      last = now;
       ctx.clearRect(0, 0, width, height);
-      draw(ctx, t, width, height);
+      draw(ctx, elapsed, width, height);
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);

@@ -16,6 +16,7 @@ import {
 } from "react-native-reanimated";
 import { ulamSpiralCoords } from "../sequences/generators";
 import { hslToHex } from "../theme";
+import { usePlayback } from "../playback/PlaybackContext";
 
 interface Props {
   width: number;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export default function UlamSpiral({ width, height, count = 2000, preview }: Props) {
+  const { speed } = usePlayback();
   const n = preview ? 400 : count;
 
   const coords = useMemo(() => ulamSpiralCoords(n), [n]);
@@ -46,16 +48,16 @@ export default function UlamSpiral({ width, height, count = 2000, preview }: Pro
 
   useEffect(() => {
     hueShift.value = withRepeat(
-      withTiming(360, { duration: 10000, easing: Easing.linear }),
+      withTiming(360, { duration: 10000 / speed, easing: Easing.linear }),
       -1,
       false
     );
     glowPulse.value = withRepeat(
-      withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.sin) }),
+      withTiming(1, { duration: 1500 / speed, easing: Easing.inOut(Easing.sin) }),
       -1,
       true
     );
-  }, []);
+  }, [speed]);
 
   return (
     <Canvas style={{ width, height }}>

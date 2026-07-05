@@ -17,6 +17,7 @@ import {
 } from "react-native-reanimated";
 import { collatzSequence } from "../sequences/generators";
 import { hslToHex } from "../theme";
+import { usePlayback } from "../playback/PlaybackContext";
 
 interface Props {
   width: number;
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export default function CollatzTree({ width, height, count = 40, preview }: Props) {
+  const { speed } = usePlayback();
   const n = preview ? 18 : count;
 
   const hueShift = useSharedValue(0);
@@ -33,16 +35,16 @@ export default function CollatzTree({ width, height, count = 40, preview }: Prop
 
   useEffect(() => {
     hueShift.value = withRepeat(
-      withTiming(360, { duration: 12000, easing: Easing.linear }),
+      withTiming(360, { duration: 12000 / speed, easing: Easing.linear }),
       -1,
       false
     );
     breathe.value = withRepeat(
-      withTiming(1, { duration: 4000, easing: Easing.inOut(Easing.sin) }),
+      withTiming(1, { duration: 4000 / speed, easing: Easing.inOut(Easing.sin) }),
       -1,
       true
     );
-  }, []);
+  }, [speed]);
 
   const branches = useMemo(() => {
     const cx = width / 2;
