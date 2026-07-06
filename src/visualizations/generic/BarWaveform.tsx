@@ -12,13 +12,15 @@ import {
   Easing,
 } from "react-native-reanimated";
 import { hslToHex } from "../../theme";
-import { usePlayback } from "../../playback/PlaybackContext";
+import { useAnimSpeed } from "../../playback/PlaybackContext";
+import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { normalize } from "../../sequences/normalize";
 import type { GenericVizProps } from "./types";
 
 export default function BarWaveform({ terms, width, height, preview }: GenericVizProps) {
-  const { speed } = usePlayback();
+  const speed = useAnimSpeed();
   const stats = useMemo(() => normalize(terms), [terms]);
+  const { step: visible } = useBuildAnimation(stats.logs.length, preview);
   const breathe = useSharedValue(0.75);
 
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function BarWaveform({ terms, width, height, preview }: GenericVi
   return (
     <Canvas style={{ width, height }}>
       <Group opacity={opacity}>
-        {bars.map((b, i) => (
+        {bars.slice(0, visible).map((b, i) => (
           <Rect
             key={i}
             x={b.x}

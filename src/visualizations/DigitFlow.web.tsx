@@ -2,6 +2,8 @@
 
 import React, { useMemo, useCallback } from "react";
 import { useWebCanvas, hslString } from "./useWebCanvas";
+import { useBuildAnimation } from "../playback/useBuildAnimation";
+import { strokePolylineProgress } from "../playback/drawProgress";
 import { piDigits } from "../sequences/generators";
 
 interface Props {
@@ -13,6 +15,7 @@ interface Props {
 
 export default function DigitFlow({ width, height, count = 400, preview }: Props) {
   const n = preview ? 150 : count;
+  const { progressRef } = useBuildAnimation(n, preview);
   const digits = useMemo(() => piDigits(n), [n]);
 
   const segments = useMemo(() => {
@@ -44,16 +47,12 @@ export default function DigitFlow({ width, height, count = 400, preview }: Props
   }, [digits, width, height, preview]);
 
   const draw = useCallback(
-    (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => {
+    (ctx: CanvasRenderingContext2D, time: number) => {
+      const progress = progressRef.current;
       const hueShift = (time * 40) % 360;
       const flowPulse = Math.sin(time * 1.26) * 0.5 + 0.5;
       const strokeW = (preview ? 0.8 : 1.5) + flowPulse * 0.5;
 
-      ctx.beginPath();
-      ctx.moveTo(segments[0].x, segments[0].y);
-      for (let i = 1; i < segments.length; i++) {
-        ctx.lineTo(segments[i].x, segments[i].y);
-      }
       ctx.strokeStyle = hslString(hueShift, 70, 45);
       ctx.lineWidth = strokeW;
       ctx.lineCap = "round";
@@ -62,11 +61,12 @@ export default function DigitFlow({ width, height, count = 400, preview }: Props
         ctx.shadowColor = hslString(hueShift, 80, 55);
         ctx.shadowBlur = 4;
       }
-      ctx.stroke();
+      strokePolylineProgress(ctx, segments, progress);
       ctx.shadowBlur = 0;
 
       if (!preview) {
-        for (let i = 0; i < segments.length; i += 4) {
+        const visible = Math.ceil(progress);
+        for (let i = 0; i < Math.min(visible, segments.length); i += 4) {
           const seg = segments[i];
           const hue = (seg.digit * 36 + hueShift) % 360;
           ctx.beginPath();
@@ -79,9 +79,9 @@ export default function DigitFlow({ width, height, count = 400, preview }: Props
         }
       }
     },
-    [segments, preview]
+    [segments, preview, progressRef]
   );
 
-  const ref = useWebCanvas(width, height, draw);
+  const ref = useWebCanvas(width, height, draw, !preview);
   return <canvas ref={ref} style={{ width, height, display: "block" }} />;
 }

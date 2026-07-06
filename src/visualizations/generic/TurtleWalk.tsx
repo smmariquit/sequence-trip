@@ -3,7 +3,7 @@
 // Turtle turns by term mod 4 each step — every sequence draws its own path.
 
 import React, { useMemo, useEffect } from "react";
-import { Canvas, Path as SkiaPath, Skia, BlurMask } from "@shopify/react-native-skia";
+import { Canvas, Path as SkiaPath, BlurMask } from "@shopify/react-native-skia";
 import {
   useDerivedValue,
   useSharedValue,
@@ -12,23 +12,26 @@ import {
   Easing,
 } from "react-native-reanimated";
 import { hslToHex } from "../../theme";
-import { usePlayback } from "../../playback/PlaybackContext";
+import { useAnimSpeed } from "../../playback/PlaybackContext";
+import { useBuildAnimation } from "../../playback/useBuildAnimation";
+import { makePolylinePath } from "../../playback/smoothPath";
 import { termMod } from "../../sequences/normalize";
 import type { GenericVizProps } from "./types";
 
 export default function TurtleWalk({ terms, width, height, preview }: GenericVizProps) {
-  const { speed } = usePlayback();
+  const speed = useAnimSpeed();
+  const { progressSV } = useBuildAnimation(terms.length, preview);
   const hueShift = useSharedValue(0);
 
   useEffect(() => {
     hueShift.value = withRepeat(
-      withTiming(360, { duration: 9000 / speed, easing: Easing.linear }),
+      withTiming(360, { duration: 9000 / Math.max(speed, 0.25), easing: Easing.linear }),
       -1,
       false
     );
   }, [speed]);
 
-  const path = useMemo(() => {
+  const points = useMemo(() => {
     const pts: { x: number; y: number }[] = [{ x: 0, y: 0 }];
     let x = 0;
     let y = 0;
@@ -49,14 +52,10 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
     const s = Math.min(sx, sy);
     const ox = (width - (maxX - minX) * s) / 2;
     const oy = (height - (maxY - minY) * s) / 2;
-    const p = Skia.Path.Make();
-    p.moveTo(ox + (pts[0].x - minX) * s, oy + (pts[0].y - minY) * s);
-    for (const pt of pts.slice(1)) {
-      p.lineTo(ox + (pt.x - minX) * s, oy + (pt.y - minY) * s);
-    }
-    return p;
+    return pts.map((p) => ({ x: ox + (p.x - minX) * s, y: oy + (p.y - minY) * s }));
   }, [terms, width, height, preview]);
 
+  const path = useDerivedValue(() => makePolylinePath(points, progressSV.value));
   const color = useDerivedValue(() => hslToHex(hueShift.value % 360, 85, 58));
 
   return (

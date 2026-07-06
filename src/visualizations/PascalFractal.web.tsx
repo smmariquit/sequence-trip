@@ -2,6 +2,8 @@
 
 import React, { useMemo, useCallback } from "react";
 import { useWebCanvas, hslString } from "./useWebCanvas";
+import { useBuildAnimation } from "../playback/useBuildAnimation";
+import { itemRevealAlpha } from "../playback/drawProgress";
 
 interface Props {
   width: number;
@@ -26,6 +28,7 @@ function computePascalMod(rows: number, mod: number): number[][] {
 
 export default function PascalFractal({ width, height, count = 128, preview }: Props) {
   const rows = preview ? 64 : count;
+  const { progressRef } = useBuildAnimation(rows, preview);
 
   const cells = useMemo(() => {
     const tri = computePascalMod(rows, 2);
@@ -48,11 +51,15 @@ export default function PascalFractal({ width, height, count = 128, preview }: P
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => {
+      const progress = progressRef.current;
       const hueShift = (time * 51.4) % 360;
       const brightness = Math.sin(time * 2.51) * 0.5 + 0.5;
       const cellH = h / rows;
 
       for (const cell of cells) {
+        const alpha = itemRevealAlpha(progress, cell.row);
+        if (alpha <= 0) continue;
+
         const cellW = w / cell.len;
         const offsetX = (w - cellW * cell.len) / 2;
         const x = offsetX + cell.col * cellW;
@@ -60,13 +67,15 @@ export default function PascalFractal({ width, height, count = 128, preview }: P
         const hue = (cell.row * 3.5 + cell.col * 7 + hueShift) % 360;
         const lit = 50 + brightness * 15;
 
+        ctx.globalAlpha = alpha;
         ctx.fillStyle = hslString(hue, 90, lit);
         ctx.fillRect(x, y, cellW + 0.5, cellH + 0.5);
       }
+      ctx.globalAlpha = 1;
     },
-    [cells, rows]
+    [cells, rows, progressRef]
   );
 
-  const ref = useWebCanvas(width, height, draw);
+  const ref = useWebCanvas(width, height, draw, !preview);
   return <canvas ref={ref} style={{ width, height, display: "block" }} />;
 }

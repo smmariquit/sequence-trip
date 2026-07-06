@@ -21,7 +21,11 @@ function hashStr(s: string): number {
 
 export function pickGenericViz(anum: string, terms: string[]): ComponentType<GenericVizProps> {
   const stats = normalize(terms);
-  if (stats.smallRange) return ModGrid;
   if (stats.hasNegative) return BarWaveform;
+  // ModGrid only for 0/1 sequences (Pascal-mod-2 style). Otherwise a line plot
+  // or path is easier to read than a mystery color grid.
+  if (stats.values.length > 0 && stats.values.every((v) => v === 0 || v === 1)) {
+    return ModGrid;
+  }
   return VARIED[hashStr(anum) % VARIED.length];
 }

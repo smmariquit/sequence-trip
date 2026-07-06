@@ -5,15 +5,22 @@ import { usePlayback } from "../playback/PlaybackContext";
 
 type DrawFn = (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => void;
 
+/**
+ * @param animated When false (preview thumbnails), draw once — no RAF loop.
+ */
 export function useWebCanvas(
   width: number,
   height: number,
-  draw: DrawFn
+  draw: DrawFn,
+  animated = true
 ) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number>(0);
   const speedRef = useRef(1);
-  speedRef.current = usePlayback().speed;
+  const playback = usePlayback();
+  if (animated) {
+    speedRef.current = playback.speed ?? 1;
+  }
 
   const setRef = useCallback((el: HTMLCanvasElement | null) => {
     canvasRef.current = el;
@@ -29,9 +36,14 @@ export function useWebCanvas(
     canvas.style.height = `${height}px`;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // accumulate speed-scaled time so speed changes don't jump the animation
+    if (!animated) {
+      ctx.clearRect(0, 0, width, height);
+      draw(ctx, 0, width, height);
+      return;
+    }
+
     let elapsed = 0;
     let last = performance.now();
 
@@ -44,7 +56,7 @@ export function useWebCanvas(
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [width, height, draw]);
+  }, [width, height, draw, animated]);
 
   return setRef;
 }

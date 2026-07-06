@@ -1,6 +1,6 @@
 // src/components/VizPreview.tsx
 
-import React from "react";
+import React, { memo } from "react";
 import type { OEISSequence } from "../sequences/types";
 import {
   RecamanArcs,
@@ -17,26 +17,38 @@ interface Props {
   width: number;
   height: number;
   preview?: boolean;
+  /** Full-screen featured viz: how many terms/steps to build. */
+  count?: number;
 }
 
-export default function VizPreview({ sequence, width, height, preview = true }: Props) {
+function VizPreview({ sequence, width, height, preview = true, count }: Props) {
+  const isPreview = preview !== false;
+
   switch (sequence.vizType) {
     case "recaman-arcs":
-      return <RecamanArcs width={width} height={height} preview={preview} />;
+      return (
+        <RecamanArcs width={width} height={height} count={count} preview={isPreview} />
+      );
     case "fibonacci-spiral":
-      return <FibonacciSpiral width={width} height={height} preview={preview} />;
+      return (
+        <FibonacciSpiral width={width} height={height} count={count} preview={isPreview} />
+      );
     case "ulam-spiral":
-      return <UlamSpiral width={width} height={height} preview={preview} />;
+      return <UlamSpiral width={width} height={height} count={count} preview={isPreview} />;
     case "collatz-tree":
-      return <CollatzTree width={width} height={height} preview={preview} />;
+      return <CollatzTree width={width} height={height} count={count} preview={isPreview} />;
     case "pascal-fractal":
-      return <PascalFractal width={width} height={height} preview={preview} />;
+      return (
+        <PascalFractal width={width} height={height} count={count} preview={isPreview} />
+      );
     case "digit-flow":
-      return <DigitFlow width={width} height={height} preview={preview} />;
+      return <DigitFlow width={width} height={height} count={count} preview={isPreview} />;
     default: {
       if (!sequence.terms?.length) return null;
       const Viz = pickGenericViz(sequence.anum, sequence.terms);
-      return <Viz terms={sequence.terms} width={width} height={height} preview={preview} />;
+      return <Viz terms={sequence.terms} width={width} height={height} preview={isPreview} />;
     }
   }
 }
+
+export default memo(VizPreview);

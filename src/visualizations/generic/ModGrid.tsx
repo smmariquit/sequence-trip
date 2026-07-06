@@ -12,13 +12,15 @@ import {
   Easing,
 } from "react-native-reanimated";
 import { hslToHex } from "../../theme";
-import { usePlayback } from "../../playback/PlaybackContext";
+import { useAnimSpeed } from "../../playback/PlaybackContext";
+import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { termMod } from "../../sequences/normalize";
 import type { GenericVizProps } from "./types";
 
 export default function ModGrid({ terms, width, height, preview }: GenericVizProps) {
-  const { speed } = usePlayback();
+  const speed = useAnimSpeed();
   const breathe = useSharedValue(0.8);
+  const { step: visible } = useBuildAnimation(terms.length, preview);
   const mod = 10;
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function ModGrid({ terms, width, height, preview }: GenericVizPro
   return (
     <Canvas style={{ width, height }}>
       <Group opacity={opacity}>
-        {cells.map((c, i) => (
+        {cells.slice(0, visible).map((c, i) => (
           <Rect
             key={i}
             x={c.x}

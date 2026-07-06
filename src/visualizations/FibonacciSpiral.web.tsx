@@ -2,6 +2,8 @@
 
 import React, { useMemo, useCallback } from "react";
 import { useWebCanvas, hslString } from "./useWebCanvas";
+import { useBuildAnimation } from "../playback/useBuildAnimation";
+import { itemRevealAlpha } from "../playback/drawProgress";
 
 const GOLDEN_ANGLE = 137.508;
 
@@ -14,6 +16,7 @@ interface Props {
 
 export default function FibonacciSpiral({ width, height, count = 300, preview }: Props) {
   const n = preview ? 120 : count;
+  const { progressRef } = useBuildAnimation(n, preview);
 
   const basePoints = useMemo(() => {
     return Array.from({ length: n }, (_, i) => {
@@ -25,6 +28,7 @@ export default function FibonacciSpiral({ width, height, count = 300, preview }:
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => {
+      const progress = progressRef.current;
       const cx = w / 2;
       const cy = h / 2;
       const maxR = Math.min(w, h) * 0.45;
@@ -33,20 +37,22 @@ export default function FibonacciSpiral({ width, height, count = 300, preview }:
       const pulse = Math.sin(time * 3.14) * 0.5 + 0.5;
 
       for (let i = 0; i < basePoints.length; i++) {
+        const alpha = itemRevealAlpha(progress, i);
+        if (alpha <= 0) continue;
+
         const pt = basePoints[i];
         const r = maxR * pt.rNorm;
         const a = pt.angle + rotation;
         const x = cx + r * Math.cos(a);
         const y = cy + r * Math.sin(a);
-
         const hue = (pt.baseHue + hueShift) % 360;
         const baseR = preview ? 1.5 : 3;
         const pr = baseR * (1 + pulse * 0.5 * Math.sin(i * 0.1));
 
+        ctx.globalAlpha = alpha;
         ctx.beginPath();
         ctx.arc(x, y, pr, 0, Math.PI * 2);
         ctx.fillStyle = hslString(hue, 95, 60);
-
         if (!preview) {
           ctx.shadowColor = hslString(hue, 100, 70);
           ctx.shadowBlur = 8;
@@ -54,10 +60,11 @@ export default function FibonacciSpiral({ width, height, count = 300, preview }:
         ctx.fill();
         ctx.shadowBlur = 0;
       }
+      ctx.globalAlpha = 1;
     },
-    [basePoints, preview]
+    [basePoints, preview, progressRef]
   );
 
-  const ref = useWebCanvas(width, height, draw);
+  const ref = useWebCanvas(width, height, draw, !preview);
   return <canvas ref={ref} style={{ width, height, display: "block" }} />;
 }

@@ -32,7 +32,7 @@ export const sequences: OEISSequence[] = [
     anum: "A006577",
     name: "Collatz Trajectories",
     description:
-      "The Collatz conjecture claims every positive integer reaches 1 under this rule (n/2 if even, 3n+1 if odd). It remains unproven, though checked by computer for every integer up to 2^68 as of 2020. Each trajectory's stopping time is plotted as a branch.",
+      "The Collatz conjecture: repeat “halve if even, otherwise 3n+1” until you reach 1 — believed to always work, but unproven. This viz draws each starting number’s path as a branch; the OEIS entry counts steps to finish.",
     vizType: "collatz-tree",
     generate: (n) => gen.collatzLengths(n),
   },
@@ -46,9 +46,9 @@ export const sequences: OEISSequence[] = [
   },
   {
     anum: "A000796",
-    name: "Digit River of π",
+    name: "Digit River of $\\pi$",
     description:
-      "Each digit of pi turns a walker left, right, or straight. Pi's digits pass every statistical test for randomness applied so far, but no proof of that randomness exists.",
+      "Each digit of $\\pi$ turns a walker left, right, or straight. The digits pass every statistical test for randomness applied so far, but no proof of that randomness exists.",
     vizType: "digit-flow",
     generate: (n) => gen.piDigits(n),
   },

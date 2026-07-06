@@ -2,6 +2,8 @@
 
 import React, { useMemo, useCallback } from "react";
 import { useWebCanvas, hslString } from "./useWebCanvas";
+import { useBuildAnimation } from "../playback/useBuildAnimation";
+import { itemRevealAlpha } from "../playback/drawProgress";
 import { ulamSpiralCoords } from "../sequences/generators";
 
 interface Props {
@@ -13,6 +15,7 @@ interface Props {
 
 export default function UlamSpiral({ width, height, count = 2000, preview }: Props) {
   const n = preview ? 400 : count;
+  const { progressRef } = useBuildAnimation(n, preview);
 
   const data = useMemo(() => {
     const coords = ulamSpiralCoords(n);
@@ -23,6 +26,7 @@ export default function UlamSpiral({ width, height, count = 2000, preview }: Pro
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => {
+      const progress = progressRef.current;
       const cx = w / 2;
       const cy = h / 2;
       const cellSize = (Math.min(w, h) * 0.9) / (data.maxC * 2 + 1);
@@ -30,15 +34,19 @@ export default function UlamSpiral({ width, height, count = 2000, preview }: Pro
       const glowPulse = Math.sin(time * 4.2) * 0.5 + 0.5;
 
       for (let i = 0; i < data.coords.length; i++) {
+        const alpha = itemRevealAlpha(progress, i);
+        if (alpha <= 0) continue;
+
         const c = data.coords[i];
         const px = cx + c.x * cellSize;
         const py = cy + c.y * cellSize;
 
         if (!c.prime) {
           if (preview && i % 3 !== 0) continue;
+          ctx.globalAlpha = alpha * 0.15;
           ctx.beginPath();
           ctx.arc(px, py, cellSize * 0.15, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(90, 80, 140, 0.15)";
+          ctx.fillStyle = "rgba(90, 80, 140, 1)";
           ctx.fill();
           continue;
         }
@@ -47,6 +55,7 @@ export default function UlamSpiral({ width, height, count = 2000, preview }: Pro
         const hue = (dist * 12 + hueShift) % 360;
         const r = (preview ? cellSize * 0.35 : cellSize * 0.45) + glowPulse * cellSize * 0.15;
 
+        ctx.globalAlpha = alpha;
         ctx.beginPath();
         ctx.arc(px, py, r, 0, Math.PI * 2);
         ctx.fillStyle = hslString(hue, 100, 65);
@@ -57,10 +66,11 @@ export default function UlamSpiral({ width, height, count = 2000, preview }: Pro
         ctx.fill();
         ctx.shadowBlur = 0;
       }
+      ctx.globalAlpha = 1;
     },
-    [data, preview]
+    [data, preview, progressRef]
   );
 
-  const ref = useWebCanvas(width, height, draw);
+  const ref = useWebCanvas(width, height, draw, !preview);
   return <canvas ref={ref} style={{ width, height, display: "block" }} />;
 }

@@ -2,10 +2,14 @@
 
 import React, { useCallback, useMemo } from "react";
 import { useWebCanvas, hslString } from "../useWebCanvas";
+import { useBuildAnimation } from "../../playback/useBuildAnimation";
+import { strokePolylineProgress } from "../../playback/drawProgress";
 import { termMod } from "../../sequences/normalize";
 import type { GenericVizProps } from "./types";
 
 export default function TurtleWalk({ terms, width, height, preview }: GenericVizProps) {
+  const { progressRef } = useBuildAnimation(terms.length, preview);
+
   const points = useMemo(() => {
     const pts: { x: number; y: number }[] = [{ x: 0, y: 0 }];
     let x = 0;
@@ -32,11 +36,8 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number) => {
-      if (points.length === 0) return;
+      if (points.length === 0 || progressRef.current <= 0) return;
       const hue = (time * 40) % 360;
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      for (const p of points.slice(1)) ctx.lineTo(p.x, p.y);
       ctx.strokeStyle = hslString(hue, 85, 58);
       ctx.lineWidth = preview ? 1 : 2;
       ctx.lineCap = "round";
@@ -45,12 +46,12 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
         ctx.shadowColor = hslString(hue, 85, 58);
         ctx.shadowBlur = 2.5;
       }
-      ctx.stroke();
+      strokePolylineProgress(ctx, points, progressRef.current);
       ctx.shadowBlur = 0;
     },
-    [points, preview]
+    [points, preview, progressRef]
   );
 
-  const ref = useWebCanvas(width, height, draw);
+  const ref = useWebCanvas(width, height, draw, !preview);
   return <canvas ref={ref} style={{ width, height, display: "block" }} />;
 }

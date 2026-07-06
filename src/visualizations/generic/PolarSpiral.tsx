@@ -12,15 +12,17 @@ import {
   Easing,
 } from "react-native-reanimated";
 import { hslToHex } from "../../theme";
-import { usePlayback } from "../../playback/PlaybackContext";
+import { useAnimSpeed } from "../../playback/PlaybackContext";
+import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { normalize } from "../../sequences/normalize";
 import type { GenericVizProps } from "./types";
 
 const GOLDEN_ANGLE = (137.508 * Math.PI) / 180;
 
 export default function PolarSpiral({ terms, width, height, preview }: GenericVizProps) {
-  const { speed } = usePlayback();
+  const speed = useAnimSpeed();
   const stats = useMemo(() => normalize(terms), [terms]);
+  const { step: visible } = useBuildAnimation(stats.logs.length, preview);
   const rotation = useSharedValue(0);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
   return (
     <Canvas style={{ width, height }}>
       <Group origin={{ x: cx, y: cy }} transform={transform}>
-        {points.map((pt, i) => (
+        {points.slice(0, visible).map((pt, i) => (
           <Circle
             key={i}
             cx={cx + pt.r * Math.cos(pt.angle)}

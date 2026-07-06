@@ -1,8 +1,8 @@
 // src/components/ErrorBoundary.tsx
 
 import React, { Component } from "react";
-import { View, Text, StyleSheet } from "react-native";
 import { colors } from "../theme";
+import { BodyText, CenteredState } from "./ui";
 
 interface Props {
   children: React.ReactNode;
@@ -24,32 +24,32 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <View style={styles.container}>
-          <Text style={styles.label}>{this.props.fallbackText ?? "Visualization error"}</Text>
-          <Text style={styles.error}>{this.state.error}</Text>
-        </View>
+        <CenteredState style={styles.container}>
+          <BodyText variant="body" style={styles.label}>
+            {this.props.fallbackText ?? "Visualization error"}
+          </BodyText>
+          <BodyText variant="caption" style={styles.error}>
+            {this.state.error}
+          </BodyText>
+        </CenteredState>
       );
     }
     return this.props.children;
   }
 }
 
-const styles = StyleSheet.create({
+const styles = {
   container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     padding: 16,
     backgroundColor: colors.bg,
   },
   label: {
-    color: colors.textDim,
-    fontSize: 14,
     marginBottom: 8,
+    textAlign: "center" as const,
   },
   error: {
     color: colors.accentAlt,
-    fontSize: 12,
-    textAlign: "center",
+    textAlign: "center" as const,
+    marginBottom: 0,
   },
-});
+};

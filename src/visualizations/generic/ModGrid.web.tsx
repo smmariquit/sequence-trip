@@ -2,10 +2,13 @@
 
 import React, { useCallback, useMemo } from "react";
 import { useWebCanvas, hslString } from "../useWebCanvas";
+import { useBuildAnimation } from "../../playback/useBuildAnimation";
+import { itemRevealAlpha } from "../../playback/drawProgress";
 import { termMod } from "../../sequences/normalize";
 import type { GenericVizProps } from "./types";
 
 export default function ModGrid({ terms, width, height, preview }: GenericVizProps) {
+  const { progressRef } = useBuildAnimation(terms.length, preview);
   const mod = 10;
 
   const cells = useMemo(() => {
@@ -20,22 +23,27 @@ export default function ModGrid({ terms, width, height, preview }: GenericVizPro
       w: cellW - 1,
       h: cellH - 1,
       m: termMod(t, mod),
+      i,
     }));
   }, [terms, width, height]);
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number) => {
+      const progress = progressRef.current;
       const breathe = 0.9 + 0.1 * Math.sin(time * 2.513);
-      ctx.globalAlpha = breathe;
+
       for (const c of cells) {
+        const alpha = itemRevealAlpha(progress, c.i) * breathe;
+        if (alpha <= 0) continue;
+        ctx.globalAlpha = alpha;
         ctx.fillStyle = c.m === 0 ? "rgba(40, 35, 70, 0.6)" : hslString((c.m * 360) / 10, 85, 55);
         ctx.fillRect(c.x, c.y, c.w, c.h);
       }
       ctx.globalAlpha = 1;
     },
-    [cells]
+    [cells, progressRef]
   );
 
-  const ref = useWebCanvas(width, height, draw);
+  const ref = useWebCanvas(width, height, draw, !preview);
   return <canvas ref={ref} style={{ width, height, display: "block" }} />;
 }

@@ -3,7 +3,7 @@
 // Polyline of signed-log values — works for any growth rate.
 
 import React, { useMemo, useEffect } from "react";
-import { Canvas, Path as SkiaPath, Skia, Circle, BlurMask } from "@shopify/react-native-skia";
+import { Canvas, Path as SkiaPath, Circle, BlurMask } from "@shopify/react-native-skia";
 import {
   useDerivedValue,
   useSharedValue,
@@ -12,24 +12,27 @@ import {
   Easing,
 } from "react-native-reanimated";
 import { hslToHex } from "../../theme";
-import { usePlayback } from "../../playback/PlaybackContext";
+import { useAnimSpeed } from "../../playback/PlaybackContext";
+import { useBuildAnimation } from "../../playback/useBuildAnimation";
+import { makePolylinePath } from "../../playback/smoothPath";
 import { normalize } from "../../sequences/normalize";
 import type { GenericVizProps } from "./types";
 
 export default function LinePlot({ terms, width, height, preview }: GenericVizProps) {
-  const { speed } = usePlayback();
+  const speed = useAnimSpeed();
   const stats = useMemo(() => normalize(terms), [terms]);
+  const { progressSV, step } = useBuildAnimation(stats.logs.length, preview);
   const hueShift = useSharedValue(0);
 
   useEffect(() => {
     hueShift.value = withRepeat(
-      withTiming(360, { duration: 8000 / speed, easing: Easing.linear }),
+      withTiming(360, { duration: 8000 / Math.max(speed, 0.25), easing: Easing.linear }),
       -1,
       false
     );
   }, [speed]);
 
-  const { path, points } = useMemo(() => {
+  const { allPoints, dotStep } = useMemo(() => {
     const pad = preview ? 10 : 30;
     const n = stats.logs.length;
     const range = stats.maxLog - stats.minLog || 1;
@@ -37,17 +40,15 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
       x: pad + ((width - pad * 2) * i) / Math.max(n - 1, 1),
       y: height - pad - ((v - stats.minLog) / range) * (height - pad * 2),
     }));
-    const p = Skia.Path.Make();
-    if (pts.length > 0) {
-      p.moveTo(pts[0].x, pts[0].y);
-      for (const pt of pts.slice(1)) p.lineTo(pt.x, pt.y);
-    }
-    return { path: p, points: pts };
+    return {
+      allPoints: pts,
+      dotStep: Math.max(1, Math.floor(pts.length / (preview ? 20 : 60))),
+    };
   }, [stats, width, height, preview]);
 
+  const path = useDerivedValue(() => makePolylinePath(allPoints, progressSV.value));
   const strokeColor = useDerivedValue(() => hslToHex(hueShift.value % 360, 90, 60));
-
-  const dotStep = Math.max(1, Math.floor(points.length / (preview ? 20 : 60)));
+  const visible = step;
 
   return (
     <Canvas style={{ width, height }}>
@@ -60,15 +61,15 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
       >
         {!preview && <BlurMask blur={3} style="solid" />}
       </SkiaPath>
-      {points
-        .filter((_, i) => i % dotStep === 0)
+      {allPoints
+        .filter((_, i) => i < visible && i % dotStep === 0)
         .map((pt, i) => (
           <Circle
             key={i}
             cx={pt.x}
             cy={pt.y}
             r={preview ? 1.5 : 3}
-            color={hslToHex((i * dotStep * 360) / Math.max(points.length, 1), 95, 65)}
+            color={hslToHex((i * dotStep * 360) / Math.max(allPoints.length, 1), 95, 65)}
           />
         ))}
     </Canvas>

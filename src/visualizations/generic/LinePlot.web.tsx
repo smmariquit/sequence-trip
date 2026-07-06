@@ -2,11 +2,15 @@
 
 import React, { useCallback, useMemo } from "react";
 import { useWebCanvas, hslString } from "../useWebCanvas";
+import { useBuildAnimation } from "../../playback/useBuildAnimation";
+import { strokePolylineProgress } from "../../playback/drawProgress";
 import { normalize } from "../../sequences/normalize";
+import { drawPlotAxes } from "../canvasAxes";
 import type { GenericVizProps } from "./types";
 
 export default function LinePlot({ terms, width, height, preview }: GenericVizProps) {
   const stats = useMemo(() => normalize(terms), [terms]);
+  const { progressRef } = useBuildAnimation(stats.logs.length, preview);
 
   const points = useMemo(() => {
     const pad = preview ? 10 : 30;
@@ -22,33 +26,44 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number) => {
-      if (points.length === 0) return;
-      const hue = (time * 45) % 360;
+      const pad = preview ? 10 : 30;
+      const progress = progressRef.current;
+      if (!preview) {
+        drawPlotAxes(ctx, {
+          pad,
+          width,
+          height,
+          xLabel: "n  (term index)",
+          yLabel: "a(n)",
+          preview,
+        });
+      }
+      if (points.length === 0 || progress <= 0) return;
 
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      for (const p of points.slice(1)) ctx.lineTo(p.x, p.y);
+      const hue = (time * 45) % 360;
       ctx.strokeStyle = hslString(hue, 90, 60);
       ctx.lineWidth = preview ? 1.2 : 2;
       ctx.lineJoin = "round";
+      ctx.lineCap = "round";
       if (!preview) {
         ctx.shadowColor = hslString(hue, 90, 60);
         ctx.shadowBlur = 3;
       }
-      ctx.stroke();
+      strokePolylineProgress(ctx, points, progress);
       ctx.shadowBlur = 0;
 
+      const visible = Math.ceil(progress);
       points.forEach((p, i) => {
-        if (i % dotStep !== 0) return;
+        if (i >= visible || i % dotStep !== 0) return;
         ctx.beginPath();
         ctx.fillStyle = hslString((i * dotStep * 360) / Math.max(points.length, 1), 95, 65);
         ctx.arc(p.x, p.y, preview ? 1.5 : 3, 0, Math.PI * 2);
         ctx.fill();
       });
     },
-    [points, dotStep, preview]
+    [points, dotStep, preview, progressRef, width, height]
   );
 
-  const ref = useWebCanvas(width, height, draw);
+  const ref = useWebCanvas(width, height, draw, !preview);
   return <canvas ref={ref} style={{ width, height, display: "block" }} />;
 }

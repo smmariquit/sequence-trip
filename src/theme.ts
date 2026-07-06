@@ -1,22 +1,41 @@
 // src/theme.ts
+//
+// Brand palette + viz generators. UI chrome uses semantic aliases below.
 
 export const colors = {
+  // Surfaces
   bg: "#07060E",
-  bgCard: "#110F1B",
-  bgCardHover: "#1A1726",
-  surface: "#16132A",
-  surfaceLight: "#221E3A",
-  text: "#F0ECFF",
-  textDim: "#8A84A6",
-  textMuted: "#5C5677",
+  bgElevated: "#0E0C18",
+  bgCard: "#12101F",
+  bgCardHover: "#18152A",
+  surface: "#1A1729",
+  surfacePressed: "#242035",
+  surfaceLight: "#2A2545",
+
+  // Text
+  text: "#F3F0FF",
+  textDim: "#9B94B8",
+  textMuted: "#6B6488",
+
+  // Brand & interaction (UI chrome — keep viz neon separate)
+  primary: "#B44AFF",
+  primaryDim: "rgba(180, 74, 255, 0.14)",
+  primaryBorder: "rgba(180, 74, 255, 0.35)",
   accent: "#B44AFF",
   accentAlt: "#FF4A8D",
-  neonCyan: "#00F5FF",
+  interactive: "#C4B5FD",
+
+  // Structure
+  border: "#2E2948",
+  borderSubtle: "rgba(255, 255, 255, 0.06)",
+  focusRing: "rgba(180, 74, 255, 0.45)",
+
+  // Legacy aliases (viz + gradual migration)
+  neonCyan: "#56E8FF",
   neonGreen: "#39FF14",
   neonPink: "#FF10F0",
   neonOrange: "#FF6B2B",
   neonYellow: "#FFE62B",
-  border: "#2A2545",
 };
 
 export const palettes = {
@@ -46,6 +65,7 @@ export const palettes = {
 };
 
 export function hslToHex(h: number, s: number, l: number): string {
+  "worklet";
   h = ((h % 360) + 360) % 360;
   s = Math.max(0, Math.min(100, s));
   l = Math.max(0, Math.min(100, l));

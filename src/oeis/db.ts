@@ -33,6 +33,11 @@ function getDb(): Promise<SQLiteDatabase> {
   return dbPromise;
 }
 
+/** Open/import the bundled DB early so first search is not janky. */
+export function warmDb(): Promise<void> {
+  return getDb().then(() => undefined);
+}
+
 export async function getById(anum: string): Promise<OEISSequence | null> {
   const db = await getDb();
   const row = await db.getFirstAsync<Row>("SELECT * FROM seq WHERE anum = ?", [

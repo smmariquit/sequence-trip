@@ -2,11 +2,14 @@
 
 import React, { useCallback, useMemo } from "react";
 import { useWebCanvas, hslString } from "../useWebCanvas";
+import { useBuildAnimation } from "../../playback/useBuildAnimation";
+import { itemRevealAlpha } from "../../playback/drawProgress";
 import { normalize } from "../../sequences/normalize";
 import type { GenericVizProps } from "./types";
 
 export default function BarWaveform({ terms, width, height, preview }: GenericVizProps) {
   const stats = useMemo(() => normalize(terms), [terms]);
+  const { progressRef } = useBuildAnimation(stats.logs.length, preview);
 
   const bars = useMemo(() => {
     const n = stats.logs.length;
@@ -24,23 +27,28 @@ export default function BarWaveform({ terms, width, height, preview }: GenericVi
         w: barW,
         h,
         hue: v >= 0 ? (i * 360) / n : ((i * 360) / n + 180) % 360,
+        i,
       };
     });
   }, [stats, width, height, preview]);
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number) => {
+      const progress = progressRef.current;
       const breathe = 0.875 + 0.125 * Math.sin(time * Math.PI);
-      ctx.globalAlpha = breathe;
+
       for (const b of bars) {
+        const alpha = itemRevealAlpha(progress, b.i) * breathe;
+        if (alpha <= 0) continue;
+        ctx.globalAlpha = alpha;
         ctx.fillStyle = hslString(b.hue, 90, 60);
         ctx.fillRect(b.x, b.y, b.w, b.h);
       }
       ctx.globalAlpha = 1;
     },
-    [bars]
+    [bars, progressRef]
   );
 
-  const ref = useWebCanvas(width, height, draw);
+  const ref = useWebCanvas(width, height, draw, !preview);
   return <canvas ref={ref} style={{ width, height, display: "block" }} />;
 }

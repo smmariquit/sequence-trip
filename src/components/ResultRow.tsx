@@ -1,74 +1,78 @@
 // src/components/ResultRow.tsx
 
-import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import React, { memo } from "react";
+import { View, StyleSheet, Platform } from "react-native";
 import { router } from "expo-router";
 import type { OEISSequence } from "../sequences/types";
 import { colors } from "../theme";
+import { radii, spacing } from "../theme/tokens";
 import ErrorBoundary from "./ErrorBoundary";
 import VizPreview from "./VizPreview";
+import { AnumBadge, BodyText, CardSurface, PressableCard, AppIcon } from "./ui";
+import PlainText from "./PlainText";
 
-const PREVIEW_W = 80;
-const PREVIEW_H = 52;
+const PREVIEW_W = Platform.OS === "web" ? 120 : 80;
+const PREVIEW_H = Platform.OS === "web" ? 72 : 52;
 
-export default function ResultRow({ sequence }: { sequence: OEISSequence }) {
+interface Props {
+  sequence: OEISSequence;
+  /** Skip thumbnail on web when false — saves canvas work in long result lists. */
+  showPreview?: boolean;
+}
+
+function ResultRow({ sequence, showPreview = true }: Props) {
   return (
-    <Pressable
+    <PressableCard
       onPress={() => router.push(`/visualize/${sequence.anum}`)}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      pressedOpacity={0.8}
+      pressedScale={1}
+      style={styles.outer}
     >
-      <View style={styles.badge}>
-        <Text style={styles.badgeText}>{sequence.anum}</Text>
-      </View>
-      <View style={styles.body}>
-        <Text style={styles.name} numberOfLines={2}>
-          {sequence.name}
-        </Text>
-        {sequence.terms && (
-          <Text style={styles.terms} numberOfLines={1}>
-            {sequence.terms.slice(0, 12).join(", ")}…
-          </Text>
-        )}
-      </View>
-      <View style={styles.previewWrap}>
-        <ErrorBoundary fallbackText="">
-          <VizPreview sequence={sequence} width={PREVIEW_W} height={PREVIEW_H} />
-        </ErrorBoundary>
-      </View>
-    </Pressable>
+      <CardSurface variant="card" style={styles.row}>
+        <AnumBadge anum={sequence.anum} size="sm" />
+        <View style={styles.body}>
+          <PlainText style={styles.name} numberOfLines={2}>
+            {sequence.name}
+          </PlainText>
+          {sequence.terms && (
+            <BodyText variant="caption" style={styles.terms} numberOfLines={1}>
+              {sequence.terms.slice(0, 12).join(", ")}...
+            </BodyText>
+          )}
+        </View>
+        {showPreview ? (
+          <View style={styles.previewWrap}>
+            <ErrorBoundary fallbackText="Preview unavailable">
+              <VizPreview
+                sequence={sequence}
+                width={PREVIEW_W}
+                height={PREVIEW_H}
+                preview
+              />
+            </ErrorBoundary>
+          </View>
+        ) : null}
+        <AppIcon name="chevron-forward" size={18} color={colors.textMuted} />
+      </CardSurface>
+    </PressableCard>
   );
 }
 
+export default memo(ResultRow);
+
 const styles = StyleSheet.create({
+  outer: {
+    marginBottom: spacing.sm,
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.bgCard,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 12,
-    marginBottom: 10,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  badge: {
-    backgroundColor: colors.surfaceLight,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  badgeText: {
-    color: colors.accent,
-    fontSize: 12,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
+    padding: spacing.md,
+    gap: spacing.sm,
   },
   body: {
     flex: 1,
-    marginRight: 10,
+    minWidth: 0,
   },
   name: {
     color: colors.text,
@@ -77,15 +81,14 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
   terms: {
-    color: colors.textDim,
-    fontSize: 12,
     marginTop: 3,
     fontVariant: ["tabular-nums"],
+    marginBottom: 0,
   },
   previewWrap: {
     width: PREVIEW_W,
     height: PREVIEW_H,
-    borderRadius: 8,
+    borderRadius: radii.sm,
     overflow: "hidden",
     backgroundColor: colors.bg,
   },

@@ -1,76 +1,90 @@
 // src/components/SequenceCard.tsx
 
-import React, { useCallback } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  useWindowDimensions,
-} from "react-native";
+import React, { memo, useCallback } from "react";
+import { View, StyleSheet, Platform } from "react-native";
 import { router } from "expo-router";
 import type { OEISSequence } from "../sequences/types";
 import { colors } from "../theme";
 import ErrorBoundary from "./ErrorBoundary";
+import MathText from "./MathText";
+import PlainText from "./PlainText";
+import { containsLatexDelimiters } from "../math/latexDelimiters";
 import VizPreview from "./VizPreview";
+import { AnumBadge, CardSurface, PressableCard, cardBorderStyles } from "./ui";
+import { radii, spacing } from "../theme/tokens";
 
-const PREVIEW_H = 180;
+const PREVIEW_H = Platform.OS === "web" ? 200 : 180;
 
 interface Props {
   sequence: OEISSequence;
   index: number;
+  cardWidth: number;
 }
 
-export default function SequenceCard({ sequence, index }: Props) {
-  const { width: screenW } = useWindowDimensions();
-  const cardW = Math.min(screenW - 32, 600);
-
+function SequenceCard({ sequence, cardWidth }: Props) {
   const handlePress = useCallback(() => {
     router.push(`/visualize/${sequence.anum}`);
   }, [sequence.anum]);
 
   return (
-    <Pressable
+    <PressableCard
       onPress={handlePress}
-      style={({ pressed }) => [
-        styles.card,
-        { width: cardW, alignSelf: "center" as const },
-        pressed && styles.cardPressed,
-      ]}
+      style={[styles.cardOuter, { width: cardWidth }]}
     >
-      <View style={[styles.previewContainer, { width: cardW }]}>
-        <ErrorBoundary fallbackText={`Preview: ${sequence.name}`}>
-          <VizPreview sequence={sequence} width={cardW} height={PREVIEW_H} />
-        </ErrorBoundary>
-        <View style={styles.previewOverlay} />
-      </View>
-      <View style={styles.info}>
-        <View style={styles.header}>
-          <Text style={styles.name}>{sequence.name}</Text>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{sequence.anum}</Text>
-          </View>
+      <CardSurface variant="card" style={styles.card}>
+        <View style={[styles.previewContainer, { width: cardWidth }]}>
+          <ErrorBoundary fallbackText={`Preview: ${sequence.name}`}>
+            <VizPreview
+              sequence={sequence}
+              width={cardWidth}
+              height={PREVIEW_H}
+              preview
+            />
+          </ErrorBoundary>
+          <View style={[styles.previewOverlay, cardBorderStyles.bottom]} />
         </View>
-        <Text style={styles.description} numberOfLines={2}>
-          {sequence.description}
-        </Text>
-      </View>
-    </Pressable>
+        <View style={styles.info}>
+          <View style={styles.header}>
+            {containsLatexDelimiters(sequence.name) ? (
+              <MathText style={styles.name} inline>
+                {sequence.name}
+              </MathText>
+            ) : (
+              <PlainText style={styles.name} numberOfLines={2}>
+                {sequence.name}
+              </PlainText>
+            )}
+            <AnumBadge anum={sequence.anum} />
+          </View>
+          {sequence.description ? (
+            containsLatexDelimiters(sequence.description) ? (
+              <MathText style={styles.description} numberOfLines={Platform.OS === "web" ? 3 : 2}>
+                {sequence.description}
+              </MathText>
+            ) : (
+              <PlainText
+                style={styles.description}
+                numberOfLines={Platform.OS === "web" ? 3 : 2}
+              >
+                {sequence.description}
+              </PlainText>
+            )
+          ) : null}
+        </View>
+      </CardSurface>
+    </PressableCard>
   );
 }
 
+export default memo(SequenceCard);
+
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.bgCard,
-    borderRadius: 20,
+  cardOuter: {
     marginBottom: 20,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: colors.border,
   },
-  cardPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
+  card: {
+    borderRadius: radii.xl,
+    overflow: "hidden",
   },
   previewContainer: {
     height: PREVIEW_H,
@@ -79,37 +93,22 @@ const styles = StyleSheet.create({
   },
   previewOverlay: {
     ...StyleSheet.absoluteFillObject,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
   info: {
-    padding: 16,
-    paddingTop: 14,
+    padding: spacing.lg,
+    paddingTop: spacing.md,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: spacing.xs,
   },
   name: {
     color: colors.text,
     fontSize: 18,
     fontWeight: "700",
     flex: 1,
-  },
-  badge: {
-    backgroundColor: colors.surfaceLight,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-    marginLeft: 8,
-  },
-  badgeText: {
-    color: colors.accent,
-    fontSize: 12,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
   },
   description: {
     color: colors.textDim,

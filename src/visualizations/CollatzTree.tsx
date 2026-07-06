@@ -1,23 +1,14 @@
 // src/visualizations/CollatzTree.tsx
 
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo } from "react";
 import {
   Canvas,
   Path as SkiaPath,
   Skia,
-  Group,
-  BlurMask,
 } from "@shopify/react-native-skia";
-import {
-  useDerivedValue,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-  Easing,
-} from "react-native-reanimated";
 import { collatzSequence } from "../sequences/generators";
 import { hslToHex } from "../theme";
-import { usePlayback } from "../playback/PlaybackContext";
+import { useBuildAnimation } from "../playback/useBuildAnimation";
 
 interface Props {
   width: number;
@@ -26,81 +17,88 @@ interface Props {
   preview?: boolean;
 }
 
-export default function CollatzTree({ width, height, count = 40, preview }: Props) {
-  const { speed } = usePlayback();
-  const n = preview ? 18 : count;
+type Branch = {
+  path: ReturnType<typeof Skia.Path.Make>;
+  hue: number;
+};
 
-  const hueShift = useSharedValue(0);
-  const breathe = useSharedValue(0);
+function buildBranches(width: number, height: number, n: number, stepLen: number): Branch[] {
+  const cx = width / 2;
+  const startY = height - 30;
+  const evenAngle = Math.PI / 12;
+  const oddAngle = -Math.PI / 7;
 
-  useEffect(() => {
-    hueShift.value = withRepeat(
-      withTiming(360, { duration: 12000 / speed, easing: Easing.linear }),
-      -1,
-      false
-    );
-    breathe.value = withRepeat(
-      withTiming(1, { duration: 4000 / speed, easing: Easing.inOut(Easing.sin) }),
-      -1,
-      true
-    );
-  }, [speed]);
+  return Array.from({ length: n }, (_, i) => {
+    const seq = collatzSequence(i + 2);
+    const path = Skia.Path.Make();
 
-  const branches = useMemo(() => {
-    const cx = width / 2;
-    const startY = height - 30;
-    const stepLen = preview ? 4 : 7;
-    const evenAngle = Math.PI / 12;
-    const oddAngle = -Math.PI / 7;
+    let x = cx;
+    let y = startY;
+    let angle = -Math.PI / 2;
+    path.moveTo(x, y);
 
-    return Array.from({ length: n }, (_, i) => {
-      const seq = collatzSequence(i + 2);
-      const path = Skia.Path.Make();
+    for (let j = 0; j < seq.length - 1 && j < 120; j++) {
+      angle += seq[j] % 2 === 0 ? evenAngle : oddAngle;
+      x += Math.cos(angle) * stepLen;
+      y += Math.sin(angle) * stepLen;
+      path.lineTo(x, y);
+    }
 
-      let x = cx;
-      let y = startY;
-      let angle = -Math.PI / 2;
-      path.moveTo(x, y);
+    return { path, hue: (i * 360) / n };
+  });
+}
 
-      for (let j = 0; j < seq.length - 1 && j < 120; j++) {
-        angle += seq[j] % 2 === 0 ? evenAngle : oddAngle;
-        x += Math.cos(angle) * stepLen;
-        y += Math.sin(angle) * stepLen;
-        path.lineTo(x, y);
-      }
-
-      return { path, len: seq.length, hue: (i * 360) / n };
-    });
-  }, [n, width, height, preview]);
+export function CollatzTreePreview({ width, height }: { width: number; height: number }) {
+  const branches = useMemo(
+    () => buildBranches(width, height, 14, 4),
+    [width, height]
+  );
 
   return (
     <Canvas style={{ width, height }}>
-      {branches.map((branch, i) => {
-        const color = useDerivedValue(() => {
-          return hslToHex(
-            (branch.hue + hueShift.value) % 360,
-            85,
-            55 + breathe.value * 10
-          );
-        });
-        const strokeWidth = useDerivedValue(() => {
-          return (preview ? 1 : 1.8) + breathe.value * 0.4;
-        });
-
-        return (
-          <SkiaPath
-            key={i}
-            path={branch.path}
-            style="stroke"
-            strokeWidth={strokeWidth}
-            color={color}
-            strokeCap="round"
-            strokeJoin="round"
-          >
-            {!preview && <BlurMask blur={2} style="solid" />}
-          </SkiaPath>
-        );
-      })}
+      {branches.map((branch, i) => (
+        <SkiaPath
+          key={i}
+          path={branch.path}
+          style="stroke"
+          strokeWidth={1}
+          color={hslToHex(branch.hue, 85, 55)}
+          strokeCap="round"
+          strokeJoin="round"
+        />
+      ))}
     </Canvas>
   );
+}
+
+export function CollatzTreeFull({ width, height, count = 40 }: Omit<Props, "preview">) {
+  const { step: visible } = useBuildAnimation(count, false);
+
+  const branches = useMemo(
+    () => buildBranches(width, height, count, 7),
+    [count, width, height]
+  );
+
+  return (
+    <Canvas style={{ width, height }}>
+      {branches.slice(0, visible).map((branch, i) => (
+        <SkiaPath
+          key={i}
+          path={branch.path}
+          style="stroke"
+          strokeWidth={1.8}
+          color={hslToHex(branch.hue, 85, 55)}
+          strokeCap="round"
+          strokeJoin="round"
+        />
+      ))}
+    </Canvas>
+  );
+}
+
+export default function CollatzTree({ width, height, count, preview }: Props) {
+  if (preview !== false) {
+    return <CollatzTreePreview width={width} height={height} />;
+  }
+  return <CollatzTreeFull width={width} height={height} count={count} />;
 }
