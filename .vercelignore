@@ -1,0 +1,4 @@
+node_modules/
+assets/oeis.db
+scripts/.oeis-data/
+dist/
