@@ -10,7 +10,7 @@ import {
   type ViewStyle,
 } from "react-native";
 import { router } from "expo-router";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import AppIcon from "./AppIcon";
 
 export type NavLinkVariant = "accent" | "muted" | "footer";
@@ -30,6 +30,9 @@ export default function NavLink({
   testID,
   style,
 }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <Pressable
       onPress={() => router.push(href as never)}
@@ -41,7 +44,7 @@ export default function NavLink({
         {variant === "footer" ? (
           <AppIcon name="information-circle-outline" size={14} color={colors.interactive} />
         ) : null}
-        <Text style={linkStyles[variant]}>{label}</Text>
+        <Text style={styles.linkStyles[variant]}>{label}</Text>
         {variant === "footer" ? (
           <AppIcon name="chevron-forward" size={14} color={colors.interactive} />
         ) : null}
@@ -50,33 +53,34 @@ export default function NavLink({
   );
 }
 
-const linkStyles = StyleSheet.create({
-  accent: {
-    color: colors.interactive,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  muted: {
-    color: colors.textDim,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  footer: {
-    color: colors.interactive,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-});
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  pressed: {
-    opacity: 0.75,
-  },
+const makeStyles = (colors: any) => ({
+  linkStyles: StyleSheet.create({
+    accent: {
+      color: colors.interactive,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+    muted: {
+      color: colors.textDim,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+    footer: {
+      color: colors.interactive,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+  }),
+  ...StyleSheet.create({
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+    pressed: {
+      opacity: 0.75,
+    },
+  }),
 });
 
 /** Shortcut for the shared info/about screen. */

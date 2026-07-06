@@ -4,7 +4,7 @@ import React, { memo } from "react";
 import { View, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import type { OEISSequence } from "../sequences/types";
-import { colors, hslToHex } from "../theme";
+import { useThemeColors, hslToHex } from "../theme";
 import { radii, spacing } from "../theme/tokens";
 import { containsLatexDelimiters } from "../math/latexDelimiters";
 import ErrorBoundary from "./ErrorBoundary";
@@ -27,6 +27,8 @@ interface Props {
 }
 
 function ExploreCard({ sequence }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
   const termsLine = sequence.terms?.length
     ? `${sequence.terms.slice(0, 10).join(", ")}…`
     : null;
@@ -78,7 +80,7 @@ function ExploreCard({ sequence }: Props) {
 
 export default memo(ExploreCard);
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   outer: {
     width: EXPLORE_CARD_W,
   },

@@ -3,7 +3,7 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import Constants from "expo-constants";
-import { colors } from "../theme";
+import { useThemeColors } from "../theme";
 import { APP_NAME } from "../constants/brand";
 import { INFO_SECTIONS } from "../content/infoContent";
 import {
@@ -17,6 +17,9 @@ import { spacing } from "../theme/tokens";
 import { AppFooter, InfoSectionBlock, LogoTitleRow } from "./ui";
 
 export default function InfoScreen() {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const version = Constants.expoConfig?.version ?? "1.0.0";
 
   return (
@@ -39,7 +42,7 @@ export default function InfoScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,

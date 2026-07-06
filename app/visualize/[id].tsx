@@ -13,7 +13,7 @@ import type { OEISSequence } from "../../src/sequences/types";
 import Controls from "../../src/components/Controls";
 import { PlaybackProvider } from "../../src/playback/PlaybackContext";
 import { MusicProvider } from "../../src/audio/MusicContext";
-import { colors } from "../../src/theme";
+import { useThemeColors } from "../../src/theme";
 import VizPreview from "../../src/components/VizPreview";
 import VizCaption from "../../src/components/VizCaption";
 import SequenceEntryPanel from "../../src/components/SequenceEntryPanel";
@@ -21,6 +21,9 @@ import { CenteredState } from "../../src/components/ui";
 import { useSequenceTermCount } from "../../src/hooks/useSequenceTermCount";
 
 export default function VisualizeScreen() {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const catalogSeq = useMemo(() => getSequence(id ?? ""), [id]);
   const [dbSeq, setDbSeq] = useState<OEISSequence | null>(null);
@@ -125,7 +128,7 @@ export default function VisualizeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,

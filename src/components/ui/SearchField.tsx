@@ -7,7 +7,7 @@ import {
   StyleSheet,
   type TextInputProps,
 } from "react-native";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import { radii, spacing, touch } from "../../theme/tokens";
 import AppIcon from "./AppIcon";
 
@@ -19,6 +19,9 @@ export default function SearchField({
   placeholder,
   testID,
 }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.wrap}>
       <AppIcon name="search" size={touch.iconSizeSm} color={colors.textMuted} />
@@ -37,7 +40,7 @@ export default function SearchField({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   wrap: {
     flexDirection: "row",
     alignItems: "center",

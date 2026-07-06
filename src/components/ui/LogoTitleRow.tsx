@@ -2,7 +2,7 @@
 
 import React from "react";
 import { View, StyleSheet, type StyleProp, type TextStyle } from "react-native";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import Logo from "../Logo";
 import PlainText from "../PlainText";
 
@@ -39,6 +39,9 @@ export default function LogoTitleRow({
   titleTestID,
   titleStyle,
 }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const resolvedLogoSize = logoSize ?? defaultLogoSizes[size];
 
   return (
@@ -65,7 +68,7 @@ export default function LogoTitleRow({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",

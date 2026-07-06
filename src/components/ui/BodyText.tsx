@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Text, StyleSheet, type StyleProp, type TextStyle } from "react-native";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 
 export type BodyTextVariant = "body" | "caption" | "muted" | "error" | "empty";
 
@@ -19,14 +19,17 @@ export default function BodyText({
   style,
   numberOfLines,
 }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeVariantStyles(colors), [colors]);
+
   return (
-    <Text style={[variantStyles[variant], style]} numberOfLines={numberOfLines}>
+    <Text style={[styles[variant], style]} numberOfLines={numberOfLines}>
       {children}
     </Text>
   );
 }
 
-const variantStyles = StyleSheet.create({
+const makeVariantStyles = (colors: any) => StyleSheet.create({
   body: {
     color: colors.textDim,
     fontSize: 14,

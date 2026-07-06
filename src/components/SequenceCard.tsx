@@ -4,7 +4,7 @@ import React, { memo, useCallback } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { router } from "expo-router";
 import type { OEISSequence } from "../sequences/types";
-import { colors } from "../theme";
+import { useThemeColors } from "../theme";
 import ErrorBoundary from "./ErrorBoundary";
 import MathText from "./MathText";
 import PlainText from "./PlainText";
@@ -22,6 +22,8 @@ interface Props {
 }
 
 function SequenceCard({ sequence, cardWidth }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
   const handlePress = useCallback(() => {
     router.push(`/visualize/${sequence.anum}`);
   }, [sequence.anum]);
@@ -78,7 +80,7 @@ function SequenceCard({ sequence, cardWidth }: Props) {
 
 export default memo(SequenceCard);
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   cardOuter: {
     marginBottom: 20,
   },

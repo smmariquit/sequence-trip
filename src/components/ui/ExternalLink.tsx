@@ -10,7 +10,7 @@ import {
   type TextStyle,
 } from "react-native";
 import { Linking } from "react-native";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import AppIcon from "./AppIcon";
 
 interface Props {
@@ -21,6 +21,9 @@ interface Props {
 }
 
 export default function ExternalLink({ url, label, style, inline }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <Pressable
       onPress={() => Linking.openURL(url)}
@@ -42,7 +45,7 @@ export default function ExternalLink({ url, label, style, inline }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   wrap: {
     alignSelf: "flex-start",
     marginTop: 4,

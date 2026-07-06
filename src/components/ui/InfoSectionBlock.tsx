@@ -2,7 +2,7 @@
 
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import type { InfoSection } from "../../content/infoContent";
 import SectionHeading from "./SectionHeading";
 import BodyText from "./BodyText";
@@ -14,6 +14,9 @@ interface Props {
 }
 
 export default function InfoSectionBlock({ section }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.section} testID={`info-section-${section.id}`}>
       <SectionHeading size="info">{section.title}</SectionHeading>
@@ -30,7 +33,7 @@ export default function InfoSectionBlock({ section }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   section: {
     marginTop: 20,
     paddingTop: 20,

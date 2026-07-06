@@ -2,7 +2,7 @@
 
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import BodyText from "./BodyText";
 
 interface Props {
@@ -10,6 +10,9 @@ interface Props {
 }
 
 export default function BulletRow({ children }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.row}>
       <Text style={styles.dot}>·</Text>
@@ -20,7 +23,7 @@ export default function BulletRow({ children }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "flex-start",

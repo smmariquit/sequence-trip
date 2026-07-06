@@ -2,7 +2,7 @@
 
 import React from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
-import { colors } from "../theme";
+import { useThemeColors } from "../theme";
 import { spacing, radii, typography } from "../theme/tokens";
 import { MUSIC_ELEMENTS } from "../audio/elements";
 import { useMusic } from "../audio/MusicContext";
@@ -15,6 +15,9 @@ interface Props {
 }
 
 export default function MusicBar({ showHeader = true }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const { enabled, toggleEnabled, elements, toggleElement } = useMusic();
 
   if (!enabled) return null;
@@ -54,6 +57,8 @@ export default function MusicBar({ showHeader = true }: Props) {
               icon={el.icon}
               active={active}
               onPress={() => toggleElement(el.id)}
+              colors={colors}
+              styles={styles}
             />
           );
         })}
@@ -68,12 +73,16 @@ function ElementChip({
   icon,
   active,
   onPress,
+  colors,
+  styles,
 }: {
   id: MusicElementId;
   label: string;
   icon: (typeof MUSIC_ELEMENTS)[number]["icon"];
   active: boolean;
   onPress: () => void;
+  colors: any;
+  styles: any;
 }) {
   return (
     <Pressable
@@ -97,7 +106,7 @@ function ElementChip({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   wrap: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.sm,

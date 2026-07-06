@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { View, Pressable, StyleSheet } from "react-native";
 import type { OEISSequence } from "../sequences/types";
 import { usePlayback } from "../playback/PlaybackContext";
-import { colors } from "../theme";
+import { useThemeColors } from "../theme";
 import { safeAreaBottomCaption } from "../theme/layout";
 import { spacing, radii } from "../theme/tokens";
 import { containsLatexDelimiters } from "../math/latexDelimiters";
@@ -45,6 +45,9 @@ export default function VizCaption({
   sequence: OEISSequence;
   termCount?: number;
 }) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const { step } = usePlayback();
   const { live, guide } = captionForSequence(sequence, step, termCount);
   const [guideOpen, setGuideOpen] = useState(false);
@@ -85,7 +88,7 @@ export default function VizCaption({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   overlay: {
     position: "absolute",
     left: 0,

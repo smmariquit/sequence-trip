@@ -2,7 +2,7 @@
 
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import { radii, typography } from "../../theme/tokens";
 
 export type AnumBadgeSize = "sm" | "md";
@@ -13,6 +13,9 @@ interface Props {
 }
 
 export default function AnumBadge({ anum, size = "md" }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={[styles.badge, sizeStyles[size]]}>
       <Text style={styles.text}>{anum}</Text>
@@ -31,7 +34,7 @@ const sizeStyles = StyleSheet.create({
   },
 });
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   badge: {
     backgroundColor: colors.primaryDim,
     borderWidth: 1,

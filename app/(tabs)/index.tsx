@@ -9,7 +9,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { router } from "expo-router";
-import { colors } from "../../src/theme";
+import { useThemeColors } from "../../src/theme";
 import { sequences } from "../../src/sequences/catalog";
 import type { OEISSequence } from "../../src/sequences/types";
 import SequenceCard from "../../src/components/SequenceCard";
@@ -34,6 +34,9 @@ import { spacing } from "../../src/theme/tokens";
 import * as oeis from "../../src/oeis/db";
 
 export default function HomeScreen() {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const { width: screenW } = useWindowDimensions();
   const pageW = Math.min(screenW, MAX_PAGE_WIDTH);
   const twoCol = Platform.OS === "web" && pageW >= 760;
@@ -156,7 +159,7 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,

@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { View, ScrollView, StyleSheet, Text } from "react-native";
-import { colors } from "../../src/theme";
+import { useThemeColors } from "../../src/theme";
 import { COLLECTIONS } from "../../src/sequences/collections";
 import type { OEISSequence } from "../../src/sequences/types";
 import { resolveSequences } from "../../src/sequences/resolveSequence";
+import { getSequence } from "../../src/sequences/catalog";
 import ExploreCard, { EXPLORE_CARD_W } from "../../src/components/ExploreCard";
 import {
   BodyText,
@@ -21,11 +22,22 @@ import { spacing } from "../../src/theme/tokens";
 import * as oeis from "../../src/oeis/db";
 
 export default function ExploreScreen() {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const [sequences, setSequences] = useState<Map<string, OEISSequence> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     const anums = COLLECTIONS.flatMap((c) => c.anums);
+    
+    const initialMap = new Map<string, OEISSequence>();
+    for (const anum of anums) {
+      const cat = getSequence(anum);
+      if (cat) initialMap.set(anum, cat);
+    }
+    setSequences(initialMap);
+
     oeis.warmDb().catch(() => {});
     resolveSequences(anums)
       .then((map) => {
@@ -33,7 +45,6 @@ export default function ExploreScreen() {
       })
       .catch((err) => {
         console.warn("Explore sequences load failed:", err);
-        if (!cancelled) setSequences(new Map());
       });
     return () => {
       cancelled = true;
@@ -88,7 +99,7 @@ export default function ExploreScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,

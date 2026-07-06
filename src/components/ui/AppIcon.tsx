@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 
 export type AppIconName = keyof typeof Ionicons.glyphMap;
 
@@ -12,6 +12,8 @@ interface Props {
   color?: string;
 }
 
-export default function AppIcon({ name, size = 20, color = colors.text }: Props) {
-  return <Ionicons name={name} size={size} color={color} />;
+export default function AppIcon({ name, size = 20, color }: Props) {
+  const colors = useThemeColors();
+
+  return <Ionicons name={name} size={size} color={color ?? colors.text} />;
 }

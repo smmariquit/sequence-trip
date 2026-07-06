@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { View, StyleSheet, Platform } from "react-native";
-import { colors } from "../theme";
+import { useThemeColors } from "../theme";
 import * as Haptics from "expo-haptics";
 import { usePlayback } from "../playback/PlaybackContext";
 import { useMusic } from "../audio/MusicContext";
@@ -40,6 +40,9 @@ export default function Controls({
   loadingMore,
   onLoadMore,
 }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const [speedIdx, setSpeedIdx] = useState(1);
   const { setSpeed, playing, togglePlay, restart, maxSteps } = usePlayback();
   const { enabled: musicOn, toggleEnabled: toggleMusic } = useMusic();
@@ -162,7 +165,7 @@ export default function Controls({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   container: {
     backgroundColor: colors.bgElevated,
     borderBottomWidth: 1,

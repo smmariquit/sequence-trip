@@ -4,7 +4,7 @@ import React, { memo } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { router } from "expo-router";
 import type { OEISSequence } from "../sequences/types";
-import { colors } from "../theme";
+import { useThemeColors } from "../theme";
 import { radii, spacing } from "../theme/tokens";
 import ErrorBoundary from "./ErrorBoundary";
 import VizPreview from "./VizPreview";
@@ -21,6 +21,8 @@ interface Props {
 }
 
 function ResultRow({ sequence, showPreview = true }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
   return (
     <PressableCard
       onPress={() => router.push(`/visualize/${sequence.anum}`)}
@@ -60,7 +62,7 @@ function ResultRow({ sequence, showPreview = true }: Props) {
 
 export default memo(ResultRow);
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   outer: {
     marginBottom: spacing.sm,
   },

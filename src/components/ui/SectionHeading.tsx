@@ -2,7 +2,7 @@
 
 import React from "react";
 import { View, Text, StyleSheet, type StyleProp, type TextStyle } from "react-native";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import { PAGE_PADDING } from "../../theme/layout";
 import { spacing } from "../../theme/tokens";
 
@@ -21,43 +21,47 @@ export default function SectionHeading({
   style,
   padded = true,
 }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={[padded && size === "page" && styles.pagePadded, styles.row]}>
       <View style={styles.accent} />
-      <Text style={[sizeStyles[size], style]}>{children}</Text>
+      <Text style={[styles.sizeStyles[size], style]}>{children}</Text>
     </View>
   );
 }
 
-const sizeStyles = StyleSheet.create({
-  page: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: "700",
-    letterSpacing: 0.2,
-  },
-  info: {
-    color: colors.text,
-    fontSize: 17,
-    fontWeight: "700",
-  },
-});
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-    marginTop: spacing.xl,
-    marginBottom: spacing.md,
-  },
-  accent: {
-    width: 3,
-    height: 18,
-    borderRadius: 2,
-    backgroundColor: colors.primary,
-  },
-  pagePadded: {
-    paddingHorizontal: PAGE_PADDING,
-  },
+const makeStyles = (colors: any) => ({
+  sizeStyles: StyleSheet.create({
+    page: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: "700",
+      letterSpacing: 0.2,
+    },
+    info: {
+      color: colors.text,
+      fontSize: 17,
+      fontWeight: "700",
+    },
+  }),
+  ...StyleSheet.create({
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: spacing.sm,
+      marginTop: spacing.xl,
+      marginBottom: spacing.md,
+    },
+    accent: {
+      width: 3,
+      height: 18,
+      borderRadius: 2,
+      backgroundColor: colors.primary,
+    },
+    pagePadded: {
+      paddingHorizontal: PAGE_PADDING,
+    },
+  }),
 });

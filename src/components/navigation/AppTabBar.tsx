@@ -5,7 +5,7 @@ import { View, Pressable, Text, StyleSheet, Platform } from "react-native";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import { radii, typography } from "../../theme/tokens";
 import AppIcon, { type AppIconName } from "../ui/AppIcon";
 
@@ -22,6 +22,9 @@ const TAB_TEST_IDS: Record<string, string> = {
 };
 
 export default function AppTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const insets = useSafeAreaInsets();
 
   return (
@@ -78,7 +81,7 @@ export default function AppTabBar({ state, descriptors, navigation }: BottomTabB
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   wrap: {
     flexDirection: "row",
     backgroundColor: colors.bgElevated,

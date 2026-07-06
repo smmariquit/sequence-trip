@@ -4,12 +4,15 @@
 
 import React from "react";
 import { View, StyleSheet, Platform, useWindowDimensions } from "react-native";
-import { colors } from "../theme";
+import { useThemeColors } from "../theme";
 import { MAX_PAGE_WIDTH } from "../theme/layout";
 
 const MAX_CONTENT = MAX_PAGE_WIDTH;
 
 export default function WebPageShell({ children }: { children: React.ReactNode }) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const { width } = useWindowDimensions();
 
   if (Platform.OS !== "web") {
@@ -27,7 +30,7 @@ export default function WebPageShell({ children }: { children: React.ReactNode }
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   outer: {
     flex: 1,
     alignItems: "center",

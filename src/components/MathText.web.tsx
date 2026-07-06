@@ -9,7 +9,7 @@ import {
 import "katex/dist/katex.min.css";
 import { containsLatexDelimiters } from "../math/latexDelimiters";
 import { renderMixedLatex } from "../math/renderMixedLatex";
-import { colors } from "../theme";
+import { useThemeColors } from "../theme";
 
 interface Props {
   children: string;
@@ -19,6 +19,8 @@ interface Props {
 }
 
 export default function MathText({ children, style, numberOfLines, inline }: Props) {
+  const colors = useThemeColors();
+
   const hasLatex = containsLatexDelimiters(children);
   const html = useMemo(
     () => (hasLatex ? renderMixedLatex(children) : null),

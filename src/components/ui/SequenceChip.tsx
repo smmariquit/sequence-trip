@@ -3,7 +3,7 @@
 import React from "react";
 import { Text, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import { typography } from "../../theme/tokens";
 import CardSurface from "./CardSurface";
 import PressableCard from "./PressableCard";
@@ -15,6 +15,9 @@ interface Props {
 }
 
 export default function SequenceChip({ anum, onPress }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const handlePress = onPress ?? (() => router.push(`/visualize/${anum}`));
 
   return (
@@ -29,7 +32,7 @@ export default function SequenceChip({ anum, onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",

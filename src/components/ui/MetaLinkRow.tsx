@@ -2,7 +2,7 @@
 
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import ExternalLink from "./ExternalLink";
 import NavLink, { type NavLinkVariant } from "./NavLink";
 
@@ -20,6 +20,9 @@ interface Props {
 }
 
 export default function MetaLinkRow({ items, separator = "·" }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.row}>
       {items.map((item, i) => (
@@ -41,7 +44,7 @@ export default function MetaLinkRow({ items, separator = "·" }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",

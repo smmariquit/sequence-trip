@@ -2,7 +2,7 @@
 
 import React from "react";
 import { View, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
-import { colors } from "../../theme";
+import { useThemeColors } from "../../theme";
 import BodyText from "./BodyText";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -14,6 +14,9 @@ interface Props {
 }
 
 export default function CenteredState({ loading, message, children, style }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={[styles.container, style]}>
       {loading ? <LoadingSpinner style={styles.inlineSpinner} /> : null}
@@ -23,7 +26,7 @@ export default function CenteredState({ loading, message, children, style }: Pro
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",

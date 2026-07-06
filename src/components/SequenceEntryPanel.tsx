@@ -21,7 +21,7 @@ import {
   parseOeisLink,
   stripOeisMarkup,
 } from "../oeis/entryText";
-import { colors } from "../theme";
+import { useThemeColors } from "../theme";
 import { safeAreaTop } from "../theme/layout";
 import { spacing, radii, typography } from "../theme/tokens";
 import AppIcon from "./ui/AppIcon";
@@ -35,6 +35,9 @@ interface Props {
 }
 
 export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const [entry, setEntry] = useState<OEISFullEntry | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -240,6 +243,8 @@ export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -249,6 +254,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function MetaRow({ label, value }: { label: string; value: string }) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.metaRow}>
       <Text style={styles.metaLabel}>{label}</Text>
@@ -258,10 +265,14 @@ function MetaRow({ label, value }: { label: string; value: string }) {
 }
 
 function Body({ children }: { children: string }) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
   return <PlainText style={styles.body}>{children}</PlainText>;
 }
 
 function CodeBlock({ children }: { children: string }) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
       <PlainText style={styles.code}>{children}</PlainText>
@@ -269,7 +280,7 @@ function CodeBlock({ children }: { children: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,

@@ -1,3 +1,4 @@
+import React from "react";
 // app/_layout.tsx
 
 import { Stack } from "expo-router";
@@ -5,31 +6,39 @@ import { StatusBar } from "expo-status-bar";
 import { Platform, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ThemeProvider, DarkTheme } from "@react-navigation/native";
+import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native";
+import { useColorScheme } from "react-native";
 import ErrorBoundary from "../src/components/ErrorBoundary";
 import WebPageShell from "../src/components/WebPageShell";
-import { colors } from "../src/theme";
-
-const appTheme = {
-  ...DarkTheme,
-  colors: {
-    ...DarkTheme.colors,
-    background: colors.bg,
-    card: colors.bg,
-    border: colors.border,
-    primary: colors.accent,
-    text: colors.text,
-  },
-};
+import { useThemeColors } from "../src/theme";
 
 export default function RootLayout() {
+  const colors = useThemeColors();
+  const scheme = useColorScheme();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
+  const appTheme = React.useMemo(() => {
+    const base = scheme === "dark" ? DarkTheme : DefaultTheme;
+    return {
+      ...base,
+      colors: {
+        ...base.colors,
+        background: colors.bg,
+        card: colors.bg,
+        border: colors.border,
+        primary: colors.accent,
+        text: colors.text,
+      },
+    };
+  }, [colors, scheme]);
+
   return (
     <ErrorBoundary fallbackText="App failed to load">
       <GestureHandlerRootView style={styles.root}>
         <SafeAreaProvider>
         <ThemeProvider value={appTheme}>
           <WebPageShell>
-            <StatusBar style="light" />
+            <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
             <Stack
               screenOptions={{
                 headerShown: false,
@@ -55,7 +64,7 @@ export default function RootLayout() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.bg,

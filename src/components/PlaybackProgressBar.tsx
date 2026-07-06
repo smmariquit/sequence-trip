@@ -6,10 +6,13 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { usePlayback } from "../playback/PlaybackContext";
-import { colors } from "../theme";
+import { useThemeColors } from "../theme";
 import { radii } from "../theme/tokens";
 
 export default function PlaybackProgressBar() {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
   const { progressSV, maxSteps } = usePlayback();
 
   const fillStyle = useAnimatedStyle(() => {
@@ -26,7 +29,7 @@ export default function PlaybackProgressBar() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: any) => StyleSheet.create({
   wrap: {
     height: 3,
     backgroundColor: colors.borderSubtle,
