@@ -30,9 +30,12 @@ export default function UlamSpiral({ width, height, count = 2000, preview }: Pro
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => {
       const progress = progressRef.current;
+      const topPad = preview ? 0 : 30;
+      const bottomPad = preview ? 0 : 64;
+      const usableH = h - topPad - bottomPad;
       const cx = w / 2;
-      const cy = h / 2;
-      const cellSize = (Math.min(w, h) * 0.9) / (data.maxC * 2 + 1);
+      const cy = topPad + usableH / 2;
+      const cellSize = (Math.min(w, usableH) * 0.94) / (data.maxC * 2 + 1);
       const hueShift = (time * 36) % 360;
       const glowPulse = Math.sin(time * 4.2) * 0.5 + 0.5;
 

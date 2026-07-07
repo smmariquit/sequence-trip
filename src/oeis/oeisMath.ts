@@ -7,18 +7,24 @@
 
 /** Words allowed inside a formula line (function names, quantifiers). */
 const FORMULA_WORDS = new Set([
-  "a", "n", "k", "m", "i", "j", "x", "sum", "product", "prod", "binomial",
-  "sqrt", "floor", "ceiling", "abs", "gcd", "lcm", "mod", "log", "log_2",
-  "exp", "sin", "cos", "tan", "max", "min", "lim", "pi", "phi", "psi",
+  "a", "b", "c", "d", "n", "k", "m", "i", "j", "p", "q", "r", "s", "t", "x", "y", "z",
+  "F", "G", "L", "T", "A", "B", "C", "P", "Q", "S",
+  "sum", "product", "prod", "binomial",
+  "sqrt", "floor", "ceiling", "ceil", "round", "abs", "gcd", "lcm", "mod",
+  "log", "log_2", "exp", "sin", "cos", "tan", "sinh", "cosh", "sign",
+  "max", "min", "lim", "pi", "phi", "psi",
   "sigma", "mu", "tau", "omega", "infinity", "if", "for", "with", "where",
   "and", "or", "else", "otherwise", "even", "odd", "prime", "fibonacci",
-  "catalan", "hypergeom", "numerator", "denominator", "digits",
+  "lucas", "catalan", "hypergeom", "numerator", "denominator", "digits",
 ]);
 
-/** Strip OEIS attribution tails: ". - _Author Name_, Mon DD YYYY". */
+/** Strip OEIS attribution tails: ". - Author Name, Mon DD YYYY" (with or
+ * without the _underscores_ that stripOeisMarkup may already have removed). */
 function stripAttribution(line: string): { math: string; tail: string } {
-  const m = line.match(/^(.*?)\s*(-\s*_[^_]+_.*)$/);
-  if (m) return { math: m[1], tail: "" };
+  const underscored = line.match(/^(.*?)\s*(-\s*_[^_]+_.*)$/);
+  if (underscored) return { math: underscored[1], tail: "" };
+  const dated = line.match(/^(.*?)\s*-\s+[A-Z][\w'. -]*,\s+[A-Z][a-z]{2}\s+\d{1,2}\s+\d{4}.*$/);
+  if (dated) return { math: dated[1], tail: "" };
   return { math: line, tail: "" };
 }
 
@@ -26,7 +32,7 @@ function stripAttribution(line: string): { math: string; tail: string } {
 function looksLikeFormula(text: string): boolean {
   if (!/[=<>~]/.test(text)) return false;
   const words = text.match(/[A-Za-z_][A-Za-z_0-9]*/g) ?? [];
-  return words.every((w) => FORMULA_WORDS.has(w.toLowerCase()));
+  return words.every((w) => FORMULA_WORDS.has(w) || FORMULA_WORDS.has(w.toLowerCase()));
 }
 
 /** OEIS ASCII math → LaTeX. Only call on text that looksLikeFormula. */

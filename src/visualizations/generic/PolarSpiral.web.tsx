@@ -57,6 +57,7 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
       }
 
       let headPos: { x: number; y: number; i: number } | null = null;
+      let prevPos: { x: number; y: number } | null = null;
       for (let i = 0; i < points.length; i++) {
         const pt = points[i];
         const alpha = itemRevealAlpha(progress, i);
@@ -65,6 +66,22 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
         const a = pt.angle + rotation;
         const x = cx + pt.r * Math.cos(a);
         const y = cy + pt.r * Math.sin(a);
+
+        // momentary connector: a line from the previous dot that fades as
+        // the next dot arrives, tracing the jump order
+        if (!preview && prevPos) {
+          const lineAlpha = Math.max(0, 1 - (progress - i));
+          if (lineAlpha > 0) {
+            ctx.globalAlpha = lineAlpha * 0.7;
+            ctx.strokeStyle = hslString(pt.hue, 90, 65);
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(prevPos.x, prevPos.y);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+          }
+        }
+        prevPos = { x, y };
         headPos = { x, y, i };
 
         ctx.globalAlpha = alpha;

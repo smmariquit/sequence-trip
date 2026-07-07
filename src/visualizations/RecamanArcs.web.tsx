@@ -64,7 +64,7 @@ export default function RecamanArcs({ width, height, count = 64, preview }: Prop
           ctx.shadowColor = hslString(hue, 100, 60);
           ctx.shadowBlur = 6;
         }
-        strokeRecamanArc(ctx, cx, midY, radius, above, 1);
+        strokeRecamanArc(ctx, cx, midY, radius, above, val < next, 1);
         ctx.shadowBlur = 0;
       }
 
@@ -86,7 +86,7 @@ export default function RecamanArcs({ width, height, count = 64, preview }: Prop
           ctx.shadowColor = hslString(hue, 100, 60);
           ctx.shadowBlur = 6;
         }
-        strokeRecamanArc(ctx, cx, midY, radius, above, frac);
+        strokeRecamanArc(ctx, cx, midY, radius, above, val < next, frac);
         ctx.shadowBlur = 0;
       }
 

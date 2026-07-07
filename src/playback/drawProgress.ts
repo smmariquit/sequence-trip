@@ -45,25 +45,29 @@ export function strokePolylineProgress(
   ctx.stroke();
 }
 
-/** Partial Recamán semicircle for arc index i in [0, frac]. */
+/** Partial Recamán semicircle for arc index i in [0, frac].
+ * fromLeft: the walk enters this arc at its LEFT endpoint (jumping right),
+ * so the partial arc must grow from that side or the animation looks like
+ * the arc materializes at its destination. Canvas y grows downward: the top
+ * half-circle is the (PI, 2PI) band, the bottom is (0, PI). */
 export function strokeRecamanArc(
   ctx: CanvasRenderingContext2D,
   cx: number,
   midY: number,
   radius: number,
   above: boolean,
+  fromLeft: boolean,
   frac: number
 ): void {
   if (frac <= 0 || radius <= 0) return;
   const t = Math.min(1, frac);
   ctx.beginPath();
   if (above) {
-    // canvas y grows downward: the top half-circle is the (PI, 2PI) sweep.
-    // The old (PI -> 0, anticlockwise) sweep passed through PI/2 and drew
-    // BELOW the line, so no arc ever rendered above it.
-    ctx.arc(cx, midY, radius, Math.PI, Math.PI * (1 + t), false);
+    if (fromLeft) ctx.arc(cx, midY, radius, Math.PI, Math.PI * (1 + t), false);
+    else ctx.arc(cx, midY, radius, 0, -Math.PI * t, true);
   } else {
-    ctx.arc(cx, midY, radius, 0, Math.PI * t, false);
+    if (fromLeft) ctx.arc(cx, midY, radius, Math.PI, Math.PI * (1 - t), true);
+    else ctx.arc(cx, midY, radius, 0, Math.PI * t, false);
   }
   ctx.stroke();
 }

@@ -36,11 +36,12 @@ export function layoutPolar(
   preview: boolean
 ): PolarLayout {
   const n = stats.logs.length;
-  // full view: keep the disc clear of the caption overlay at the bottom
-  const usableH = height - (preview ? 0 : 56);
+  // full view: keep the disc clear of the caption overlay and legend line
+  const topPad = preview ? 0 : 28;
+  const usableH = height - topPad - (preview ? 0 : 64);
   const cx = width / 2;
-  const cy = usableH / 2 + (preview ? 0 : 4);
-  const maxR = Math.min(width, usableH) * 0.44;
+  const cy = topPad + usableH / 2;
+  const maxR = Math.min(width, usableH) * 0.46;
   const range = stats.maxLog - stats.minLog || 1;
 
   const rOf = (v: number) => maxR * (0.12 + 0.88 * ((v - stats.minLog) / range));

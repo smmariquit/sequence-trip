@@ -194,6 +194,12 @@ const BLURBS: Record<string, string> = {
   A001608: "Perrin: a(n) = a(n-2) + a(n-3). Detects primes in a surprising way.",
   A005843: "The even numbers.",
   A000292: "Tetrahedral numbers: cannonballs stacked in triangular pyramids.",
+  A000004: "Zero. Forever. The OEIS catalogs it anyway.",
+  A000012: "1, 1, 1, 1. All ones. That is the whole sequence.",
+  A007395: "All twos. Somebody had to submit it.",
+  A010701: "All threes. The saga continues.",
+  A001477: "0, 1, 2, 3. Counting, starting at zero.",
+  A000027: "1, 2, 3, 4. The natural numbers. The most important sequence there is.",
 };
 
 /** Plain-language one-liner for a sequence, when curated. */

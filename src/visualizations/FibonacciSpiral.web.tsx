@@ -32,9 +32,13 @@ export default function FibonacciSpiral({ width, height, count = 300, preview }:
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => {
       const progress = progressRef.current;
+      // keep the disc clear of the caption bar and the legend line
+      const topPad = preview ? 0 : 30;
+      const bottomPad = preview ? 0 : 64;
+      const usableH = h - topPad - bottomPad;
       const cx = w / 2;
-      const cy = h / 2;
-      const maxR = Math.min(w, h) * 0.45;
+      const cy = topPad + usableH / 2;
+      const maxR = Math.min(w, usableH) * 0.47;
       const rotation = time * 0.314;
       const hueShift = (time * 60) % 360;
       const pulse = Math.sin(time * 3.14) * 0.5 + 0.5;
@@ -53,6 +57,7 @@ export default function FibonacciSpiral({ width, height, count = 300, preview }:
       }
 
       let head: { x: number; y: number; i: number } | null = null;
+      let prev: { x: number; y: number } | null = null;
       for (let i = 0; i < basePoints.length; i++) {
         const alpha = itemRevealAlpha(progress, i);
         if (alpha <= 0) continue;
@@ -63,6 +68,21 @@ export default function FibonacciSpiral({ width, height, count = 300, preview }:
         const x = cx + r * Math.cos(a);
         const y = cy + r * Math.sin(a);
         const hue = (pt.baseHue + hueShift) % 360;
+
+        // fading connector from the previous dot shows the placement order
+        if (!preview && prev) {
+          const lineAlpha = Math.max(0, 1 - (progress - i));
+          if (lineAlpha > 0) {
+            ctx.globalAlpha = lineAlpha * 0.7;
+            ctx.strokeStyle = hslString(hue, 90, 65);
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(prev.x, prev.y);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+          }
+        }
+        prev = { x, y };
         const baseR = preview ? 1.5 : 3;
         const pr = baseR * (1 + pulse * 0.5 * Math.sin(i * 0.1));
 

@@ -8,6 +8,7 @@ import type { OEISSequence } from "../../src/sequences/types";
 import { resolveSequences } from "../../src/sequences/resolveSequence";
 import { getSequence } from "../../src/sequences/catalog";
 import ExploreCard, { EXPLORE_CARD_W } from "../../src/components/ExploreCard";
+import ResultRow from "../../src/components/ResultRow";
 import {
   BodyText,
   LoadingSpinner,
@@ -27,6 +28,30 @@ export default function ExploreScreen() {
 
   const [sequences, setSequences] = useState<Map<string, OEISSequence> | null>(null);
   const [resolving, setResolving] = useState(true);
+  // endless feed: random draws from all 397k sequences, appended on scroll
+  const [feed, setFeed] = useState<OEISSequence[]>([]);
+  const feedBusy = React.useRef(false);
+
+  const loadMoreFeed = React.useCallback(async () => {
+    if (feedBusy.current) return;
+    feedBusy.current = true;
+    try {
+      const batch: OEISSequence[] = [];
+      for (let i = 0; i < 8; i++) {
+        try {
+          batch.push(await oeis.random());
+        } catch {
+          break;
+        }
+      }
+      setFeed((prev) => {
+        const seen = new Set(prev.map((s) => s.anum));
+        return [...prev, ...batch.filter((s) => !seen.has(s.anum))];
+      });
+    } finally {
+      feedBusy.current = false;
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,17 +74,25 @@ export default function ExploreScreen() {
       })
       .finally(() => {
         if (!cancelled) setResolving(false);
+        if (!cancelled) void loadMoreFeed();
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadMoreFeed]);
 
   return (
     <View style={styles.container} testID="explore-screen" nativeID="main">
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={120}
+        onScroll={(e) => {
+          const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+          if (contentOffset.y + layoutMeasurement.height > contentSize.height - 900) {
+            void loadMoreFeed();
+          }
+        }}
       >
         <View style={styles.hero}>
           <LogoTitleRow
@@ -105,6 +138,23 @@ export default function ExploreScreen() {
             </View>
           ))
         )}
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Endless</Text>
+            <BodyText variant="caption" style={styles.sectionDesc}>
+              Random draws from all 397,167 sequences. Keep scrolling.
+            </BodyText>
+          </View>
+          <View style={styles.feed} testID="explore-endless">
+            {feed.map((seq) => (
+              <ResultRow key={seq.anum} sequence={seq} />
+            ))}
+            <View style={styles.loading}>
+              <LoadingSpinner />
+            </View>
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -149,6 +199,9 @@ const makeStyles = (colors: any) => StyleSheet.create({
   carousel: {
     paddingHorizontal: PAGE_PADDING,
     gap: spacing.md,
+  },
+  feed: {
+    paddingHorizontal: PAGE_PADDING,
   },
   cardPlaceholder: {
     width: EXPLORE_CARD_W,

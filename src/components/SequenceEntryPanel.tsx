@@ -21,7 +21,7 @@ import {
   parseOeisLink,
   stripOeisMarkup,
 } from "../oeis/entryText";
-import { tokenizeCode } from "../oeis/codeTokens";
+import { tokenizeCode, type CodeLang } from "../oeis/codeTokens";
 import { formatOeisLine } from "../oeis/oeisMath";
 import { keywordMeaning } from "../oeis/keywordInfo";
 import MathText from "./MathText";
@@ -161,12 +161,12 @@ export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
             ) : null}
             {entry.maple.length > 0 ? (
               <Section title="Maple">
-                <CodeBlock>{entry.maple.join("\n\n")}</CodeBlock>
+                <CodeBlock lang="maple">{entry.maple.join("\n\n")}</CodeBlock>
               </Section>
             ) : null}
             {entry.mathematica.length > 0 ? (
               <Section title="Mathematica">
-                <CodeBlock>{entry.mathematica.join("\n\n")}</CodeBlock>
+                <CodeBlock lang="mathematica">{entry.mathematica.join("\n\n")}</CodeBlock>
               </Section>
             ) : null}
             {entry.comment.length > 0 ? (
@@ -300,10 +300,10 @@ function FormulaLine({ children }: { children: string }) {
   return <PlainText style={styles.body}>{text}</PlainText>;
 }
 
-function CodeBlock({ children }: { children: string }) {
+function CodeBlock({ children, lang = "other" }: { children: string; lang?: CodeLang }) {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
-  const tokens = React.useMemo(() => tokenizeCode(children), [children]);
+  const tokens = React.useMemo(() => tokenizeCode(children, lang), [children, lang]);
   const tokenColor: Record<string, string> = {
     kw: colors.interactive,
     num: colors.neonCyan,

@@ -190,6 +190,7 @@ export default function Controls({
       {termCount != null ? (
         <BodyText variant="caption" style={styles.termMeta}>
           {`${termCount.toLocaleString()} terms`}
+          {termCount >= 500 ? "  ·  large term counts can slow this device down" : ""}
         </BodyText>
       ) : null}
 

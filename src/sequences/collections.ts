@@ -59,4 +59,9 @@ export const COLLECTIONS: SequenceCollection[] = [
     description: "What numbers look like in base 2.",
     anums: ["A000120", "A003188", "A010060", "A000079", "A007376", "A000035"],
   },
+  {
+    title: "Gloriously stupid",
+    description: "Sequences that exist anyway. The OEIS keeps them, so do we.",
+    anums: ["A000004", "A000012", "A007395", "A010701", "A001477", "A000027"],
+  },
 ];

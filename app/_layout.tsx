@@ -13,6 +13,7 @@ import WebPageShell from "../src/components/WebPageShell";
 import { AmbientProvider } from "../src/audio/AmbientContext";
 import { useThemeColors } from "../src/theme";
 import { loadVizColorPrefs } from "../src/visualizations/vizColorStore";
+import { loadMusicSettings } from "../src/audio/musicSettings";
 
 export default function RootLayout() {
   const colors = useThemeColors();
@@ -20,6 +21,7 @@ export default function RootLayout() {
 
   React.useEffect(() => {
     void loadVizColorPrefs();
+    void loadMusicSettings();
   }, []);
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 

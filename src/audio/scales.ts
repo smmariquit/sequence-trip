@@ -1,7 +1,6 @@
 // src/audio/scales.ts
 
-/** C-major pentatonic semitone offsets from root. */
-const PENTATONIC = [0, 2, 4, 7, 9];
+import { musicSettings, SCALES } from "./musicSettings";
 
 const A4 = 440;
 
@@ -10,10 +9,12 @@ export function midiToHz(midi: number): number {
 }
 
 function indexToMidi(index: number, baseMidi: number): number {
+  const { scaleId, rootShift } = musicSettings();
+  const degrees = SCALES[scaleId];
   const i = ((index % 25) + 25) % 25;
-  const octave = Math.floor(i / 5);
-  const degree = PENTATONIC[i % 5];
-  return baseMidi + octave * 12 + degree;
+  const octave = Math.floor(i / degrees.length);
+  const degree = degrees[i % degrees.length];
+  return baseMidi + rootShift + octave * 12 + degree;
 }
 
 /** Map a non-negative index into a pentatonic frequency (baseMidi ≈ C4). */
