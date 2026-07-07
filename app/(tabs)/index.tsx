@@ -70,7 +70,8 @@ export default function HomeScreen() {
           setResults(r);
           setSearching(false);
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error("search failed", err);
           if (!cancelled) setSearching(false);
         });
     }, 300);

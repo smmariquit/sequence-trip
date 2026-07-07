@@ -48,7 +48,8 @@ const CHOICES: Record<GenericVizKey, GenericVizChoice> = {
     key: "grid",
     label: "Grid",
     Component: ModGrid,
-    guide: "Grid of $a(n)$ values, one cell per term, colored by value.",
+    guide:
+      "One cell per term, reading left to right then top to bottom (like text); each cell is colored by $a(n)$.",
   },
   polar: {
     key: "polar",

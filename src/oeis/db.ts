@@ -3,6 +3,7 @@
 // Bundled OEIS dataset (assets/oeis.db, built by scripts/build-db.mjs).
 // Schema: seq(anum, name, terms)  +  seq_fts(name) FTS5 over names.
 
+import { Platform } from "react-native";
 import {
   importDatabaseFromAssetAsync,
   openDatabaseAsync,
@@ -48,9 +49,22 @@ export async function getById(anum: string): Promise<OEISSequence | null> {
 
 export async function searchNames(text: string, limit = 30): Promise<OEISSequence[]> {
   const db = await getDb();
-  // quote each token for FTS5, prefix-match the last one as the user types
   const tokens = text.match(/[A-Za-z0-9]+/g);
   if (!tokens) return [];
+
+  // expo-sqlite's web wasm build has no FTS5 — a MATCH query kills the worker
+  // and every pending promise hangs. LIKE scan instead (runs off-main-thread).
+  if (Platform.OS === "web") {
+    const where = tokens.map(() => "name LIKE ? ESCAPE '\\'").join(" AND ");
+    const params = tokens.map((t) => `%${t.replace(/[%_\\]/g, "\\$&")}%`);
+    const rows = await db.getAllAsync<Row>(
+      `SELECT * FROM seq WHERE ${where} ORDER BY rowid LIMIT ?`,
+      [...params, limit]
+    );
+    return rows.map(toSequence);
+  }
+
+  // quote each token for FTS5, prefix-match the last one as the user types
   const match = tokens.map((t, i) => `"${t}"${i === tokens.length - 1 ? "*" : ""}`).join(" ");
   const rows = await db.getAllAsync<Row>(
     `SELECT s.* FROM seq_fts f JOIN seq s ON s.rowid = f.rowid

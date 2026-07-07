@@ -17,7 +17,8 @@ export const darkColors = {
   // Text
   text: "#F3F0FF",
   textDim: "#9B94B8",
-  textMuted: "#6B6488",
+  // ≥4.5:1 (WCAG AA) on every dark surface up to surfaceLight
+  textMuted: "#8680AA",
 
   // Brand & interaction
   primary: "#B44AFF",
@@ -51,7 +52,8 @@ export const lightColors = {
   
   text: "#111827",
   textDim: "#4B5563",
-  textMuted: "#6B7280",
+  // ≥4.5:1 (WCAG AA) on white and light cards/surfaces
+  textMuted: "#5C6678",
   
   primary: "#9333EA",
   primaryDim: "rgba(147, 51, 234, 0.1)",

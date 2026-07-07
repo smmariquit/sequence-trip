@@ -12,8 +12,14 @@ interface Props {
   compact?: boolean;
 }
 
+/** Deep links (shared URLs, web reloads) have no stack to pop — go home. */
+function goBack() {
+  if (router.canGoBack()) router.back();
+  else router.replace("/");
+}
+
 export default function BackButton({
-  onPress = () => router.back(),
+  onPress = goBack,
   testID = "back-button",
   compact = Platform.OS !== "web",
 }: Props) {
