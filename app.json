@@ -28,11 +28,11 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
-      "output": "single",
+      "output": "static",
       "backgroundColor": "#07060E",
       "name": "Sequence Trip",
       "shortName": "SeqTrip",
-      "description": "Explore and animate 397k+ OEIS integer sequences.",
+      "description": "Animate and search 397k+ OEIS integer sequences.",
       "themeColor": "#07060E",
       "lang": "en"
     },
