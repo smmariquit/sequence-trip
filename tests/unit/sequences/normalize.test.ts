@@ -66,4 +66,12 @@ describe("deltaLogs", () => {
     expect(d[0]).toBeGreaterThan(0);
     expect(d[1]).toBeGreaterThan(d[0]);
   });
+
+  it("does not throw on scientific-notation terms from String(Number)", () => {
+    // String(1.5e21) — how generated catalog terms arrive past 2^53
+    const d = deltaLogs(["1.5005205362068963e+21", "2.4276480729346457e+21"]);
+    expect(d).toHaveLength(1);
+    expect(Number.isFinite(d[0])).toBe(true);
+    expect(d[0]).toBeGreaterThan(0);
+  });
 });

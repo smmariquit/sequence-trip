@@ -107,13 +107,16 @@ export function allDigits(terms: string[], limit = 1200): number[] {
 
 /** First differences as signed logs (BigInt only when Number would overflow). */
 export function deltaLogs(terms: string[]): number[] {
+  const isDigits = (t: string) => /^-?\d+$/.test(t);
   const out: number[] = [];
   for (let i = 1; i < terms.length; i++) {
     const a = terms[i - 1];
     const b = terms[i];
-    if (a.length < 15 && b.length < 15) {
+    // generated terms can arrive as "1.5e+21" — BigInt() throws on those
+    if ((a.length < 15 && b.length < 15) || !isDigits(a) || !isDigits(b)) {
       const d = Number(b) - Number(a);
-      out.push(Math.sign(d) * Math.log10(1 + Math.abs(d)));
+      const mag = Number.isFinite(d) ? Math.log10(1 + Math.abs(d)) : 308;
+      out.push(Math.sign(d) * mag);
     } else {
       const d = BigInt(b) - BigInt(a);
       const s = d < 0n ? -1 : d > 0n ? 1 : 0;
