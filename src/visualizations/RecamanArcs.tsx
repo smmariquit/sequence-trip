@@ -65,12 +65,14 @@ function buildArcs(
   height: number,
   preview: boolean
 ): { arcs: Arc[]; head: { x: number; y: number } | null } {
-  const pad = preview ? 8 : 24;
-  const axisY = height - (preview ? 14 : 36);
-  const midY = axisY - (preview ? 28 : 72);
+  const basePad = preview ? 8 : 24;
+  const axisY = height - (preview ? 14 : 56);
+  const usable = axisY - (preview ? 6 : 16);
+  const midY = usable / 2 + (preview ? 3 : 8);
   const maxVal = Math.max(...seq, 1);
-  const span = width - pad * 2;
-  const scaleX = span / maxVal;
+  const fullSpan = width - basePad * 2;
+  const scaleX = Math.min(fullSpan, usable) / maxVal;
+  const pad = basePad + (fullSpan - maxVal * scaleX) / 2;
 
   const arcs = seq.slice(0, -1).map((val, i) => {
     const next = seq[i + 1];
@@ -117,15 +119,20 @@ export function RecamanArcsFull({ width, height, count = 64 }: Omit<Props, "prev
 
   const seq = useMemo(() => buildRecamanSeq(n), [n]);
 
+  // Static scale over the whole walk — rescaling every step reads as jumpy.
+  // Walk line centered above the axis so both arc halves always fit;
+  // axis sits clear of the caption overlay at the bottom.
   const layout = useMemo(() => {
     const pad = 24;
-    const axisY = height - 36;
-    const midY = axisY - 72;
-    const maxVal = Math.max(...seq.slice(0, Math.max(visible, 1) + 1), 1);
+    const axisY = height - 56;
+    const usable = axisY - 16;
+    const midY = usable / 2 + 8;
+    const maxVal = Math.max(...seq, 1);
     const span = width - pad * 2;
-    const scaleX = span / maxVal;
-    return { pad, axisY, midY, span, scaleX };
-  }, [seq, width, height, visible]);
+    const scaleX = Math.min(span, usable) / maxVal;
+    const xOffset = pad + (span - maxVal * scaleX) / 2;
+    return { pad: xOffset, axisY, midY, span: maxVal * scaleX, scaleX };
+  }, [seq, width, height]);
 
   // completed arcs + the in-progress one (trimmed by fractional progress)
   const arcs = useMemo(() => {

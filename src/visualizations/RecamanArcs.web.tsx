@@ -33,13 +33,17 @@ export default function RecamanArcs({ width, height, count = 64, preview }: Prop
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => {
       const progress = progressRef.current;
-      const pad = preview ? 8 : 24;
-      const axisY = h - (preview ? 14 : 36);
-      const midY = axisY - (preview ? 28 : 72);
+      const basePad = preview ? 8 : 24;
+      const axisY = h - (preview ? 14 : 56);
+      const usable = axisY - (preview ? 6 : 16);
+      const midY = usable / 2 + (preview ? 3 : 8);
       const { complete, frac } = splitProgress(progress);
-      const maxVal = Math.max(...seq.slice(0, Math.max(complete, 1) + 2), 1);
-      const span = w - pad * 2;
-      const scaleX = span / maxVal;
+      // static full-walk scale — per-step rescaling reads as jumpy
+      const maxVal = Math.max(...seq, 1);
+      const fullSpan = w - basePad * 2;
+      const scaleX = Math.min(fullSpan, usable) / maxVal;
+      const pad = basePad + (fullSpan - maxVal * scaleX) / 2;
+      const span = maxVal * scaleX;
       const hueOffset = (time * 45) % 360;
       const breathe = Math.sin(time * 2.1) * 0.5 + 0.5;
 
