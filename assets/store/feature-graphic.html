@@ -1,0 +1,66 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1024px; height:500px; overflow:hidden; }
+  .g {
+    width:1024px; height:500px; position:relative; overflow:hidden;
+    background:
+      radial-gradient(700px 520px at 70% 44%, rgba(150,40,220,.30), transparent 68%),
+      radial-gradient(560px 420px at 96% 90%, rgba(255,60,150,.22), transparent 70%),
+      radial-gradient(520px 380px at 40% 96%, rgba(60,230,140,.14), transparent 68%),
+      radial-gradient(480px 340px at 6% 6%, rgba(0,245,255,.16), transparent 70%),
+      radial-gradient(420px 300px at 88% 8%, rgba(255,150,40,.12), transparent 70%),
+      #07060E;
+    font-family:"Montserrat", sans-serif;
+  }
+  .swirl {
+    position:absolute; inset:-20%;
+    background:conic-gradient(from 200deg at 70% 46%,
+      rgba(255,74,141,.10), rgba(180,74,255,.10), rgba(0,245,255,.10),
+      rgba(60,230,140,.08), rgba(255,150,40,.08), rgba(255,74,141,.10));
+    filter:blur(60px); opacity:.9;
+  }
+  svg { position:absolute; inset:0; width:1024px; height:500px; }
+  .mark { position:absolute; left:74px; top:148px; }
+  .l1 { font-weight:300; font-size:52px; letter-spacing:7px; color:#EEECF8; text-transform:uppercase;
+    text-shadow:0 2px 14px rgba(7,6,14,.85), 0 0 2px rgba(7,6,14,.7); }
+  .l2 {
+    font-weight:900; font-size:124px; line-height:1.02; letter-spacing:-2px; margin-top:0;
+    padding:6px 8px 8px 0;
+    background:linear-gradient(96deg,#00F5FF 4%,#4AA8FF 26%,#B44AFF 52%,#FF4A8D 74%,#FF9838 98%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 26px rgba(180,74,255,.55)) drop-shadow(0 0 10px rgba(255,74,141,.5)) drop-shadow(0 0 3px rgba(0,245,255,.6));
+  }
+  .cap { margin-top:10px; font-weight:500; font-style:italic; font-size:21px; color:#C4BFD8; letter-spacing:.3px;
+    text-shadow:0 2px 12px rgba(7,6,14,.9); }
+</style></head>
+<body>
+<div class="g">
+  <div class="swirl"></div>
+  <svg id="s" viewBox="0 0 1024 500"></svg>
+  <div class="mark">
+    <div class="l1">Sequence</div>
+    <div class="l2">Trip<span style="color:#FF4A8D">.</span></div>
+    <div class="cap">integer sequences, visualized</div>
+  </div>
+</div>
+<script>
+// Pascal's triangle mod 2 → the Sierpiński fractal (A007318), the app's rainbow.
+const R=32, cx=744, y0=64, sp=13.2, rowH=11.5, rad=4.3;
+const cells=[];
+for(let r=0;r<R;r++) for(let k=0;k<=r;k++) if((r & k)===k){
+  const x=cx+(k-r/2)*sp, y=y0+r*rowH, hue=(r*3.5+k*7)%360;
+  cells.push({x,y,hue});
+}
+const dots=cells.map(c=>`<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="${rad}" fill="hsl(${c.hue.toFixed(0)} 95% 62%)"/>`).join("");
+const pivot=y0+R*rowH*0.55;
+const defs=`<defs>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="halo" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="9"/></filter>
+</defs>`;
+// ghost echo behind (psychedelic bloom) + crisp fractal on top
+document.getElementById('s').innerHTML=defs
+  +`<g transform="rotate(-7 ${cx} ${pivot}) translate(${cx} ${pivot}) scale(1.16) translate(${-cx} ${-pivot})" opacity="0.22" filter="url(#halo)">${dots}</g>`
+  +`<g transform="rotate(-7 ${cx} ${pivot})" filter="url(#glow)">${dots}</g>`;
+</script>
+</body></html>

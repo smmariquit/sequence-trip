@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: OEIS
+    url: https://oeis.org
+    about: Online Encyclopedia of Integer Sequences
+  - name: Contributing guide
+    url: https://github.com/smmariquit/oeis-visualize/blob/main/CONTRIBUTING.md
+    about: Setup, PR checklist, and agent docs

@@ -7,14 +7,16 @@
 //
 // Usage: node scripts/build-db.mjs [dir-with-dumps]
 //   Downloads the dumps into the dir if missing (default: scripts/.oeis-data).
+//
+// Uses better-sqlite3 (not node:sqlite) so this runs on Node 20 EAS builders.
 
 import { createReadStream, existsSync, mkdirSync, rmSync, statSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { createGunzip } from "node:zlib";
 import { pipeline } from "node:stream/promises";
 import { createWriteStream } from "node:fs";
-import { DatabaseSync } from "node:sqlite";
 import path from "node:path";
+import Database from "better-sqlite3";
 
 const MAX_TERMS = 48; // b-files are fetched on demand for more
 const MAX_TERMS_CHARS = 400; // huge-value sequences get fewer stored terms
@@ -57,10 +59,10 @@ console.log(`${names.size} names`);
 
 rmSync(dbPath, { force: true });
 mkdirSync(path.dirname(dbPath), { recursive: true });
-const db = new DatabaseSync(dbPath);
+const db = new Database(dbPath);
+db.pragma("journal_mode = OFF");
+db.pragma("synchronous = OFF");
 db.exec(`
-  PRAGMA journal_mode = OFF;
-  PRAGMA synchronous = OFF;
   CREATE TABLE seq (anum TEXT PRIMARY KEY, name TEXT NOT NULL, terms TEXT NOT NULL);
   CREATE VIRTUAL TABLE seq_fts USING fts5(name, content='seq', content_rowid='rowid', detail='none');
 `);
@@ -73,7 +75,6 @@ let count = 0;
 for await (const line of lines(strippedGz)) {
   const sp = line.indexOf(" ");
   const anum = line.slice(0, sp);
-  // stripped format: "A000001 ,0,1,1,1,2,..." — leading/trailing commas
   const raw = line.slice(sp + 1).trim().replace(/^,|,$/g, "");
   let terms = raw.split(",").slice(0, MAX_TERMS).join(",");
   if (terms.length > MAX_TERMS_CHARS) {

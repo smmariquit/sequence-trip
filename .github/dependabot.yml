@@ -1,0 +1,51 @@
+# Dependabot version updates for npm and GitHub Actions.
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      expo:
+        patterns:
+          - "expo"
+          - "expo-*"
+          - "@expo/*"
+      react-native:
+        patterns:
+          - "react-native*"
+          - "@react-native*"
+          - "@shopify/react-native-skia"
+      jest:
+        patterns:
+          - "jest*"
+          - "@jest/*"
+          - "jest-expo"
+      playwright:
+        patterns:
+          - "@playwright/*"
+      dev-tooling:
+        dependency-type: development
+        patterns:
+          - "*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      github-actions:
+        patterns:
+          - "*"

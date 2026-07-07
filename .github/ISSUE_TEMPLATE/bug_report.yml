@@ -1,0 +1,53 @@
+name: Bug report
+description: Something broken in Sequence Trip
+title: "[bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Include the sequence A-number if the bug is sequence-specific.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What you saw vs what you expected.
+    validations:
+      required: true
+
+  - type: input
+    id: sequence
+    attributes:
+      label: OEIS A-number (optional)
+      placeholder: A005132
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Web
+        - Android
+        - iOS
+        - Multiple
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open …
+        2. Tap Play …
+        3. See error toast …
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Extra context
+      description: Browser version, device model, screenshots, console errors.

@@ -1,0 +1,65 @@
+name: EAS Build
+
+# Builds native apps on Expo Application Services.
+# Requires EXPO_TOKEN in repository secrets (expo.dev → Access tokens).
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to build
+        required: true
+        default: android
+        type: choice
+        options:
+          - android
+          - ios
+          - all
+      profile:
+        description: EAS build profile (see eas.json)
+        required: true
+        default: preview
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: eas-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: EAS ${{ github.event_name == 'push' && 'production release' || 'manual' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build on EAS (release tag)
+        if: github.event_name == 'push'
+        # ponytail: android only — no Apple credentials yet; switch back to all when iOS ships
+        run: eas build --platform android --profile production --non-interactive
+
+      - name: Build on EAS (manual)
+        if: github.event_name == 'workflow_dispatch'
+        run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive

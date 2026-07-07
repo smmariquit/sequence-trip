@@ -1,0 +1,42 @@
+name: Feature request
+description: Suggest a visualization or app improvement
+title: "[feat] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the sequence or UX you want. Link an OEIS entry if applicable.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What is hard to see or missing today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: How should it look or work?
+    validations:
+      required: true
+
+  - type: input
+    id: oeis
+    attributes:
+      label: Example OEIS sequence(s)
+      placeholder: A000045, A005132
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Primary platform
+      options:
+        - Web
+        - Android
+        - iOS
+        - All platforms
