@@ -28,7 +28,7 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
-      "output": "static",
+      "output": "single",
       "backgroundColor": "#07060E",
       "name": "Sequence Trip",
       "shortName": "SeqTrip",
