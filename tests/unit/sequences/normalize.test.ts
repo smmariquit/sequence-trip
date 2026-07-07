@@ -26,6 +26,16 @@ describe("normalize", () => {
     expect(Number.isFinite(stats.logs[0])).toBe(true);
     expect(stats.logs[0]).toBeGreaterThan(0);
   });
+
+  it("auto-fits symlog threshold so offset sequences keep relative spread", () => {
+    // 1e6..3e6: with a fixed threshold of 1 these compress into ~log10(3e6)-log10(1e6)
+    // ≈ 0.48 of a 6.5 range; with C = 1e6 the spread dominates the range.
+    const stats = normalize(["1000000", "2000000", "3000000"]);
+    const range = stats.maxLog - stats.minLog;
+    expect(stats.logs[0]).toBeCloseTo(Math.log10(2), 5); // log10(1 + 1e6/1e6)
+    expect(range).toBeGreaterThan(0.2);
+    expect(stats.maxLog).toBeLessThan(1); // not up at ~6.5 anymore
+  });
 });
 
 describe("termMod", () => {

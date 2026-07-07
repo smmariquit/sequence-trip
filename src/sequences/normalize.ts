@@ -35,10 +35,35 @@ function signedLog(t: string): number {
   return neg ? -log : log;
 }
 
+/**
+ * Symlog with a per-sequence linear threshold (Webber 2013 / d3.scaleSymlog):
+ * sign * log10(1 + |v|/C). Fitting C to the smallest nonzero |term| stops
+ * near-zero-dense sequences rendering as a squashed band.
+ */
+function symlog(t: string, threshold: number): number {
+  const v = approxValue(t);
+  if (Number.isFinite(v)) {
+    return Math.sign(v) * Math.log10(1 + Math.abs(v) / threshold);
+  }
+  // beyond double range: log10(1 + |v|/C) ≈ log10(|v|) - log10(C)
+  return signedLog(t) - Math.sign(v) * Math.log10(threshold);
+}
+
+/** Smallest nonzero |value|, clamped to [1e-12, 1e12]; 1 when none. */
+function fitThreshold(values: number[]): number {
+  let min = Infinity;
+  for (const v of values) {
+    const a = Math.abs(v);
+    if (a > 0 && a < min) min = a;
+  }
+  return Number.isFinite(min) ? Math.min(Math.max(min, 1e-12), 1e12) : 1;
+}
+
 export function normalize(terms: string[]): SeqStats {
   const clean = terms.filter((t) => /^-?\d+$/.test(t));
   const values = clean.map(approxValue);
-  const logs = clean.map(signedLog);
+  const threshold = fitThreshold(values);
+  const logs = clean.map((t) => symlog(t, threshold));
   const finite = values.filter(Number.isFinite);
   const min = Math.min(...finite, 0);
   const max = Math.max(...finite, 0);
