@@ -1,7 +1,7 @@
 // src/components/Controls.tsx
 
 import React, { useState } from "react";
-import { View, StyleSheet, Platform } from "react-native";
+import { View, StyleSheet, Platform, Modal, Pressable, useWindowDimensions } from "react-native";
 import { useThemeColors } from "../theme";
 import * as Haptics from "expo-haptics";
 import { usePlayback } from "../playback/PlaybackContext";
@@ -9,7 +9,7 @@ import { useMusic } from "../audio/MusicContext";
 import { containsLatexDelimiters } from "../math/latexDelimiters";
 import { SPEEDS } from "./controlsConfig";
 import { safeAreaTop } from "../theme/layout";
-import { spacing } from "../theme/tokens";
+import { spacing, radii } from "../theme/tokens";
 import MathText from "./MathText";
 import PlainText from "./PlainText";
 import MusicBar from "./MusicBar";
@@ -21,7 +21,9 @@ import {
   BodyText,
   ExternalLink,
   PillButton,
+  AppIcon,
 } from "./ui";
+import type { AppIconName } from "./ui/AppIcon";
 
 interface Props {
   title: string;
@@ -33,6 +35,13 @@ interface Props {
   canLoadMore?: boolean;
   loadingMore?: boolean;
   onLoadMore?: () => void;
+}
+
+interface Action {
+  icon: AppIconName;
+  label: string;
+  onPress: () => void;
+  testID: string;
 }
 
 export default function Controls({
@@ -48,9 +57,14 @@ export default function Controls({
 }: Props) {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
+  const { width } = useWindowDimensions();
+  // phone-width: secondary actions collapse into an overflow sheet so the
+  // title keeps its room. Wide (desktop web): show them inline.
+  const narrow = width < 600;
 
   const [speedIdx, setSpeedIdx] = useState(SPEEDS.indexOf(1));
   const [colorsOpen, setColorsOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const { setSpeed, playing, togglePlay, restart, stepBy, maxSteps } = usePlayback();
   const { enabled: musicOn, toggleEnabled: toggleMusic } = useMusic();
 
@@ -58,9 +72,7 @@ export default function Controls({
     const next = (speedIdx + 1) % SPEEDS.length;
     setSpeedIdx(next);
     setSpeed(SPEEDS[next]);
-    if (Platform.OS !== "web") {
-      Haptics.selectionAsync();
-    }
+    if (Platform.OS !== "web") Haptics.selectionAsync();
   };
 
   const haptic = () => {
@@ -68,6 +80,14 @@ export default function Controls({
   };
 
   const showLoadMore = termCount != null && onLoadMore;
+
+  // secondary actions, in priority order (music stays inline separately)
+  const secondary: Action[] = [
+    { icon: "color-palette-outline", label: "Colors", onPress: () => setColorsOpen(true), testID: "viz-colors-toggle" },
+    ...(onExportPress ? [{ icon: "image-outline" as AppIconName, label: "Save as wallpaper", onPress: onExportPress, testID: "controls-export" }] : []),
+    ...(onTermsPress ? [{ icon: "list-outline" as AppIconName, label: "View raw terms", onPress: onTermsPress, testID: "controls-terms" }] : []),
+    ...(onEntryPress ? [{ icon: "document-text-outline" as AppIconName, label: "Full OEIS entry", onPress: onEntryPress, testID: "controls-entry" }] : []),
+  ];
 
   return (
     <View style={styles.container}>
@@ -83,11 +103,7 @@ export default function Controls({
               {title}
             </PlainText>
           )}
-          <ExternalLink
-            url={`https://oeis.org/${oeis}`}
-            label={oeis}
-            inline
-          />
+          <ExternalLink url={`https://oeis.org/${oeis}`} label={oeis} inline />
           <MetaChips anum={oeis} name={title} compact />
         </View>
         <View style={styles.navActions}>
@@ -99,60 +115,32 @@ export default function Controls({
             testID="music-toggle"
             accessibilityLabel={musicOn ? "Mute sequence music" : "Play sequence music"}
           />
-          <PillButton
-            variant="icon"
-            icon="color-palette-outline"
-            iconPosition="only"
-            onPress={() => setColorsOpen(true)}
-            testID="viz-colors-toggle"
-            accessibilityLabel="Customize visualization colors"
-          />
-          {onExportPress ? (
+          {narrow ? (
             <PillButton
               variant="icon"
-              icon="image-outline"
+              icon="ellipsis-horizontal"
               iconPosition="only"
-              onPress={onExportPress}
-              testID="controls-export"
-              accessibilityLabel="Save as wallpaper"
+              onPress={() => setMoreOpen(true)}
+              testID="controls-more"
+              accessibilityLabel="More actions"
             />
-          ) : null}
-          {onTermsPress ? (
-            <PillButton
-              variant="icon"
-              icon="list-outline"
-              iconPosition="only"
-              onPress={onTermsPress}
-              testID="controls-terms"
-              accessibilityLabel="View the raw terms"
-            />
-          ) : null}
-          {onEntryPress ? (
-            <PillButton
-              variant="icon"
-              icon="document-text-outline"
-              iconPosition="only"
-              onPress={onEntryPress}
-              testID="controls-entry"
-              accessibilityLabel="View full OEIS entry"
-            />
-          ) : null}
+          ) : (
+            secondary.map((a) => (
+              <PillButton
+                key={a.testID}
+                variant="icon"
+                icon={a.icon}
+                iconPosition="only"
+                onPress={a.onPress}
+                testID={a.testID}
+                accessibilityLabel={a.label}
+              />
+            ))
+          )}
         </View>
       </View>
 
       <View style={styles.transportRow}>
-        <PillButton
-          variant="primary"
-          icon={playing ? "pause" : "play"}
-          iconPosition="only"
-          onPress={() => {
-            togglePlay();
-            haptic();
-          }}
-          testID="controls-play"
-          accessibilityLabel={playing ? "Pause" : "Play"}
-          style={styles.playBtn}
-        />
         <PillButton
           variant="icon"
           icon="refresh"
@@ -175,6 +163,18 @@ export default function Controls({
           accessibilityLabel="Previous term"
         />
         <PillButton
+          variant="primary"
+          icon={playing ? "pause" : "play"}
+          iconPosition="only"
+          onPress={() => {
+            togglePlay();
+            haptic();
+          }}
+          testID="controls-play"
+          accessibilityLabel={playing ? "Pause" : "Play"}
+          style={styles.playBtn}
+        />
+        <PillButton
           variant="icon"
           icon="play-skip-forward"
           iconPosition="only"
@@ -193,34 +193,58 @@ export default function Controls({
         >
           {`${SPEEDS[speedIdx]}×`}
         </PillButton>
-        {showLoadMore ? (
-          <PillButton
-            variant="action"
-            icon="add-circle-outline"
-            onPress={() => {
-              onLoadMore();
-              haptic();
-            }}
-            disabled={!canLoadMore || loadingMore}
-            testID="controls-load-more"
-            accessibilityLabel="Load more terms"
-            style={styles.loadMoreBtn}
-          >
-            {loadingMore ? "…" : "More"}
-          </PillButton>
-        ) : null}
       </View>
 
       {termCount != null ? (
-        <BodyText variant="caption" style={styles.termMeta}>
-          {`${termCount.toLocaleString()} terms`}
-          {termCount >= 500 ? "  ·  large term counts can slow this device down" : ""}
-        </BodyText>
+        <View style={styles.metaRow}>
+          <BodyText variant="caption" style={styles.termMeta}>
+            {`${termCount.toLocaleString()} terms`}
+            {termCount >= 500 ? "  ·  large counts may lag this device" : ""}
+          </BodyText>
+          {showLoadMore ? (
+            <PillButton
+              variant="action"
+              icon="add-circle-outline"
+              onPress={() => {
+                onLoadMore();
+                haptic();
+              }}
+              disabled={!canLoadMore || loadingMore}
+              testID="controls-load-more"
+              accessibilityLabel="Load more terms"
+              style={styles.loadMoreBtn}
+            >
+              {loadingMore ? "…" : "More terms"}
+            </PillButton>
+          ) : null}
+        </View>
       ) : null}
 
       {maxSteps > 0 ? <PlaybackProgressBar /> : null}
       <MusicBar showHeader={false} />
       <VizColorSheet anum={oeis} visible={colorsOpen} onClose={() => setColorsOpen(false)} />
+
+      <Modal visible={moreOpen} transparent animationType="fade" onRequestClose={() => setMoreOpen(false)}>
+        <Pressable style={styles.sheetBackdrop} onPress={() => setMoreOpen(false)} accessibilityLabel="Close menu">
+          <Pressable style={styles.sheet} onPress={() => {}} testID="controls-more-sheet">
+            {secondary.map((a) => (
+              <Pressable
+                key={a.testID}
+                onPress={() => {
+                  setMoreOpen(false);
+                  a.onPress();
+                }}
+                style={({ pressed }) => [styles.sheetRow, pressed && styles.sheetRowPressed]}
+                accessibilityRole="button"
+                testID={`more-${a.testID}`}
+              >
+                <AppIcon name={a.icon} size={22} color={colors.text} />
+                <PlainText style={styles.sheetLabel}>{a.label}</PlainText>
+              </Pressable>
+            ))}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -247,9 +271,9 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   title: {
     color: colors.text,
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: "700",
-    lineHeight: 22,
+    lineHeight: 23,
   },
   navActions: {
     flexDirection: "row",
@@ -265,15 +289,51 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   playBtn: {
     flex: 1,
-    minHeight: 44,
+    minHeight: 48,
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+    gap: spacing.sm,
   },
   loadMoreBtn: {
     paddingHorizontal: 12,
   },
   termMeta: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
     fontVariant: ["tabular-nums"],
     marginBottom: 0,
+    flexShrink: 1,
+  },
+  sheetBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: colors.bgElevated,
+    borderTopLeftRadius: radii.xl,
+    borderTopRightRadius: radii.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: spacing.sm,
+    paddingBottom: spacing.xl,
+  },
+  sheetRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  sheetRowPressed: {
+    backgroundColor: colors.surface,
+  },
+  sheetLabel: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

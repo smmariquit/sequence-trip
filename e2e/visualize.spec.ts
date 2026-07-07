@@ -106,3 +106,18 @@ test.describe("Terms sheet", () => {
     await expect(page.getByTestId("terms-sheet")).not.toBeVisible();
   });
 });
+
+test.describe("Mobile toolbar", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+  test("secondary actions collapse into an overflow sheet", async ({ page }) => {
+    await page.goto("/visualize/A005132");
+    await expect(page.getByTestId("visualize-screen")).toBeVisible();
+    // inline secondary buttons are hidden on narrow; overflow is shown
+    await expect(page.getByTestId("controls-more")).toBeVisible();
+    await expect(page.getByTestId("controls-entry")).toHaveCount(0);
+    await page.getByTestId("controls-more").click();
+    await expect(page.getByTestId("controls-more-sheet")).toBeVisible();
+    await page.getByTestId("more-controls-terms").click();
+    await expect(page.getByTestId("terms-sheet")).toBeVisible();
+  });
+});
