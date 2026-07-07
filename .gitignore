@@ -22,3 +22,4 @@ playwright/.cache/
 .vercel
 logcat.txt
 interaction.log
+play-service-account.json

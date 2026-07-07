@@ -55,10 +55,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Write Play service account key
+        if: github.event_name == 'push'
+        run: printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > play-service-account.json
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+
       - name: Build on EAS (release tag)
         if: github.event_name == 'push'
         # ponytail: android only — no Apple credentials yet; switch back to all when iOS ships
-        run: eas build --platform android --profile production --non-interactive
+        # --auto-submit pushes the finished .aab to the Play internal track (eas.json submit config)
+        run: eas build --platform android --profile production --non-interactive --auto-submit
 
       - name: Build on EAS (manual)
         if: github.event_name == 'workflow_dispatch'
