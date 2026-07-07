@@ -10,6 +10,7 @@ import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native
 import { useColorScheme } from "react-native";
 import ErrorBoundary from "../src/components/ErrorBoundary";
 import WebPageShell from "../src/components/WebPageShell";
+import { AmbientProvider } from "../src/audio/AmbientContext";
 import { useThemeColors } from "../src/theme";
 
 export default function RootLayout() {
@@ -37,6 +38,7 @@ export default function RootLayout() {
       <GestureHandlerRootView style={styles.root}>
         <SafeAreaProvider>
         <ThemeProvider value={appTheme}>
+          <AmbientProvider>
           <WebPageShell>
             <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
             <Stack
@@ -57,6 +59,7 @@ export default function RootLayout() {
               />
             </Stack>
           </WebPageShell>
+          </AmbientProvider>
         </ThemeProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>

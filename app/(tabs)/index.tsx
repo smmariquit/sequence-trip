@@ -14,6 +14,7 @@ import { sequences } from "../../src/sequences/catalog";
 import type { OEISSequence } from "../../src/sequences/types";
 import SequenceCard from "../../src/components/SequenceCard";
 import ResultRow from "../../src/components/ResultRow";
+import AmbientButton from "../../src/components/AmbientButton";
 import {
   AppFooter,
   BodyText,
@@ -87,7 +88,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} nativeID="main">
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -142,6 +143,7 @@ export default function HomeScreen() {
                   {`Today: ${sotd.anum}`}
                 </PillButton>
               )}
+              <AmbientButton />
             </View>
 
             <SectionHeading>Featured</SectionHeading>

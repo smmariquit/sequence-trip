@@ -69,3 +69,44 @@ export function toneToWavUri(frequency: number, durationSec: number): string {
   const bytes = toneToWavBytes(frequency, durationSec);
   return `data:audio/wav;base64,${bytesToBase64(bytes)}`;
 }
+
+/**
+ * Seamlessly loopable ambient pad: summed sines with a slow swell.
+ * Caller must pick frequencies and swell rate with an integer number of
+ * cycles in durationSec, so the loop boundary is continuous.
+ */
+export function padToWavUri(
+  frequencies: number[],
+  durationSec: number,
+  sampleRate = 22050
+): string {
+  const samples = Math.max(1, Math.floor(durationSec * sampleRate));
+  const buffer = new ArrayBuffer(44 + samples * 2);
+  const view = new DataView(buffer);
+
+  writeString(view, 0, "RIFF");
+  view.setUint32(4, 36 + samples * 2, true);
+  writeString(view, 8, "WAVE");
+  writeString(view, 12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeString(view, 36, "data");
+  view.setUint32(40, samples * 2, true);
+
+  const swellHz = 1 / durationSec; // one full swell per loop — continuous at the seam
+  const norm = 0.7 / frequencies.length;
+  for (let i = 0; i < samples; i++) {
+    const t = i / sampleRate;
+    const swell = 0.75 + 0.25 * Math.sin(2 * Math.PI * swellHz * t);
+    let s = 0;
+    for (const f of frequencies) s += Math.sin(2 * Math.PI * f * t);
+    view.setInt16(44 + i * 2, s * norm * swell * 0x7fff, true);
+  }
+
+  return `data:audio/wav;base64,${bytesToBase64(new Uint8Array(buffer))}`;
+}
