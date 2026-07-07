@@ -200,16 +200,30 @@ export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
                     <Body>{stripOeisMarkup(line)}</Body>
                     <View style={styles.xrefChips}>
                       {extractAnums(line).map((a) => (
-                        <Pressable
-                          key={a}
-                          style={styles.xrefChip}
-                          onPress={() => {
-                            onClose();
-                            router.push(`/visualize/${a}`);
-                          }}
-                        >
-                          <Text style={styles.xrefChipText}>{a}</Text>
-                        </Pressable>
+                        <View key={a} style={styles.xrefPair}>
+                          <Pressable
+                            style={styles.xrefChip}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Open sequence ${a}`}
+                            onPress={() => {
+                              onClose();
+                              router.push(`/visualize/${a}`);
+                            }}
+                          >
+                            <Text style={styles.xrefChipText}>{a}</Text>
+                          </Pressable>
+                          <Pressable
+                            style={styles.xrefCompare}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Compare ${anum} with ${a}`}
+                            onPress={() => {
+                              onClose();
+                              router.push(`/compare/${anum}-${a}`);
+                            }}
+                          >
+                            <AppIcon name="git-compare-outline" size={13} color={colors.textMuted} />
+                          </Pressable>
+                        </View>
                       ))}
                     </View>
                   </View>
@@ -415,12 +429,27 @@ const makeStyles = (colors: any) => StyleSheet.create({
     gap: spacing.xs,
     marginTop: spacing.xs,
   },
+  xrefPair: {
+    flexDirection: "row",
+    alignItems: "stretch",
+  },
   xrefChip: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.sm,
+    borderTopLeftRadius: radii.sm,
+    borderBottomLeftRadius: radii.sm,
     paddingHorizontal: 8,
     paddingVertical: 4,
+    backgroundColor: colors.surface,
+  },
+  xrefCompare: {
+    borderWidth: 1,
+    borderLeftWidth: 0,
+    borderColor: colors.border,
+    borderTopRightRadius: radii.sm,
+    borderBottomRightRadius: radii.sm,
+    paddingHorizontal: 6,
+    justifyContent: "center",
     backgroundColor: colors.surface,
   },
   xrefChipText: {
