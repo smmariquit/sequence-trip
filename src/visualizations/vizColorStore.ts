@@ -12,15 +12,18 @@ export type PaletteId = "rainbow" | "neon" | "acid" | "ocean" | "plasma" | "mono
 
 export interface VizColorSettings {
   paletteId: PaletteId;
-  /** 0–360: rotates hues; for mono this IS the accent hue. */
+  /** 0-360: rotates hues; for mono this IS the accent hue. */
   hueOffset: number;
   glow: boolean;
+  /** Ambient motion: rotation, hue cycling, breathing. Off freezes them. */
+  motion: boolean;
 }
 
 export const DEFAULT_VIZ_COLORS: VizColorSettings = {
   paletteId: "rainbow",
   hueOffset: 0,
   glow: true,
+  motion: true,
 };
 
 export const PALETTE_LABELS: Record<PaletteId, string> = {
@@ -60,6 +63,7 @@ function sanitize(raw: any): VizColorSettings {
         ? ((raw.hueOffset % 360) + 360) % 360
         : DEFAULT_VIZ_COLORS.hueOffset,
     glow: raw && typeof raw.glow === "boolean" ? raw.glow : DEFAULT_VIZ_COLORS.glow,
+    motion: raw && typeof raw.motion === "boolean" ? raw.motion : DEFAULT_VIZ_COLORS.motion,
   };
 }
 
@@ -171,4 +175,8 @@ export function resolveVizColor(
 
 export function vizGlowEnabled(): boolean {
   return activeVizColors().glow;
+}
+
+export function vizMotionEnabled(): boolean {
+  return activeVizColors().motion;
 }

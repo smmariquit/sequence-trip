@@ -66,3 +66,12 @@ test.describe("Offline", () => {
     await expect(page.getByTestId("offline-banner")).not.toBeVisible();
   });
 });
+
+test.describe("Search filters", () => {
+  test("tag chips filter results", async ({ page }) => {
+    await page.goto("/");
+    await page.getByTestId("search-input").pressSequentially("prime", { delay: 60 });
+    await expect(page.getByTestId("search-filters")).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByText("Number theory").first()).toBeVisible();
+  });
+});

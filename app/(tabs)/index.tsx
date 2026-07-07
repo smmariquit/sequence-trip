@@ -33,6 +33,15 @@ import {
 } from "../../src/theme/layout";
 import { spacing } from "../../src/theme/tokens";
 import * as oeis from "../../src/oeis/db";
+import PlainText from "../../src/components/PlainText";
+import { Pressable } from "react-native";
+import {
+  DIFFICULTY,
+  MATH_FIELDS,
+  metadataFor,
+  type DifficultyId,
+  type MathFieldId,
+} from "../../src/sequences/metadata";
 
 export default function HomeScreen() {
   const colors = useThemeColors();
@@ -47,6 +56,21 @@ export default function HomeScreen() {
   const [results, setResults] = useState<OEISSequence[] | null>(null);
   const [searching, setSearching] = useState(false);
   const [sotd, setSotd] = useState<OEISSequence | null>(null);
+  // tag filters: metadata comes from curated map + name heuristics, so every
+  // sequence in the db gets tags without hand-labeling 397k entries
+  const [fieldFilter, setFieldFilter] = useState<MathFieldId | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyId | null>(null);
+
+  const filteredResults = React.useMemo(() => {
+    if (!results) return null;
+    if (!fieldFilter && !difficultyFilter) return results;
+    return results.filter((seq) => {
+      const meta = metadataFor(seq.anum, seq.name);
+      if (fieldFilter && !meta.fields.includes(fieldFilter)) return false;
+      if (difficultyFilter && meta.difficulty !== difficultyFilter) return false;
+      return true;
+    });
+  }, [results, fieldFilter, difficultyFilter]);
 
   useEffect(() => {
     oeis.warmDb().catch(() => {});
@@ -114,18 +138,44 @@ export default function HomeScreen() {
           />
         </View>
 
-        {results !== null ? (
+        {results !== null && filteredResults !== null ? (
           <View style={styles.results}>
+            <View style={styles.filterRow} testID="search-filters">
+              {(Object.keys(MATH_FIELDS) as MathFieldId[]).map((f) => (
+                <Pressable
+                  key={f}
+                  onPress={() => setFieldFilter(fieldFilter === f ? null : f)}
+                  style={[styles.filterChip, fieldFilter === f && styles.filterChipOn]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: fieldFilter === f }}
+                >
+                  <PlainText style={fieldFilter === f ? styles.filterTextOn : styles.filterText}>
+                    {MATH_FIELDS[f].label}
+                  </PlainText>
+                </Pressable>
+              ))}
+              {(Object.keys(DIFFICULTY) as DifficultyId[]).map((d) => (
+                <Pressable
+                  key={d}
+                  onPress={() => setDifficultyFilter(difficultyFilter === d ? null : d)}
+                  style={[styles.filterChip, difficultyFilter === d && styles.filterChipOn]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: difficultyFilter === d }}
+                >
+                  <PlainText style={difficultyFilter === d ? styles.filterTextOn : styles.filterText}>
+                    {DIFFICULTY[d].label}
+                  </PlainText>
+                </Pressable>
+              ))}
+            </View>
             {searching && <LoadingSpinner />}
-            {!searching && results.length === 0 && (
-              <BodyText variant="empty">No sequences found</BodyText>
+            {!searching && filteredResults.length === 0 && (
+              <BodyText variant="empty">
+                {results.length === 0 ? "No sequences found" : "No results match the filters"}
+              </BodyText>
             )}
-            {results.map((seq, i) => (
-              <ResultRow
-                key={seq.anum}
-                sequence={seq}
-                showPreview={Platform.OS !== "web" || i < 8}
-              />
+            {filteredResults.map((seq, i) => (
+              <ResultRow key={seq.anum} sequence={seq} index={i} />
             ))}
           </View>
         ) : (
@@ -184,6 +234,34 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   results: {
     paddingHorizontal: PAGE_PADDING,
+  },
+  filterRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  filterChip: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  filterChipOn: {
+    borderColor: colors.primaryBorder,
+    backgroundColor: colors.primaryDim,
+  },
+  filterText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  filterTextOn: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: "600",
   },
   actionsRow: {
     flexDirection: "row",

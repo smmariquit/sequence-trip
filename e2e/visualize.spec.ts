@@ -94,3 +94,15 @@ test.describe("Viz colors", () => {
     expect(stored2).toContain('"glow":false');
   });
 });
+
+test.describe("Terms sheet", () => {
+  test("raw terms open without the OEIS entry", async ({ page }) => {
+    await page.goto("/visualize/A005132");
+    await expect(page.getByTestId("visualize-screen")).toBeVisible();
+    await page.getByTestId("controls-terms").click();
+    await expect(page.getByTestId("terms-sheet")).toBeVisible();
+    await expect(page.getByText("a(0)", { exact: true })).toBeVisible();
+    await page.getByTestId("terms-sheet-close").click();
+    await expect(page.getByTestId("terms-sheet")).not.toBeVisible();
+  });
+});

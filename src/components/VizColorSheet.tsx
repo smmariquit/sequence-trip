@@ -92,6 +92,22 @@ export function VizColorControls({ anum }: { anum?: string }) {
           />
 
           <View style={styles.toggleRow}>
+            <PlainText style={styles.label}>Motion</PlainText>
+            <Pressable
+              onPress={() => update({ motion: !settings.motion })}
+              style={[styles.toggle, settings.motion && styles.toggleOn]}
+              accessibilityRole="switch"
+              accessibilityState={{ checked: settings.motion }}
+              accessibilityLabel="Toggle ambient motion"
+              testID="viz-color-motion"
+            >
+              <PlainText style={settings.motion ? styles.toggleTextOn : styles.toggleText}>
+                {settings.motion ? "On" : "Off"}
+              </PlainText>
+            </Pressable>
+          </View>
+
+          <View style={styles.toggleRow}>
             <PlainText style={styles.label}>Glow</PlainText>
             <Pressable
               onPress={() => update({ glow: !settings.glow })}

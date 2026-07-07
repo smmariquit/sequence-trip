@@ -20,6 +20,7 @@ import VizSwitcher from "../../src/components/VizSwitcher";
 import { rankGenericViz, type GenericVizKey } from "../../src/visualizations/generic/select";
 import { setActiveAnum } from "../../src/visualizations/vizColorStore";
 import SequenceEntryPanel from "../../src/components/SequenceEntryPanel";
+import TermsSheet from "../../src/components/TermsSheet";
 import { CenteredState } from "../../src/components/ui";
 import { useSequenceTermCount } from "../../src/hooks/useSequenceTermCount";
 
@@ -33,6 +34,7 @@ export default function VisualizeScreen() {
   const [loading, setLoading] = useState(() => !catalogSeq && !!id);
   const [vizSize, setVizSize] = useState({ width: 0, height: 0 });
   const [entryOpen, setEntryOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
   const [vizKey, setVizKey] = useState<GenericVizKey | undefined>();
 
   useEffect(() => setVizKey(undefined), [id]);
@@ -117,6 +119,7 @@ export default function VisualizeScreen() {
             title={seq.name}
             oeis={seq.anum}
             onEntryPress={() => setEntryOpen(true)}
+            onTermsPress={() => setTermsOpen(true)}
             termCount={termCount}
             canLoadMore={canLoadMore}
             loadingMore={loadingMore}
@@ -152,6 +155,12 @@ export default function VisualizeScreen() {
             anum={seq.anum}
             visible={entryOpen}
             onClose={() => setEntryOpen(false)}
+          />
+          <TermsSheet
+            anum={seq.anum}
+            terms={displaySequence.terms ?? []}
+            visible={termsOpen}
+            onClose={() => setTermsOpen(false)}
           />
         </View>
       </MusicProvider>

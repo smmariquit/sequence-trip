@@ -27,6 +27,7 @@ interface Props {
   title: string;
   oeis: string;
   onEntryPress?: () => void;
+  onTermsPress?: () => void;
   termCount?: number;
   canLoadMore?: boolean;
   loadingMore?: boolean;
@@ -37,6 +38,7 @@ export default function Controls({
   title,
   oeis,
   onEntryPress,
+  onTermsPress,
   termCount,
   canLoadMore,
   loadingMore,
@@ -103,6 +105,16 @@ export default function Controls({
             testID="viz-colors-toggle"
             accessibilityLabel="Customize visualization colors"
           />
+          {onTermsPress ? (
+            <PillButton
+              variant="icon"
+              icon="list-outline"
+              iconPosition="only"
+              onPress={onTermsPress}
+              testID="controls-terms"
+              accessibilityLabel="View the raw terms"
+            />
+          ) : null}
           {onEntryPress ? (
             <PillButton
               variant="icon"
