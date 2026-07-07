@@ -15,7 +15,7 @@ export default function LoadingSpinner({ style }: Props) {
   return <ActivityIndicator color={colors.primary} style={[styles.spinner, style]} />;
 }
 
-const makeStyles = (colors: any) => StyleSheet.create({
+const makeStyles = (_colors: any) => StyleSheet.create({
   spinner: {
     marginVertical: 16,
   },
