@@ -21,6 +21,7 @@ import {
   parseOeisLink,
   stripOeisMarkup,
 } from "../oeis/entryText";
+import { tokenizeCode } from "../oeis/codeTokens";
 import { useThemeColors } from "../theme";
 import { safeAreaTop } from "../theme/layout";
 import { spacing, radii, typography } from "../theme/tokens";
@@ -287,9 +288,27 @@ function Body({ children }: { children: string }) {
 function CodeBlock({ children }: { children: string }) {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
+  const tokens = React.useMemo(() => tokenizeCode(children), [children]);
+  const tokenColor: Record<string, string> = {
+    kw: colors.interactive,
+    num: colors.neonCyan,
+    str: colors.neonGreen,
+    com: colors.textMuted,
+    tag: colors.accentAlt,
+  };
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      <PlainText style={styles.code}>{children}</PlainText>
+      <Text style={styles.code}>
+        {tokens.map((t, i) =>
+          t.type === "plain" ? (
+            t.text
+          ) : (
+            <Text key={i} style={{ color: tokenColor[t.type] }}>
+              {t.text}
+            </Text>
+          )
+        )}
+      </Text>
     </ScrollView>
   );
 }
