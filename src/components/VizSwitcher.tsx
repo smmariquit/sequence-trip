@@ -95,7 +95,14 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   row: {
     flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
     gap: spacing.xs,
+    // opaque backing so the chips read as a control, not colliding with the
+    // axis labels drawn on the canvas underneath
+    backgroundColor: colors.bgElevated,
+    borderRadius: radii.pill,
+    padding: spacing.xs,
   },
   infoPanel: {
     marginTop: spacing.xs,

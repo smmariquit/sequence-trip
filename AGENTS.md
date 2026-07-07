@@ -217,8 +217,31 @@ Catalog sequences with `vizType` (e.g. `recaman-arcs`) live in [`src/visualizati
 
 Do not commit large raw OEIS dumps. Use the build script.
 
+### Tags and metadata (name-derived, sustainable at 397k)
+
+- The bundled DB has only `(anum, name, terms)` — **no OEIS keywords**. So field tags come from the sequence **name** via `fieldsFromName` in [`src/sequences/metadata.ts`](src/sequences/metadata.ts), using OEIS naming conventions ("Number of …" = combinatorics, "Numbers k such that …"/"Primes …" = number theory, "Decimal expansion of …" = analysis, …). This tags every sequence; keep the regex list broad and always return ≥1 field (default number-theory) so a field filter never hides everything.
+- **Difficulty is NOT a search filter.** It can only be honestly assigned to the ~26 curated sequences in `CURATED`; a difficulty filter over DB search results hides ~all of them. Difficulty shows only on curated cards and drives the Explore "Start here / Next steps / Deep dives" collections.
+- **Sequence of the day** is a UTC-date hash → rowid ([`src/oeis/dayPick.ts`](src/oeis/dayPick.ts), pure and unit-tested). Reuse `picksForDates` to precompute future days while the DB is open (notifications, widget snapshot). The widget's headless task must **never** open the 130MB DB — it reads a slim `widget-picks.json` the app writes at launch.
+
+## Hard-won gotchas
+
+Things that cost real debugging time; check these first.
+
+- **expo-sqlite web has no FTS5.** A `MATCH` query does not throw — it kills the SQLite worker, so the promise never settles **and every later DB call hangs**, looking like a total app freeze with no console error. Web must use `LIKE`; native keeps FTS5 (`searchNames` in `src/oeis/db.ts`).
+- **Guard native-only modules on web.** `expo-notifications`' `useLastNotificationResponse()` and `react-native-android-widget`'s `registerWidgetTaskHandler` (uses `AppRegistry.registerHeadlessTask`) both **throw at runtime on web**, breaking the whole bundle. Gate them: notification tap routing lives in a native-only `<NotificationRouter>` (rendered only when `Platform.OS !== "web"`); widget registration in `index.js` is wrapped in `if (Platform.OS === "android")`. **Always `npx expo export -p web` (or e2e) after adding a native module** to catch this.
+- **Managed prebuild.** `android/` is gitignored. ALL native config (permissions, plugins, widget/notification setup) goes through `app.json` `plugins` — never hand-edit the manifest. EAS runs prebuild automatically; a local native build needs `npx expo prebuild -p android --clean` or plugin changes silently don't apply.
+- **Deep link scheme is already set** (`sequencetrip` in `app.json`); `sequencetrip://visualize/A000045` routes to `/visualize/[id]`. Notification taps and widget `OPEN_URI` reuse it — no new routing code.
+- **Reanimated worklet closures freeze captured primitives.** A worklet that reads a module-level `let x` sees its value at closure-creation time, not live. Keep mutable store state **inside an object** (`const state = { current: … }`) so `state.current` reads stay fresh. Pattern in `vizColorStore.ts`, `musicSettings.ts`, `notifyStore.ts`.
+- **Persistence pattern** (copy verbatim for new settings): module store = `state` object + `version` counter + `Set` of listeners + `sanitize()`; `useSyncExternalStore(subscribe, version, version)` in UI; load/persist = `Platform.OS==="web" ? localStorage : new File(Paths.document,"x.json").write()` via `await import("expo-file-system")` (SDK-54 File/Paths API); load once in `app/_layout.tsx` useEffect.
+- **Canvas arc direction (web):** canvas y grows **downward**, so the *top* half-circle is the `(PI, 2PI)` sweep, not `(PI, 0)`. A wrong sweep silently draws every arc on the same side (the long-standing Recamán "half" bug). Native Skia `addArc` uses degrees and was already correct — verify web against native with a pixel probe.
+- **Metro assetExts:** new binary asset types (e.g. `.ogg`) must be added to `config.resolver.assetExts` in `metro.config.js` or the web export fails to resolve them.
+- **EAS build/submit:** bump `expo.android.versionCode` every build. Submit track is `alpha` (closed testing) in `eas.json`. `--auto-submit` needs `play-service-account.json` on disk (gitignored); no key → build succeeds, submit step fails. Cancel + rebuild (new versionCode) if a JS fix must ride the same native build rather than shipping the known-bad one to testers.
+
 ## UX guardrails
 
+- **No em dashes (—) in any user-facing string.** Use a period, comma, or colon. (Comments/code are fine.) This is a hard user rule.
+- **Web and mobile are different niches; do not blindly reuse a wide row on a phone.** Below ~600px width, collapse secondary toolbar actions into an overflow sheet, keep text larger (body 15-16px, not 12-13), and make the primary action (Play) dominant. The visualize `Controls` toolbar gates inline-vs-overflow on `useWindowDimensions().width < 600`; desktop keeps inline buttons.
+- **On-canvas viz labels compete with overlays on narrow screens.** Keep axis titles short ("a(n)", not "a(n) (log scale)" — the "?" guide explains scaling), give floating controls like `VizSwitcher` an opaque backing, and back head-labels with a translucent pill (`SkiaLabel` / `drawBackedLabel`) so they read over neon strokes.
 - **No decorative emojis** in UI copy, controls, or captions.
 - **Web layout:** [`WebPageShell`](src/components/WebPageShell.tsx) centers content (~1280px max). Full-screen viz uses flex column: Controls → viz area → caption; bars must not overlap the canvas.
 - **LaTeX (strict):** KaTeX only when copy contains `$…$` or `$$…$$` delimiters (`MathText`). OEIS names, titles, search results, and live numeric readouts use [`PlainText`](src/components/PlainText.tsx) — never auto-render undelimited formulas.

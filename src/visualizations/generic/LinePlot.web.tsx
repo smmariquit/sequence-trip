@@ -34,7 +34,7 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
           width,
           height,
           xLabel: "n  (term index)",
-          yLabel: layout.logScale ? "a(n)  (log scale)" : "a(n)",
+          yLabel: "a(n)",
           preview,
           ink: colors.textMuted,
           xTicks: layout.xTicks,

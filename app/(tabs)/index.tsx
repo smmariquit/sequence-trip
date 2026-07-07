@@ -36,10 +36,8 @@ import * as oeis from "../../src/oeis/db";
 import PlainText from "../../src/components/PlainText";
 import { Pressable } from "react-native";
 import {
-  DIFFICULTY,
   MATH_FIELDS,
   metadataFor,
-  type DifficultyId,
   type MathFieldId,
 } from "../../src/sequences/metadata";
 
@@ -56,21 +54,19 @@ export default function HomeScreen() {
   const [results, setResults] = useState<OEISSequence[] | null>(null);
   const [searching, setSearching] = useState(false);
   const [sotd, setSotd] = useState<OEISSequence | null>(null);
-  // tag filters: metadata comes from curated map + name heuristics, so every
-  // sequence in the db gets tags without hand-labeling 397k entries
+  // field filter: tags come from the sequence NAME (see fieldsFromName), which
+  // covers every sequence in the db. Difficulty is NOT a filter here: it can
+  // only be honestly assigned to the ~26 curated sequences, so a difficulty
+  // filter would hide almost every search result.
   const [fieldFilter, setFieldFilter] = useState<MathFieldId | null>(null);
-  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyId | null>(null);
 
   const filteredResults = React.useMemo(() => {
     if (!results) return null;
-    if (!fieldFilter && !difficultyFilter) return results;
-    return results.filter((seq) => {
-      const meta = metadataFor(seq.anum, seq.name);
-      if (fieldFilter && !meta.fields.includes(fieldFilter)) return false;
-      if (difficultyFilter && meta.difficulty !== difficultyFilter) return false;
-      return true;
-    });
-  }, [results, fieldFilter, difficultyFilter]);
+    if (!fieldFilter) return results;
+    return results.filter((seq) =>
+      metadataFor(seq.anum, seq.name).fields.includes(fieldFilter)
+    );
+  }, [results, fieldFilter]);
 
   useEffect(() => {
     oeis.warmDb().catch(() => {});
@@ -148,22 +144,10 @@ export default function HomeScreen() {
                   style={[styles.filterChip, fieldFilter === f && styles.filterChipOn]}
                   accessibilityRole="button"
                   accessibilityState={{ selected: fieldFilter === f }}
+                  testID={`filter-field-${f}`}
                 >
                   <PlainText style={fieldFilter === f ? styles.filterTextOn : styles.filterText}>
                     {MATH_FIELDS[f].label}
-                  </PlainText>
-                </Pressable>
-              ))}
-              {(Object.keys(DIFFICULTY) as DifficultyId[]).map((d) => (
-                <Pressable
-                  key={d}
-                  onPress={() => setDifficultyFilter(difficultyFilter === d ? null : d)}
-                  style={[styles.filterChip, difficultyFilter === d && styles.filterChipOn]}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: difficultyFilter === d }}
-                >
-                  <PlainText style={difficultyFilter === d ? styles.filterTextOn : styles.filterText}>
-                    {DIFFICULTY[d].label}
                   </PlainText>
                 </Pressable>
               ))}
@@ -171,7 +155,7 @@ export default function HomeScreen() {
             {searching && <LoadingSpinner />}
             {!searching && filteredResults.length === 0 && (
               <BodyText variant="empty">
-                {results.length === 0 ? "No sequences found" : "No results match the filters"}
+                {results.length === 0 ? "No sequences found" : "No results in that field"}
               </BodyText>
             )}
             {filteredResults.map((seq, i) => (

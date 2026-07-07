@@ -129,15 +129,35 @@ const CURATED: Record<string, SequenceMeta> = {
   A000959: { fields: ["number-theory", "recreational"], difficulty: "intermediate" }, // lucky
 };
 
-/** Name-keyword heuristic (#5 option 3) — fallback when not curated. */
+// Name-based field tagging. This is the SUSTAINABLE mechanism: the on-device
+// db has only (anum, name, terms) — no OEIS keywords — so field tags are
+// derived from the sequence NAME, which follows strong OEIS conventions
+// ("Number of ..." = counting, "Numbers k such that ..." = number theory,
+// "Decimal expansion of ..." = analysis, etc). Covers ~all 397k sequences
+// without hand-labeling. Order matters only for the 2-tag cap.
 const NAME_RULES: [RegExp, MathFieldId][] = [
-  [/\bprimes?\b|divisor|factor|gcd|totient|congruen|modul|semiprime/i, "number-theory"],
-  [/partition|permutation|binomial|catalan|combinat|number of ways|count of|arrangement/i, "combinatorics"],
-  [/triangl|polygon|lattice|geometr|circle|sphere|hexagon/i, "geometry"],
-  [/decimal expansion|digits? of|continued fraction|limit|convergen/i, "analysis"],
-  [/polynomial|coefficient|matrix|group|determinant|character/i, "algebra"],
-  [/random|probabilit|expected|distribution/i, "probability"],
-  [/sierpinski|fractal|self-similar|cantor|dragon/i, "fractals"],
+  [
+    /\bprimes?\b|prime power|\bdivisors?\b|\bgcd\b|\blcm\b|totient|congruen|\bmodul|residues?|semiprime|coprime|factoriz|multiplicative|zeckendorf|\bnumbers?\s+(k|n|m)\b|numbers of the form|integers?\s+(k|n)\b|perfect numbers?|squarefree|\bmod\b/i,
+    "number-theory",
+  ],
+  [
+    /\bnumber of\b|partitions?|permutations?|binomial|catalan|combinat|\bways\b|arrangement|necklace|bracelet|\barrays?\b|subsets?|composition|stirling|\bbell\b|young tableau|\bwalks?\b|\bpaths?\b|\bgraphs?\b|\btrees?\b|labeled|unlabeled|\bcount\b/i,
+    "combinatorics",
+  ],
+  [
+    /triangle|polygon|hexagon|pentagon|\bsquares?\b|circle|sphere|\bcube\b|coordination sequence|magic square|tiling|polyomino|\blattice\b|geometr|\bdimension|\bcubes?\b|centered/i,
+    "geometry",
+  ],
+  [
+    /decimal expansion|digits? of|continued fraction|expansion of|\bconstant\b|integral|\bseries\b|convergen|\blimit\b|engel expansion|bernoulli|\be\^|logarithm/i,
+    "analysis",
+  ],
+  [
+    /polynomial|coefficient|\bmatrix|determinant|\bgroup\b|\bring\b|character|eigen|generating function|recurrence|linear/i,
+    "algebra",
+  ],
+  [/random|probabilit|expected|distribution|variance|stochastic/i, "probability"],
+  [/sierpinski|fractal|self-similar|cantor|\bdragon\b|thue-?morse|automatic sequence/i, "fractals"],
 ];
 
 export function fieldsFromName(name: string): MathFieldId[] {
@@ -145,6 +165,9 @@ export function fieldsFromName(name: string): MathFieldId[] {
   for (const [re, id] of NAME_RULES) {
     if (re.test(name) && !out.includes(id)) out.push(id);
   }
+  // "a(n) = ..." recurrences and other bare-formula names match nothing;
+  // give them a broad default so the field filter never hides everything.
+  if (out.length === 0) out.push("number-theory");
   return out.slice(0, 2);
 }
 

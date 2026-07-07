@@ -68,10 +68,17 @@ test.describe("Offline", () => {
 });
 
 test.describe("Search filters", () => {
-  test("tag chips filter results", async ({ page }) => {
+  test("field chip actually narrows the results", async ({ page }) => {
     await page.goto("/");
     await page.getByTestId("search-input").pressSequentially("prime", { delay: 60 });
     await expect(page.getByTestId("search-filters")).toBeVisible({ timeout: 90_000 });
-    await expect(page.getByText("Number theory").first()).toBeVisible();
+    // wait for result rows to render
+    await expect(page.getByText(/^A\d{6}$/).first()).toBeVisible({ timeout: 30_000 });
+    const before = await page.getByText(/^A\d{6}$/).count();
+    // a narrow field (Fractals) should hide most "prime" results
+    await page.getByTestId("filter-field-fractals").click();
+    await page.waitForTimeout(500);
+    const after = await page.getByText(/^A\d{6}$/).count();
+    expect(after).toBeLessThan(before);
   });
 });

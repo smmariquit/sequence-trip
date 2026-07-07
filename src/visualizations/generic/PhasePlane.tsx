@@ -112,7 +112,7 @@ export default function PhasePlane({ terms, width, height, preview }: GenericViz
           <SkiaText
             x={pad.left}
             y={pad.top - 4}
-            text={layout.logScale ? "a(n+1)  (log scale)" : "a(n+1)"}
+            text="a(n+1)"
             font={tickFont}
             color={colors.textMuted}
           />

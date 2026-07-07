@@ -110,7 +110,7 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
           <SkiaText
             x={pad.left}
             y={pad.top - 4}
-            text={layout.logScale ? "a(n)  (log scale)" : "a(n)"}
+            text="a(n)"
             font={tickFont}
             color={colors.textMuted}
           />
