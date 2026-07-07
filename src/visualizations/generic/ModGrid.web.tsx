@@ -6,6 +6,7 @@ import { useThemeColors } from "../../theme";
 import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { itemRevealAlpha } from "../../playback/drawProgress";
 import { layoutModGrid } from "./modGridLayout";
+import { drawBackedLabel } from "../canvasAxes";
 import { formatTermLabel } from "./linePlotLayout";
 import type { GenericVizProps } from "./types";
 
@@ -25,17 +26,16 @@ export default function ModGrid({ terms, width, height, preview }: GenericVizPro
       const breathe = 0.9 + 0.1 * Math.sin(time * 2.513);
 
       if (!preview) {
-        ctx.font = "12px system-ui, sans-serif";
-        ctx.fillStyle = colors.textMuted;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        ctx.globalAlpha = 0.85;
-        ctx.fillText(
-          "one cell per term, reading left → right, row by row ↓ · color = a(n)",
-          width / 2,
-          8
-        );
-        ctx.globalAlpha = 1;
+        drawBackedLabel(ctx, {
+          text: "one cell per term, reading left → right, row by row ↓ · color = a(n)",
+          x: width / 2,
+          y: 15,
+          fg: colors.textMuted,
+          bg: colors.bg,
+          size: 12,
+          weight: "400",
+          align: "center",
+        });
       }
 
       let head: (typeof cells)[number] | null = null;
@@ -61,11 +61,8 @@ export default function ModGrid({ terms, width, height, preview }: GenericVizPro
         const label = `a(${headIdx}) = ${formatTermLabel(terms[headIdx])}`;
         ctx.font = "600 13px system-ui, sans-serif";
         const tw = ctx.measureText(label).width;
-        ctx.textAlign = "left";
-        ctx.textBaseline = "alphabetic";
-        ctx.fillStyle = colors.text;
         const lx = head.x + head.w + 8 + tw > width ? head.x - 8 - tw : head.x + head.w + 8;
-        ctx.fillText(label, lx, head.y + head.h / 2 + 4);
+        drawBackedLabel(ctx, { text: label, x: lx, y: head.y + head.h / 2, fg: colors.text, bg: colors.bg });
       }
     },
     [cells, terms, preview, progressRef, width, colors.textMuted, colors.text]

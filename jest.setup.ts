@@ -30,9 +30,12 @@ jest.mock("@shopify/react-native-skia", () => ({
   BlurMask: "BlurMask",
   Line: "Line",
   Text: "Text",
+  RoundedRect: "RoundedRect",
+  Rect: "Rect",
   vec: (x: number, y: number) => ({ x, y }),
   matchFont: jest.fn(() => ({
     measureText: jest.fn(() => ({ width: 0 })),
+    getSize: jest.fn(() => 13),
   })),
 }));
 

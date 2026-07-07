@@ -2,6 +2,44 @@
 //
 // Shared axis / number-line drawing for HTML5 Canvas visualizations.
 
+/** Text with a translucent dark pill behind it — readable over neon strokes. */
+export function drawBackedLabel(
+  ctx: CanvasRenderingContext2D,
+  opts: {
+    text: string;
+    /** anchor: left edge (align left) or center (align center), vertical middle */
+    x: number;
+    y: number;
+    fg: string;
+    /** pill color — pass the theme background */
+    bg: string;
+    size?: number;
+    weight?: string;
+    align?: "left" | "center";
+  }
+) {
+  const { text, x, y, fg, bg, size = 13, weight = "600", align = "left" } = opts;
+  ctx.font = `${weight} ${size}px system-ui, sans-serif`;
+  const w = ctx.measureText(text).width;
+  const padX = 5;
+  const boxH = size + 8;
+  const left = align === "center" ? x - w / 2 : x;
+
+  ctx.save();
+  ctx.globalAlpha = 0.78;
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  ctx.roundRect(left - padX, y - boxH / 2, w + padX * 2, boxH, 5);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.fillStyle = fg;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, left, y + 0.5);
+  ctx.textBaseline = "alphabetic";
+}
+
 export function drawNumberLine(
   ctx: CanvasRenderingContext2D,
   opts: {

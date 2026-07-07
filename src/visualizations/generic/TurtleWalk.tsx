@@ -9,7 +9,6 @@ import {
   Canvas,
   Path as SkiaPath,
   BlurMask,
-  Text as SkiaText,
   Group,
   Skia,
   matchFont,
@@ -26,6 +25,7 @@ import { useAnimSpeed } from "../../playback/PlaybackContext";
 import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { makePolylinePath } from "../../playback/smoothPath";
 import { layoutTurtle, TURN_LABELS } from "./turtleLayout";
+import SkiaLabel from "../SkiaLabel";
 import type { GenericVizProps } from "./types";
 
 const fontFamily = Platform.select({ ios: "Helvetica", default: "sans-serif" });
@@ -79,13 +79,14 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
   return (
     <Canvas style={{ width, height }}>
       {!preview && (
-        <SkiaText
-          x={width / 2 - tickFont.measureText(LEGEND).width / 2}
-          y={20}
+        <SkiaLabel
+          x={width / 2}
+          y={18}
           text={LEGEND}
           font={tickFont}
-          color={colors.textMuted}
-          opacity={0.85}
+          fg={colors.textMuted}
+          bg={colors.bg}
+          align="center"
         />
       )}
       <SkiaPath
@@ -113,12 +114,13 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
             </SkiaPath>
           </Group>
           {headLabel !== "" && (
-            <SkiaText
+            <SkiaLabel
               x={head.x + 14 + headLabelW > width ? head.x - 14 - headLabelW : head.x + 14}
-              y={head.y - 12}
+              y={head.y - 16}
               text={headLabel}
               font={labelFont}
-              color={colors.text}
+              fg={colors.text}
+              bg={colors.bg}
             />
           )}
         </>

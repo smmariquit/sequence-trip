@@ -29,6 +29,7 @@ import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { makePolylinePath } from "../../playback/smoothPath";
 import { normalize } from "../../sequences/normalize";
 import { layoutLinePlot, formatTermLabel } from "./linePlotLayout";
+import SkiaLabel from "../SkiaLabel";
 import type { GenericVizProps } from "./types";
 
 const fontFamily = Platform.select({ ios: "Helvetica", default: "sans-serif" });
@@ -140,16 +141,17 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
           <Circle cx={allPoints[head].x} cy={allPoints[head].y} r={6} color={strokeColor}>
             <BlurMask blur={6} style="solid" />
           </Circle>
-          <SkiaText
+          <SkiaLabel
             x={
               allPoints[head].x + 12 + headLabelW > axisRight
                 ? allPoints[head].x - 12 - headLabelW
                 : allPoints[head].x + 12
             }
-            y={allPoints[head].y < pad.top + 32 ? allPoints[head].y + 28 : allPoints[head].y}
+            y={allPoints[head].y < pad.top + 32 ? allPoints[head].y + 24 : allPoints[head].y - 5}
             text={headLabel}
             font={labelFont}
-            color={colors.text}
+            fg={colors.text}
+            bg={colors.bg}
           />
         </>
       )}

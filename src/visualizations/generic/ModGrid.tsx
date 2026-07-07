@@ -5,7 +5,7 @@
 
 import React, { useMemo, useEffect } from "react";
 import { Platform } from "react-native";
-import { Canvas, Rect, Group, Text as SkiaText, matchFont } from "@shopify/react-native-skia";
+import { Canvas, Rect, Group, matchFont } from "@shopify/react-native-skia";
 import {
   useDerivedValue,
   useSharedValue,
@@ -18,6 +18,7 @@ import { useAnimSpeed } from "../../playback/PlaybackContext";
 import { useBuildAnimation, useItemFrac } from "../../playback/useBuildAnimation";
 import { layoutModGrid } from "./modGridLayout";
 import { formatTermLabel } from "./linePlotLayout";
+import SkiaLabel from "../SkiaLabel";
 import type { GenericVizProps } from "./types";
 
 const fontFamily = Platform.select({ ios: "Helvetica", default: "sans-serif" });
@@ -60,13 +61,14 @@ export default function ModGrid({ terms, width, height, preview }: GenericVizPro
   return (
     <Canvas style={{ width, height }}>
       {!preview && (
-        <SkiaText
-          x={width / 2 - tickFont.measureText(LEGEND).width / 2}
-          y={18}
+        <SkiaLabel
+          x={width / 2}
+          y={15}
           text={LEGEND}
           font={tickFont}
-          color={colors.textMuted}
-          opacity={0.85}
+          fg={colors.textMuted}
+          bg={colors.bg}
+          align="center"
         />
       )}
       <Group opacity={opacity}>
@@ -96,12 +98,13 @@ export default function ModGrid({ terms, width, height, preview }: GenericVizPro
             strokeWidth={2}
             color={colors.text}
           />
-          <SkiaText
+          <SkiaLabel
             x={head.x + head.w + 8 + headLabelW > width ? head.x - 8 - headLabelW : head.x + head.w + 8}
-            y={head.y + head.h / 2 + 4}
+            y={head.y + head.h / 2}
             text={headLabel}
             font={labelFont}
-            color={colors.text}
+            fg={colors.text}
+            bg={colors.bg}
           />
         </>
       )}

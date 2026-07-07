@@ -30,6 +30,7 @@ import { makePolylinePath } from "../../playback/smoothPath";
 import { normalize } from "../../sequences/normalize";
 import { layoutPhasePlane } from "./phasePoints";
 import { formatTermLabel } from "./linePlotLayout";
+import SkiaLabel from "../SkiaLabel";
 import type { GenericVizProps } from "./types";
 
 const fontFamily = Platform.select({ ios: "Helvetica", default: "sans-serif" });
@@ -131,12 +132,13 @@ export default function PhasePlane({ terms, width, height, preview }: GenericViz
         <>
           <Circle cx={head.x} cy={head.y} r={4} color={hslToHex(0, 100, 70)} />
           {headLabel !== "" && (
-            <SkiaText
+            <SkiaLabel
               x={head.x + 10 + headLabelW > axisRight ? head.x - 10 - headLabelW : head.x + 10}
-              y={head.y < pad.top + 32 ? head.y + 24 : head.y - 10}
+              y={head.y < pad.top + 32 ? head.y + 20 : head.y - 14}
               text={headLabel}
               font={labelFont}
-              color={colors.text}
+              fg={colors.text}
+              bg={colors.bg}
             />
           )}
         </>

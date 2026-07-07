@@ -7,7 +7,7 @@ import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { strokePolylineProgress } from "../../playback/drawProgress";
 import { normalize } from "../../sequences/normalize";
 import { layoutPhasePlane } from "./phasePoints";
-import { drawPlotAxes } from "../canvasAxes";
+import { drawPlotAxes, drawBackedLabel } from "../canvasAxes";
 import { formatTermLabel } from "./linePlotLayout";
 import type { GenericVizProps } from "./types";
 
@@ -66,11 +66,8 @@ export default function PhasePlane({ terms, width, height, preview }: GenericViz
         ctx.font = "600 13px system-ui, sans-serif";
         const tw = ctx.measureText(label).width;
         const lx = head.x + 10 + tw > width - layout.pad.right ? head.x - 10 - tw : head.x + 10;
-        const ly = head.y < layout.pad.top + 32 ? head.y + 24 : head.y - 10;
-        ctx.textAlign = "left";
-        ctx.textBaseline = "alphabetic";
-        ctx.fillStyle = colors.text;
-        ctx.fillText(label, lx, ly);
+        const ly = head.y < layout.pad.top + 32 ? head.y + 20 : head.y - 14;
+        drawBackedLabel(ctx, { text: label, x: lx, y: ly, fg: colors.text, bg: colors.bg });
       }
     },
     [points, layout, stats.terms, preview, progressRef, width, height, colors.textMuted, colors.text]

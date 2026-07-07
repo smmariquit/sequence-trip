@@ -7,6 +7,7 @@ import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { itemRevealAlpha } from "../../playback/drawProgress";
 import { normalize } from "../../sequences/normalize";
 import { layoutPolar } from "./polarLayout";
+import { drawBackedLabel } from "../canvasAxes";
 import { formatTermLabel } from "./linePlotLayout";
 import type { GenericVizProps } from "./types";
 
@@ -42,10 +43,17 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
           ctx.fillText(`a = ${ring.label}`, cx + ring.r + 5, cy);
         }
         ctx.setLineDash([]);
-        ctx.globalAlpha = 0.6;
-        ctx.textAlign = "center";
-        ctx.fillText("each dot turns 137.5° from the last · farther out = bigger value", cx, 14);
         ctx.globalAlpha = 1;
+        drawBackedLabel(ctx, {
+          text: "each dot turns 137.5° from the last · farther out = bigger value",
+          x: cx,
+          y: 16,
+          fg: colors.textMuted,
+          bg: colors.bg,
+          size: 11,
+          weight: "400",
+          align: "center",
+        });
       }
 
       let headPos: { x: number; y: number; i: number } | null = null;
@@ -77,11 +85,8 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
         const label = `a(${headPos.i}) = ${formatTermLabel(stats.terms[headPos.i])}`;
         ctx.font = "600 13px system-ui, sans-serif";
         const tw = ctx.measureText(label).width;
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = colors.text;
         const lx = headPos.x + 10 + tw > width ? headPos.x - 10 - tw : headPos.x + 10;
-        ctx.fillText(label, lx, headPos.y);
+        drawBackedLabel(ctx, { text: label, x: lx, y: headPos.y, fg: colors.text, bg: colors.bg });
       }
     },
     [points, rings, cx, cy, preview, progressRef, stats.terms, width, colors.textMuted, colors.text]

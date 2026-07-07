@@ -6,7 +6,7 @@ import { useThemeColors } from "../../theme";
 import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { strokePolylineProgress } from "../../playback/drawProgress";
 import { normalize } from "../../sequences/normalize";
-import { drawPlotAxes } from "../canvasAxes";
+import { drawPlotAxes, drawBackedLabel } from "../canvasAxes";
 import { layoutLinePlot, formatTermLabel } from "./linePlotLayout";
 import type { GenericVizProps } from "./types";
 
@@ -83,9 +83,8 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
           // keep the label inside the plot: flip left near the right edge,
           // drop below the point near the top (viz switcher chips live there)
           const lx = p.x + 12 + tw > width - layout.pad.right ? p.x - 12 - tw : p.x + 12;
-          const ly = p.y < layout.pad.top + 32 ? p.y + 28 : p.y;
-          ctx.fillStyle = colors.text;
-          ctx.fillText(label, lx, ly);
+          const ly = p.y < layout.pad.top + 32 ? p.y + 24 : p.y;
+          drawBackedLabel(ctx, { text: label, x: lx, y: ly, fg: colors.text, bg: colors.bg });
         }
       }
     },

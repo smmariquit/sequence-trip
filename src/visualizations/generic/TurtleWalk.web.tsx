@@ -6,6 +6,7 @@ import { useThemeColors } from "../../theme";
 import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { strokePolylineProgress } from "../../playback/drawProgress";
 import { layoutTurtle, TURN_LABELS } from "./turtleLayout";
+import { drawBackedLabel } from "../canvasAxes";
 import type { GenericVizProps } from "./types";
 
 export default function TurtleWalk({ terms, width, height, preview }: GenericVizProps) {
@@ -24,17 +25,16 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
 
       if (!preview) {
         // legend: the rule that steers the walker
-        ctx.font = "12px system-ui, sans-serif";
-        ctx.fillStyle = colors.textMuted;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        ctx.globalAlpha = 0.85;
-        ctx.fillText(
-          "each step turns by a(n) mod 4:   0 = hard left   1 = soft left   2 = soft right   3 = hard right",
-          width / 2,
-          10
-        );
-        ctx.globalAlpha = 1;
+        drawBackedLabel(ctx, {
+          text: "each step turns by a(n) mod 4:   0 = hard left   1 = soft left   2 = soft right   3 = hard right",
+          x: width / 2,
+          y: 18,
+          fg: colors.textMuted,
+          bg: colors.bg,
+          size: 12,
+          weight: "400",
+          align: "center",
+        });
       }
       if (points.length === 0 || progress <= 0) return;
 
@@ -76,11 +76,8 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
           const label = `a(${stepIdx}) mod 4 = ${m}  →  ${TURN_LABELS[m]}`;
           ctx.font = "600 13px system-ui, sans-serif";
           const tw = ctx.measureText(label).width;
-          ctx.textAlign = "left";
-          ctx.textBaseline = "alphabetic";
-          ctx.fillStyle = colors.text;
           const lx = p.x + 14 + tw > width ? p.x - 14 - tw : p.x + 14;
-          ctx.fillText(label, lx, p.y - 12);
+          drawBackedLabel(ctx, { text: label, x: lx, y: p.y - 16, fg: colors.text, bg: colors.bg });
         }
       }
     },

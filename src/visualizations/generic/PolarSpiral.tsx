@@ -26,6 +26,7 @@ import { useBuildAnimation, useItemFrac } from "../../playback/useBuildAnimation
 import { normalize } from "../../sequences/normalize";
 import { layoutPolar } from "./polarLayout";
 import { formatTermLabel } from "./linePlotLayout";
+import SkiaLabel from "../SkiaLabel";
 import type { GenericVizProps } from "./types";
 
 const fontFamily = Platform.select({ ios: "Helvetica", default: "sans-serif" });
@@ -93,12 +94,13 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
             opacity={0.7}
           />
           {headLabel !== "" && (
-            <SkiaText
+            <SkiaLabel
               x={12}
-              y={height - 68}
+              y={height - 72}
               text={headLabel}
               font={labelFont}
-              color={colors.text}
+              fg={colors.text}
+              bg={colors.bg}
             />
           )}
         </>
