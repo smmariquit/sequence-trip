@@ -28,6 +28,7 @@ interface Props {
   oeis: string;
   onEntryPress?: () => void;
   onTermsPress?: () => void;
+  onExportPress?: () => void;
   termCount?: number;
   canLoadMore?: boolean;
   loadingMore?: boolean;
@@ -39,6 +40,7 @@ export default function Controls({
   oeis,
   onEntryPress,
   onTermsPress,
+  onExportPress,
   termCount,
   canLoadMore,
   loadingMore,
@@ -105,6 +107,16 @@ export default function Controls({
             testID="viz-colors-toggle"
             accessibilityLabel="Customize visualization colors"
           />
+          {onExportPress ? (
+            <PillButton
+              variant="icon"
+              icon="image-outline"
+              iconPosition="only"
+              onPress={onExportPress}
+              testID="controls-export"
+              accessibilityLabel="Save as wallpaper"
+            />
+          ) : null}
           {onTermsPress ? (
             <PillButton
               variant="icon"

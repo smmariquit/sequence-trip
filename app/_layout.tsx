@@ -8,12 +8,29 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { useColorScheme } from "react-native";
+import * as Notifications from "expo-notifications";
+import NotificationRouter from "../src/notifications/NotificationRouter";
 import ErrorBoundary from "../src/components/ErrorBoundary";
 import WebPageShell from "../src/components/WebPageShell";
 import { AmbientProvider } from "../src/audio/AmbientContext";
 import { useThemeColors } from "../src/theme";
 import { loadVizColorPrefs } from "../src/visualizations/vizColorStore";
 import { loadMusicSettings } from "../src/audio/musicSettings";
+import { loadNotifySettings } from "../src/notifications/notifyStore";
+import { rescheduleDaily } from "../src/notifications/scheduler";
+import { writeWidgetSnapshot } from "../src/widget/snapshot";
+
+// show a banner when a scheduled notification fires while the app is foregrounded
+if (Platform.OS !== "web") {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 export default function RootLayout() {
   const colors = useThemeColors();
@@ -22,7 +39,10 @@ export default function RootLayout() {
   React.useEffect(() => {
     void loadVizColorPrefs();
     void loadMusicSettings();
+    void loadNotifySettings().then(rescheduleDaily);
+    void writeWidgetSnapshot();
   }, []);
+
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 
   const appTheme = React.useMemo(() => {
@@ -46,6 +66,7 @@ export default function RootLayout() {
         <SafeAreaProvider>
         <ThemeProvider value={appTheme}>
           <AmbientProvider>
+          {Platform.OS !== "web" ? <NotificationRouter /> : null}
           <WebPageShell>
             <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
             <Stack

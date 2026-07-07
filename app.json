@@ -19,7 +19,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#07060E"
       },
-      "versionCode": 8
+      "versionCode": 9
     },
     "ios": {
       "bundleIdentifier": "dev.stimmie.oeisvisualizations",
@@ -51,7 +51,39 @@
         }
       ],
       "expo-sqlite",
-      "expo-audio"
+      "expo-audio",
+      [
+        "expo-notifications",
+        {
+          "color": "#07060E"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "Save your generated wallpaper to your gallery.",
+          "photosPermission": "Save your generated wallpaper to your gallery.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "SequenceOfDay",
+              "label": "Sequence of the Day",
+              "minWidth": "180dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 3,
+              "targetCellHeight": 2,
+              "description": "Today's OEIS sequence",
+              "previewImage": "./assets/widget-preview.png",
+              "updatePeriodMillis": 21600000
+            }
+          ]
+        }
+      ]
     ],
     "extra": {
       "router": {

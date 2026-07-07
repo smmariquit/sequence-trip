@@ -4,7 +4,7 @@
 // button on a visualize screen can still save per-sequence overrides.
 
 import React, { useSyncExternalStore } from "react";
-import { View, ScrollView, StyleSheet, Pressable, Platform } from "react-native";
+import { View, ScrollView, StyleSheet, Pressable, Platform, Switch } from "react-native";
 import Slider from "@react-native-community/slider";
 import { useThemeColors } from "../../src/theme";
 import { VizColorControls } from "../../src/components/VizColorSheet";
@@ -20,6 +20,13 @@ import {
   type ScaleId,
 } from "../../src/audio/musicSettings";
 import { indexToNoteName } from "../../src/audio/scales";
+import {
+  notifySettings,
+  notifyVersion,
+  setNotifyEnabled,
+  subscribeNotify,
+} from "../../src/notifications/notifyStore";
+import { cancelDaily, rescheduleDaily } from "../../src/notifications/scheduler";
 
 const NOTE_ROOTS = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
 import {
@@ -35,7 +42,9 @@ export default function SettingsScreen() {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
   useSyncExternalStore(subscribeMusicSettings, musicSettingsVersion, musicSettingsVersion);
+  useSyncExternalStore(subscribeNotify, notifyVersion, notifyVersion);
   const music = musicSettings();
+  const notify = notifySettings();
 
   return (
     <ScrollView
@@ -101,6 +110,29 @@ export default function SettingsScreen() {
           <AmbientVolumeRow />
         </>
       ) : null}
+
+      {Platform.OS !== "web" ? (
+        <>
+          <SectionHeading>Notifications</SectionHeading>
+          <PlainText style={styles.note}>
+            A daily reminder naming the sequence of the day, around 9am. Tap it
+            to jump straight to that sequence.
+          </PlainText>
+          <View style={styles.toggleRow}>
+            <PlainText style={styles.label}>Daily sequence</PlainText>
+            <Switch
+              value={notify.enabled}
+              onValueChange={(v) => {
+                setNotifyEnabled(v);
+                if (v) void rescheduleDaily();
+                else void cancelDaily();
+              }}
+              testID="notify-toggle"
+              accessibilityLabel="Daily sequence notification"
+            />
+          </View>
+        </>
+      ) : null}
     </ScrollView>
   );
 }
@@ -124,6 +156,12 @@ const makeStyles = (colors: any) => StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     marginBottom: spacing.md,
+  },
+  toggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: spacing.xs,
   },
   panel: {
     gap: spacing.sm,

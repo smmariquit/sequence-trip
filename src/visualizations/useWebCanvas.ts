@@ -6,6 +6,9 @@ import { resolveVizColor, vizGlowEnabled, vizMotionEnabled } from "./vizColorSto
 
 type DrawFn = (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => void;
 
+/** The most-recently-mounted animated (full-view) canvas, for image export. */
+export let currentWebCanvas: HTMLCanvasElement | null = null;
+
 /**
  * @param animated When false (preview thumbnails), draw once — no RAF loop.
  */
@@ -29,6 +32,8 @@ export function useWebCanvas(
     (el: HTMLCanvasElement | null) => {
       canvasRef.current = el;
       if (!el || !animated) return;
+      // surface the on-screen full-view canvas for image export
+      currentWebCanvas = el;
       el.style.touchAction = "none";
       el.onwheel = (e) => {
         e.preventDefault();

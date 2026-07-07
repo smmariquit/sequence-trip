@@ -10,6 +10,7 @@ import {
   type SQLiteDatabase,
 } from "expo-sqlite";
 import type { OEISSequence } from "../sequences/types";
+import { dayHash, isoDate, rowidForDate } from "./dayPick";
 
 interface Row {
   anum: string;
@@ -96,14 +97,37 @@ export async function random(): Promise<OEISSequence> {
 /** Deterministic per-day pick — same sequence for everyone on a given date. */
 export async function sequenceOfTheDay(): Promise<OEISSequence> {
   const db = await getDb();
-  const today = new Date().toISOString().slice(0, 10);
-  let hash = 0;
-  for (const ch of today) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
   const row = await db.getFirstAsync<Row>(
     "SELECT * FROM seq WHERE rowid = (? % (SELECT MAX(rowid) FROM seq)) + 1",
-    [hash]
+    [dayHash(isoDate())]
   );
   return toSequence(row!);
+}
+
+export interface DayPick {
+  date: string;
+  anum: string;
+  name: string;
+  terms: string[];
+}
+
+/** Picks for a run of dates (for scheduling/precompute while the db is open).
+ * One MAX(rowid) query, then one primary-key lookup per date. */
+export async function picksForDates(dates: string[]): Promise<DayPick[]> {
+  const db = await getDb();
+  const maxRow = await db.getFirstAsync<{ max: number }>(
+    "SELECT MAX(rowid) AS max FROM seq"
+  );
+  const max = maxRow?.max ?? 1;
+  const out: DayPick[] = [];
+  for (const date of dates) {
+    const row = await db.getFirstAsync<Row>(
+      "SELECT anum, name, terms FROM seq WHERE rowid = ?",
+      [rowidForDate(date, max)]
+    );
+    if (row) out.push({ date, anum: row.anum, name: row.name, terms: row.terms.split(",") });
+  }
+  return out;
 }
 
 /** Auto-detect query mode: A-number, raw terms, or name keywords. */

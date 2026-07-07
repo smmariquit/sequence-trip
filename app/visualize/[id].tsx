@@ -21,6 +21,11 @@ import { rankGenericViz, type GenericVizKey } from "../../src/visualizations/gen
 import { setActiveAnum } from "../../src/visualizations/vizColorStore";
 import SequenceEntryPanel from "../../src/components/SequenceEntryPanel";
 import TermsSheet from "../../src/components/TermsSheet";
+import {
+  exportWallpaper,
+  WALLPAPER_W,
+  WALLPAPER_H,
+} from "../../src/components/exportWallpaper";
 import { CenteredState } from "../../src/components/ui";
 import { useSequenceTermCount } from "../../src/hooks/useSequenceTermCount";
 
@@ -35,6 +40,8 @@ export default function VisualizeScreen() {
   const [vizSize, setVizSize] = useState({ width: 0, height: 0 });
   const [entryOpen, setEntryOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const shotRef = React.useRef<View>(null);
   const [vizKey, setVizKey] = useState<GenericVizKey | undefined>();
 
   useEffect(() => setVizKey(undefined), [id]);
@@ -120,6 +127,7 @@ export default function VisualizeScreen() {
             oeis={seq.anum}
             onEntryPress={() => setEntryOpen(true)}
             onTermsPress={() => setTermsOpen(true)}
+            onExportPress={() => exportWallpaper(shotRef, setExporting)}
             termCount={termCount}
             canLoadMore={canLoadMore}
             loadingMore={loadingMore}
@@ -162,6 +170,23 @@ export default function VisualizeScreen() {
             visible={termsOpen}
             onClose={() => setTermsOpen(false)}
           />
+          {exporting ? (
+            <View
+              ref={shotRef}
+              collapsable={false}
+              style={[styles.exportSurface, { backgroundColor: colors.bg }]}
+              pointerEvents="none"
+            >
+              <VizPreview
+                sequence={displaySequence}
+                width={WALLPAPER_W}
+                height={WALLPAPER_H}
+                preview={false}
+                count={seq.vizType ? termCount : undefined}
+                genericVizKey={vizKey}
+              />
+            </View>
+          ) : null}
         </View>
       </MusicProvider>
     </PlaybackProvider>
@@ -178,5 +203,12 @@ const makeStyles = (colors: any) => StyleSheet.create({
     minHeight: 0,
     overflow: "hidden",
     position: "relative",
+  },
+  exportSurface: {
+    position: "absolute",
+    left: -10000,
+    top: 0,
+    width: WALLPAPER_W,
+    height: WALLPAPER_H,
   },
 });
