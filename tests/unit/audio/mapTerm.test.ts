@@ -33,3 +33,19 @@ describe("audio/mapTerm", () => {
     expect(notes.some((n) => n.drum === "kick")).toBe(true);
   });
 });
+
+describe("tempoSubNotes", () => {
+  const { tempoSubNotes } = require("../../../src/audio/mapTerm");
+
+  it("returns nothing without a previous term or zero count", () => {
+    expect(tempoSubNotes({ step: 1, term: "5", speed: 1 }, 3)).toEqual([]);
+    expect(tempoSubNotes({ step: 2, term: "5", prevTerm: "1", speed: 1 }, 0)).toEqual([]);
+  });
+
+  it("interpolates pitch between prev and current term", () => {
+    const notes = tempoSubNotes({ step: 2, term: "10", prevTerm: "0", speed: 1 }, 3);
+    expect(notes).toHaveLength(3);
+    const freqs = notes.map((n: { frequency: number }) => n.frequency);
+    expect(freqs[0]).toBeLessThan(freqs[2]); // rising toward a(n)
+  });
+});

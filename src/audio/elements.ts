@@ -33,9 +33,15 @@ export const MUSIC_ELEMENTS: MusicElementDef[] = [
     icon: "keypad-outline",
     description: "Arpeggio through the decimal digits of a(n)",
   },
+  {
+    id: "pad",
+    label: "Pad",
+    icon: "cloudy-outline",
+    description: "Sustained chord bed under the melody",
+  },
 ];
 
-export const DEFAULT_ELEMENTS: MusicElementId[] = ["melody"];
+export const DEFAULT_ELEMENTS: MusicElementId[] = ["melody", "pad"];
 
 export function isMusicElementId(id: string): id is MusicElementId {
   return MUSIC_ELEMENTS.some((el) => el.id === id);

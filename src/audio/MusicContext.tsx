@@ -5,13 +5,15 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import type { OEISSequence } from "../sequences/types";
-import { usePlayback } from "../playback/PlaybackContext";
+import { usePlayback, STEP_MS } from "../playback/PlaybackContext";
+import { deltaLogs } from "../sequences/normalize";
 import { DEFAULT_ELEMENTS } from "./elements";
-import { mapStepToNotes } from "./mapTerm";
+import { mapStepToNotes, tempoSubNotes } from "./mapTerm";
 import { termsAtStep } from "./termsAtStep";
 import { playNotes, setAudioSuspended } from "./engine";
 import type { MusicElementId } from "./types";
@@ -43,6 +45,15 @@ export function MusicProvider({
   const [enabled, setEnabled] = useState(false);
   const [elements, setElements] = useState<MusicElementId[]>(DEFAULT_ELEMENTS);
   const prevStepRef = useRef(0);
+  const subTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  // Local steepness in symlog space — drives variable tempo sampling.
+  const { deltas, maxDelta } = useMemo(() => {
+    const d = sequence.terms?.length ? deltaLogs(sequence.terms) : [];
+    let max = 0;
+    for (const v of d) max = Math.max(max, Math.abs(v));
+    return { deltas: d, maxDelta: max };
+  }, [sequence.terms]);
 
   const toggleEnabled = useCallback(() => {
     setEnabled((on) => {
@@ -70,12 +81,28 @@ export function MusicProvider({
     const hit = termsAtStep(sequence, step);
     if (!hit) return;
 
-    const notes = mapStepToNotes(
-      { step, term: hit.term, prevTerm: hit.prevTerm, speed },
-      elements
-    );
-    void playNotes(notes);
-  }, [preview, enabled, playing, step, speed, sequence, elements]);
+    const ctx = { step, term: hit.term, prevTerm: hit.prevTerm, speed };
+    void playNotes(mapStepToNotes(ctx, elements));
+
+    // Variable tempo: steeper local slope → more, denser sub-notes this step.
+    if (elements.includes("melody") && maxDelta > 0) {
+      const steep = Math.abs(deltas[step - 1] ?? 0) / maxDelta;
+      const subCount = Math.min(3, Math.floor(steep * 4));
+      const stepWindow = STEP_MS / Math.max(speed, 0.25);
+      tempoSubNotes(ctx, subCount).forEach((note, i) => {
+        const t = setTimeout(
+          () => void playNotes([note]),
+          ((i + 1) / (subCount + 1)) * stepWindow
+        );
+        subTimersRef.current.push(t);
+      });
+    }
+
+    return () => {
+      subTimersRef.current.forEach(clearTimeout);
+      subTimersRef.current = [];
+    };
+  }, [preview, enabled, playing, step, speed, sequence, elements, deltas, maxDelta]);
 
   useEffect(() => {
     if (step === 0) prevStepRef.current = 0;

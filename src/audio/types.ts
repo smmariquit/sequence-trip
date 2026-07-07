@@ -1,6 +1,6 @@
 // src/audio/types.ts
 
-export type MusicElementId = "melody" | "bass" | "harmony" | "rhythm" | "digits";
+export type MusicElementId = "melody" | "bass" | "harmony" | "rhythm" | "digits" | "pad";
 
 export type WaveType = "sine" | "triangle" | "square" | "sawtooth";
 
@@ -18,7 +18,7 @@ export interface NoteSpec {
 export interface MusicElementDef {
   id: MusicElementId;
   label: string;
-  icon: "musical-notes" | "radio" | "layers-outline" | "pulse" | "keypad-outline";
+  icon: "musical-notes" | "radio" | "layers-outline" | "pulse" | "keypad-outline" | "cloudy-outline";
   description: string;
 }
 

@@ -70,6 +70,20 @@ function digitNotes(ctx: SonifyContext): NoteSpec[] {
   }));
 }
 
+function padNotes(ctx: SonifyContext): NoteSpec[] {
+  // Sustained pentatonic triad every 4th step — the arrangement bed under
+  // the per-term melody (musification layer, not raw parameter mapping).
+  if (ctx.step % 4 !== 0) return [];
+  const root = termMod(ctx.term, 10);
+  const dur = stepDuration(ctx.speed) * 3.5;
+  return [0, 2, 4].map((stack, i) => ({
+    frequency: indexToFreq(root + stack, 48),
+    duration: dur,
+    gain: 0.09 - i * 0.02,
+    wave: "sine" as const,
+  }));
+}
+
 const mappers: Record<
   MusicElementId,
   (ctx: SonifyContext) => NoteSpec | NoteSpec[]
@@ -79,6 +93,7 @@ const mappers: Record<
   harmony: harmonyNote,
   rhythm: rhythmNotes,
   digits: digitNotes,
+  pad: padNotes,
 };
 
 /** Map one construction step into note specs for the active musical elements. */
@@ -93,4 +108,25 @@ export function mapStepToNotes(
     else out.push(mapped);
   }
   return out;
+}
+
+/**
+ * Variable tempo sampling (arXiv 2508.06872): steep regions play denser.
+ * Extra melody notes for one step, pitch-interpolated from a(n-1) to a(n);
+ * caller staggers them across the step window.
+ */
+export function tempoSubNotes(ctx: SonifyContext, count: number): NoteSpec[] {
+  if (count <= 0 || !ctx.prevTerm) return [];
+  const from = termMod(ctx.prevTerm, 25);
+  const to = termMod(ctx.term, 25);
+  const dur = stepDuration(ctx.speed) / (count + 1);
+  return Array.from({ length: count }, (_, i) => {
+    const t = (i + 1) / (count + 1);
+    return {
+      frequency: indexToFreq(Math.round(from + (to - from) * t), 60),
+      duration: dur,
+      gain: 0.2,
+      wave: "sine" as const,
+    };
+  });
 }
