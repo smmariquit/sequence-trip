@@ -14,7 +14,7 @@ export const COLLECTIONS: SequenceCollection[] = [
   },
   {
     title: "Chaotic & weird",
-    description: "Strange rules, unpredictable paths, and beautifully messy behavior.",
+    description: "Strange rules and unpredictable paths.",
     anums: ["A005132", "A006577", "A000002", "A004001", "A005185", "A006336"],
   },
   {

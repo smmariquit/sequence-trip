@@ -60,7 +60,7 @@ export default function ExploreScreen() {
         <View style={styles.hero}>
           <LogoTitleRow
             title="Explore"
-            subtitle="Curated collections — swipe through, tap to visualize"
+            subtitle="Sequence collections. Swipe through, tap to visualize."
             size="page"
           />
         </View>

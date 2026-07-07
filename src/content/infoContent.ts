@@ -29,7 +29,7 @@ export const INFO_SECTIONS: InfoSection[] = [
     body: [
       "An integer sequence is an ordered list of whole numbers (…, −2, −1, 0, 1, 2, 3, …) that follows a rule. Each number in the list is called a term.",
       "You already know several. Counting is 1, 2, 3, 4, 5, … Even numbers are 0, 2, 4, 6, 8, … The Fibonacci sequence 0, 1, 1, 2, 3, 5, 8, … adds the previous two terms to get the next one.",
-      "Some rules are simple (add 1 each time). Others are weird, beautiful, or still unsolved — like Collatz, where every starting number is believed to eventually reach 1, but nobody has proved it for all numbers.",
+      "Some rules are simple (add 1 each time). Others are strange or still unsolved — like Collatz, where every starting number is believed to eventually reach 1, but nobody has proved it for all numbers.",
     ],
     bullets: [
       "Term index n starts at 0 or 1 depending on the sequence — the caption shows you which.",
