@@ -120,7 +120,7 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   description: {
     color: colors.textDim,
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 14,
+    lineHeight: 20,
   },
 });

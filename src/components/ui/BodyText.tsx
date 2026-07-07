@@ -32,18 +32,18 @@ export default function BodyText({
 const makeVariantStyles = (colors: any) => StyleSheet.create({
   body: {
     color: colors.textDim,
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: 16,
+    lineHeight: 24,
     marginBottom: 8,
   },
   caption: {
     color: colors.textDim,
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 14,
+    lineHeight: 20,
   },
   muted: {
     color: colors.textMuted,
-    fontSize: 12,
+    fontSize: 13,
     textAlign: "center",
   },
   error: {
@@ -54,6 +54,6 @@ const makeVariantStyles = (colors: any) => StyleSheet.create({
     color: colors.textMuted,
     textAlign: "center",
     marginVertical: 20,
-    fontSize: 14,
+    fontSize: 15,
   },
 });

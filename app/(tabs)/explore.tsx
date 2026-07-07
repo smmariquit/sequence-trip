@@ -26,11 +26,12 @@ export default function ExploreScreen() {
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 
   const [sequences, setSequences] = useState<Map<string, OEISSequence> | null>(null);
+  const [resolving, setResolving] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     const anums = COLLECTIONS.flatMap((c) => c.anums);
-    
+
     const initialMap = new Map<string, OEISSequence>();
     for (const anum of anums) {
       const cat = getSequence(anum);
@@ -45,6 +46,9 @@ export default function ExploreScreen() {
       })
       .catch((err) => {
         console.warn("Explore sequences load failed:", err);
+      })
+      .finally(() => {
+        if (!cancelled) setResolving(false);
       });
     return () => {
       cancelled = true;
@@ -87,8 +91,15 @@ export default function ExploreScreen() {
               >
                 {collection.anums.map((anum) => {
                   const seq = sequences.get(anum);
-                  if (!seq) return null;
-                  return <ExploreCard key={anum} sequence={seq} />;
+                  if (seq) return <ExploreCard key={anum} sequence={seq} />;
+                  // db still resolving: placeholder keeps the slot visible
+                  if (!resolving) return null;
+                  return (
+                    <View key={anum} style={styles.cardPlaceholder} testID="explore-card-loading">
+                      <LoadingSpinner />
+                      <Text style={styles.placeholderText}>{anum}</Text>
+                    </View>
+                  );
                 })}
               </ScrollView>
             </View>
@@ -138,5 +149,21 @@ const makeStyles = (colors: any) => StyleSheet.create({
   carousel: {
     paddingHorizontal: PAGE_PADDING,
     gap: spacing.md,
+  },
+  cardPlaceholder: {
+    width: EXPLORE_CARD_W,
+    height: 180,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    backgroundColor: colors.bgCard,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
+  },
+  placeholderText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontVariant: ["tabular-nums"],
   },
 });

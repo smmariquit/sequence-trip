@@ -81,9 +81,9 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   name: {
     color: colors.text,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "600",
-    lineHeight: 19,
+    lineHeight: 20,
   },
   terms: {
     marginTop: 3,

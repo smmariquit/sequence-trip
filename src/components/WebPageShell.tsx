@@ -17,6 +17,17 @@ const WEB_EXTRAS_CSS = `
 .katex { color: inherit; font-size: 1em; }
 .katex-display { margin: 0.4em 0; }
 .math-text .katex { white-space: normal; }
+/* themed scrollbars — default white bars glare on the dark theme */
+* { scrollbar-width: thin; scrollbar-color: #2E2948 transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2E2948; border-radius: 5px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: #453E6B; background-clip: content-box; }
+@media (prefers-color-scheme: light) {
+  * { scrollbar-color: #C7CBD4 transparent; }
+  ::-webkit-scrollbar-thumb { background: #C7CBD4; background-clip: content-box; }
+  ::-webkit-scrollbar-thumb:hover { background: #9AA1AE; background-clip: content-box; }
+}
 `;
 
 function WebExtras() {

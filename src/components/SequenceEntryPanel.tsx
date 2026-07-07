@@ -22,6 +22,9 @@ import {
   stripOeisMarkup,
 } from "../oeis/entryText";
 import { tokenizeCode } from "../oeis/codeTokens";
+import { formatOeisLine } from "../oeis/oeisMath";
+import { keywordMeaning } from "../oeis/keywordInfo";
+import MathText from "./MathText";
 import { useThemeColors } from "../theme";
 import { safeAreaTop } from "../theme/layout";
 import { spacing, radii, typography } from "../theme/tokens";
@@ -117,17 +120,20 @@ export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
             ) : null}
             {entry.keyword.length > 0 ? (
               <Section title="Keywords">
-                <View style={styles.chips}>
-                  {entry.keyword.map((k) => (
-                    <View key={k} style={styles.chip}>
+                {entry.keyword.map((k) => (
+                  <View key={k} style={styles.keywordRow}>
+                    <View style={styles.chip}>
                       <Text style={styles.chipText}>{k}</Text>
                     </View>
-                  ))}
-                </View>
+                    <Text style={styles.keywordMeaning}>
+                      {keywordMeaning(k) ?? "No standard meaning — see oeis.org/wiki/Keywords."}
+                    </Text>
+                  </View>
+                ))}
               </Section>
             ) : null}
             <Section title="Definition">
-              <Body>{stripOeisMarkup(entry.name)}</Body>
+              <FormulaLine>{entry.name}</FormulaLine>
             </Section>
             {entry.data ? (
               <Section title="Data">
@@ -137,14 +143,14 @@ export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
             {entry.formula.length > 0 ? (
               <Section title="Formula">
                 {entry.formula.map((line) => (
-                  <Body key={line.slice(0, 40)}>{stripOeisMarkup(line)}</Body>
+                  <FormulaLine key={line.slice(0, 40)}>{line}</FormulaLine>
                 ))}
               </Section>
             ) : null}
             {entry.example.length > 0 ? (
               <Section title="Example">
                 {entry.example.map((line) => (
-                  <Body key={line.slice(0, 40)}>{stripOeisMarkup(line)}</Body>
+                  <FormulaLine key={line.slice(0, 40)}>{line}</FormulaLine>
                 ))}
               </Section>
             ) : null}
@@ -285,6 +291,15 @@ function Body({ children }: { children: string }) {
   return <PlainText style={styles.body}>{children}</PlainText>;
 }
 
+/** Entry line that typesets as LaTeX when it is unambiguously a formula. */
+function FormulaLine({ children }: { children: string }) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+  const { text, isMath } = formatOeisLine(stripOeisMarkup(children));
+  if (isMath) return <MathText style={styles.body}>{text}</MathText>;
+  return <PlainText style={styles.body}>{text}</PlainText>;
+}
+
 function CodeBlock({ children }: { children: string }) {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
@@ -386,14 +401,14 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   body: {
     color: colors.textDim,
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: 15,
+    lineHeight: 22,
     marginBottom: spacing.xs,
   },
   code: {
     color: colors.interactive,
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 13,
+    lineHeight: 20,
     fontFamily: Platform.OS === "ios" ? "Menlo" : Platform.OS === "web" ? "monospace" : "monospace",
     backgroundColor: colors.bgElevated,
     borderWidth: 1,
@@ -405,6 +420,17 @@ const makeStyles = (colors: any) => StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
+  },
+  keywordRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  keywordMeaning: {
+    color: colors.textDim,
+    fontSize: 14,
+    flex: 1,
   },
   chip: {
     backgroundColor: colors.primaryDim,
