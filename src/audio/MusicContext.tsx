@@ -45,7 +45,6 @@ export function MusicProvider({
   const [enabled, setEnabled] = useState(false);
   const [elements, setElements] = useState<MusicElementId[]>(DEFAULT_ELEMENTS);
   const prevStepRef = useRef(0);
-  const subTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Local steepness in symlog space — drives variable tempo sampling.
   const { deltas, maxDelta } = useMemo(() => {
@@ -85,23 +84,24 @@ export function MusicProvider({
     void playNotes(mapStepToNotes(ctx, elements));
 
     // Variable tempo: steeper local slope → more, denser sub-notes this step.
+    // deltas[step-2] is the interval prevTerm→term actually traversed at this
+    // step (deltas[step-1] would be the NEXT interval's slope).
+    const timers: ReturnType<typeof setTimeout>[] = [];
     if (elements.includes("melody") && maxDelta > 0) {
-      const steep = Math.abs(deltas[step - 1] ?? 0) / maxDelta;
+      const steep = Math.abs(deltas[step - 2] ?? 0) / maxDelta;
       const subCount = Math.min(3, Math.floor(steep * 4));
       const stepWindow = STEP_MS / Math.max(speed, 0.25);
       tempoSubNotes(ctx, subCount).forEach((note, i) => {
-        const t = setTimeout(
-          () => void playNotes([note]),
-          ((i + 1) / (subCount + 1)) * stepWindow
+        timers.push(
+          setTimeout(
+            () => void playNotes([note]),
+            ((i + 1) / (subCount + 1)) * stepWindow
+          )
         );
-        subTimersRef.current.push(t);
       });
     }
 
-    return () => {
-      subTimersRef.current.forEach(clearTimeout);
-      subTimersRef.current = [];
-    };
+    return () => timers.forEach(clearTimeout);
   }, [preview, enabled, playing, step, speed, sequence, elements, deltas, maxDelta]);
 
   useEffect(() => {

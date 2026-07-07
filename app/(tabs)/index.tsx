@@ -14,7 +14,7 @@ import { sequences } from "../../src/sequences/catalog";
 import type { OEISSequence } from "../../src/sequences/types";
 import SequenceCard from "../../src/components/SequenceCard";
 import ResultRow from "../../src/components/ResultRow";
-import AmbientButton from "../../src/components/AmbientButton";
+import AmbientButton, { AmbientVolumeRow } from "../../src/components/AmbientButton";
 import {
   AppFooter,
   BodyText,
@@ -145,6 +145,9 @@ export default function HomeScreen() {
               )}
               <AmbientButton />
             </View>
+            <View style={styles.volumeWrap}>
+              <AmbientVolumeRow />
+            </View>
 
             <SectionHeading>Featured</SectionHeading>
             <View style={[styles.featuredGrid, twoCol && { gap: gridGap }]}>
@@ -185,6 +188,10 @@ const makeStyles = (colors: any) => StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: PAGE_PADDING,
     gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  volumeWrap: {
+    paddingHorizontal: PAGE_PADDING,
     marginBottom: spacing.sm,
   },
   featuredGrid: {

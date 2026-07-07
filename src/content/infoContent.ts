@@ -90,6 +90,7 @@ export const INFO_SECTIONS: InfoSection[] = [
     body: [
       "Sequence data from the On-Line Encyclopedia of Integer Sequences (OEIS), founded by Neil J. A. Sloane (N. J. A. Sloane) and maintained by The OEIS Foundation Inc., under CC BY-SA 4.0.",
       "This app is not affiliated with or endorsed by The OEIS Foundation or Dr. Sloane.",
+      "Ambient music: \"Heavenly Loop\" by isaiah658 (CC0, opengameart.org).",
     ],
     links: [
       { label: "oeis.org", url: "https://oeis.org" },

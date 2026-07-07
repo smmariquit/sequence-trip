@@ -1,62 +1,71 @@
 // src/components/AmbientButton.tsx
 //
-// Cycles zen ambience: on → low → off. Hidden on web (ambience is native-only).
+// Zen ambience controls: on/off toggle; volume slider shows while on.
+// Hidden on web (ambience is native-only).
 
 import React from "react";
-import { Platform, Pressable, StyleSheet } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
+import Slider from "@react-native-community/slider";
 import { useAmbient } from "../audio/AmbientContext";
 import { useThemeColors } from "../theme";
-import { radii, touch } from "../theme/tokens";
+import { spacing } from "../theme/tokens";
 import AppIcon from "./ui/AppIcon";
-
-const ICONS = {
-  on: "volume-high",
-  low: "volume-low",
-  off: "volume-mute",
-} as const;
-
-const LABELS = {
-  on: "Ambient music on, switch to low volume",
-  low: "Ambient music low, switch off",
-  off: "Ambient music off, switch on",
-} as const;
+import PillButton from "./ui/PillButton";
 
 export default function AmbientButton() {
-  const colors = useThemeColors();
-  const styles = React.useMemo(() => makeStyles(colors), [colors]);
-  const { level, cycleLevel } = useAmbient();
+  const { enabled, toggle } = useAmbient();
 
   if (Platform.OS === "web") return null;
 
   return (
-    <Pressable
-      onPress={cycleLevel}
+    <PillButton
+      variant={enabled ? "primary" : "icon"}
+      icon={enabled ? "volume-high" : "volume-mute"}
+      iconPosition="only"
+      onPress={toggle}
       testID="ambient-toggle"
-      accessibilityRole="button"
-      accessibilityLabel={LABELS[level]}
-      style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
-    >
-      <AppIcon
-        name={ICONS[level]}
-        size={touch.iconSizeSm}
-        color={level === "off" ? colors.textMuted : colors.primary}
-      />
-    </Pressable>
+      accessibilityLabel={enabled ? "Turn ambient music off" : "Turn ambient music on"}
+    />
   );
 }
 
-const makeStyles = (colors: any) => StyleSheet.create({
-  btn: {
-    minWidth: touch.minHeight,
-    minHeight: touch.minHeight,
+/** Volume slider row — rendered below the actions row while ambience is on. */
+export function AmbientVolumeRow() {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+  const { enabled, volume, setVolume } = useAmbient();
+
+  if (Platform.OS === "web" || !enabled) return null;
+
+  return (
+    <View style={styles.sliderRow}>
+      <AppIcon name="volume-low" size={14} color={colors.textMuted} />
+      <Slider
+        style={styles.slider}
+        minimumValue={0}
+        maximumValue={1}
+        value={volume}
+        onSlidingComplete={setVolume}
+        minimumTrackTintColor={colors.primary}
+        maximumTrackTintColor={colors.border}
+        thumbTintColor={colors.primary}
+        accessibilityLabel="Ambient music volume"
+        testID="ambient-volume"
+      />
+      <AppIcon name="volume-high" size={14} color={colors.textMuted} />
+    </View>
+  );
+}
+
+const makeStyles = (_colors: any) => StyleSheet.create({
+  sliderRow: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.bgCard,
+    gap: spacing.xs,
+    marginTop: spacing.xs,
   },
-  pressed: {
-    opacity: 0.7,
+  slider: {
+    flex: 1,
+    height: 28,
   },
 });

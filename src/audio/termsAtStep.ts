@@ -2,26 +2,27 @@
 
 import type { OEISSequence } from "../sequences/types";
 import * as gen from "../sequences/generators";
+import { intString } from "../sequences/normalize";
 
 const GENERATED_LEN = 120;
 
 function generatedTerms(sequence: OEISSequence): string[] {
   if (sequence.generate) {
-    return sequence.generate(GENERATED_LEN).map(String);
+    return sequence.generate(GENERATED_LEN).map(intString);
   }
   switch (sequence.vizType) {
     case "recaman-arcs":
-      return gen.recaman(GENERATED_LEN).map(String);
+      return gen.recaman(GENERATED_LEN).map(intString);
     case "fibonacci-spiral":
-      return gen.fibonacci(GENERATED_LEN).map(String);
+      return gen.fibonacci(GENERATED_LEN).map(intString);
     case "ulam-spiral":
-      return gen.primes(GENERATED_LEN).map(String);
+      return gen.primes(GENERATED_LEN).map(intString);
     case "collatz-tree":
-      return gen.collatzLengths(GENERATED_LEN).map(String);
+      return gen.collatzLengths(GENERATED_LEN).map(intString);
     case "pascal-fractal":
-      return gen.pascalRow(GENERATED_LEN - 1).map(String);
+      return gen.pascalRow(GENERATED_LEN - 1).map(intString);
     case "digit-flow":
-      return gen.piDigits(GENERATED_LEN).map(String);
+      return gen.piDigits(GENERATED_LEN).map(intString);
     default:
       return [];
   }

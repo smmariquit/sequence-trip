@@ -4,6 +4,6 @@ const { getDefaultConfig } = require("expo/metro-config");
 
 const config = getDefaultConfig(__dirname);
 
-config.resolver.assetExts.push("db", "wasm");
+config.resolver.assetExts.push("db", "wasm", "ogg");
 
 module.exports = config;

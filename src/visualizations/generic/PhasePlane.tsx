@@ -17,25 +17,8 @@ import { useAnimSpeed } from "../../playback/PlaybackContext";
 import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { makePolylinePath } from "../../playback/smoothPath";
 import { normalize } from "../../sequences/normalize";
+import { phasePoints } from "./phasePoints";
 import type { GenericVizProps } from "./types";
-
-export function phasePoints(
-  logs: number[],
-  minLog: number,
-  maxLog: number,
-  width: number,
-  height: number,
-  pad: number
-): { x: number; y: number }[] {
-  const range = maxLog - minLog || 1;
-  const sx = (v: number) => pad + ((v - minLog) / range) * (width - pad * 2);
-  const sy = (v: number) => height - pad - ((v - minLog) / range) * (height - pad * 2);
-  const pts: { x: number; y: number }[] = [];
-  for (let i = 0; i + 1 < logs.length; i++) {
-    pts.push({ x: sx(logs[i]), y: sy(logs[i + 1]) });
-  }
-  return pts;
-}
 
 export default function PhasePlane({ terms, width, height, preview }: GenericVizProps) {
   const speed = useAnimSpeed();

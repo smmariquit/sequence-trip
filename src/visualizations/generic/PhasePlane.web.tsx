@@ -6,6 +6,7 @@ import { useThemeColors } from "../../theme";
 import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { strokePolylineProgress } from "../../playback/drawProgress";
 import { normalize } from "../../sequences/normalize";
+import { phasePoints } from "./phasePoints";
 import { drawPlotAxes } from "../canvasAxes";
 import type { GenericVizProps } from "./types";
 
@@ -15,15 +16,7 @@ export default function PhasePlane({ terms, width, height, preview }: GenericViz
 
   const points = useMemo(() => {
     const pad = preview ? 10 : 30;
-    const range = stats.maxLog - stats.minLog || 1;
-    const sx = (v: number) => pad + ((v - stats.minLog) / range) * (width - pad * 2);
-    const sy = (v: number) =>
-      height - pad - ((v - stats.minLog) / range) * (height - pad * 2);
-    const pts: { x: number; y: number }[] = [];
-    for (let i = 0; i + 1 < stats.logs.length; i++) {
-      pts.push({ x: sx(stats.logs[i]), y: sy(stats.logs[i + 1]) });
-    }
-    return pts;
+    return phasePoints(stats.logs, stats.minLog, stats.maxLog, width, height, pad);
   }, [stats, width, height, preview]);
 
   const { progressRef } = useBuildAnimation(Math.max(points.length - 1, 0), preview);
@@ -45,7 +38,7 @@ export default function PhasePlane({ terms, width, height, preview }: GenericViz
       }
       if (points.length === 0 || progress <= 0) return;
 
-      const hue = (time * 45) % 360;
+      const hue = (time * 36) % 360; // 10s cycle — matches native
       ctx.strokeStyle = hslString(hue, 85, 60);
       ctx.lineWidth = preview ? 1 : 1.6;
       ctx.lineJoin = "round";

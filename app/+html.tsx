@@ -1,4 +1,8 @@
 // app/+html.tsx
+//
+// ONLY used when app.json web.output is "static" — the current "single"
+// output ignores this file entirely. Skip link + katex CSS live in
+// WebPageShell's runtime injection instead.
 
 import { ScrollViewStyleReset } from "expo-router/html";
 import type { PropsWithChildren } from "react";
@@ -39,31 +43,12 @@ export default function Root({ children }: PropsWithChildren) {
         <ScrollViewStyleReset />
         <style dangerouslySetInnerHTML={{ __html: webStyles }} />
       </head>
-      <body>
-        <a href="#main" className="skip-link">
-          Skip to main content
-        </a>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
 
 const webStyles = `
-.skip-link {
-  position: absolute;
-  left: -9999px;
-  z-index: 100;
-  background: #F0ECFF;
-  color: #07060E;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-family: system-ui, sans-serif;
-}
-.skip-link:focus {
-  left: 8px;
-  top: 8px;
-}
 html, body {
   height: 100%;
   background-color: #07060E;
@@ -78,15 +63,5 @@ body {
   flex: 1;
   width: 100%;
   max-width: 100vw;
-}
-.katex {
-  color: inherit;
-  font-size: 1em;
-}
-.katex-display {
-  margin: 0.4em 0;
-}
-.math-text .katex {
-  white-space: normal;
 }
 `;

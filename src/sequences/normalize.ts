@@ -59,6 +59,19 @@ function fitThreshold(values: number[]): number {
   return Number.isFinite(min) ? Math.min(Math.max(min, 1e-12), 1e12) : 1;
 }
 
+/** Threshold-free signed log10 of each valid term — for cross-sequence math
+ * (ratios) where per-sequence symlog thresholds would distort the result. */
+export function signedLogs(terms: string[]): number[] {
+  return terms.filter((t) => /^-?\d+$/.test(t)).map(signedLog);
+}
+
+/** Format a JS number as a plain integer digit string — String() emits
+ * scientific notation past ~1e21, which every term consumer rejects. */
+export function intString(n: number): string {
+  if (!Number.isFinite(n)) return "0";
+  return n.toLocaleString("fullwide", { useGrouping: false, maximumFractionDigits: 0 });
+}
+
 export function normalize(terms: string[]): SeqStats {
   const clean = terms.filter((t) => /^-?\d+$/.test(t));
   const values = clean.map(approxValue);

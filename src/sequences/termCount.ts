@@ -2,6 +2,7 @@
 
 import type { OEISSequence, VizType } from "./types";
 import { MAX_BFILE_TERMS } from "../oeis/bfile";
+import { intString } from "./normalize";
 
 const VIZ_DEFAULT_COUNT: Record<VizType, number> = {
   "recaman-arcs": 64,
@@ -45,7 +46,7 @@ export function buildDisplaySequence(
 ): OEISSequence {
   if (sequence.vizType) {
     const terms = sequence.generate
-      ? sequence.generate(termCount).map(String)
+      ? sequence.generate(termCount).map(intString) // String() goes scientific past 1e21
       : sequence.terms?.slice(0, termCount);
     return terms ? { ...sequence, terms } : sequence;
   }

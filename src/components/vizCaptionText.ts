@@ -45,11 +45,25 @@ export function recamanCaption(step: number, terms?: string[]): CaptionText {
   };
 }
 
+// pickGenericVizInfo runs normalize() over every term; the caption re-renders
+// each playback step, so cache the (constant per sequence) guide string.
+const guideCache = new Map<string, string>();
+
+function genericGuide(anum: string, terms: string[]): string {
+  const key = `${anum}:${terms.length}`;
+  let guide = guideCache.get(key);
+  if (!guide) {
+    guide = pickGenericVizInfo(anum, terms).guide;
+    guideCache.set(key, guide);
+  }
+  return guide;
+}
+
 export function genericCaption(sequence: OEISSequence, step: number): CaptionText {
   const terms = sequence.terms ?? [];
   // same deterministic pick as VizPreview, so the guide matches what's drawn
   const guide = terms.length
-    ? pickGenericVizInfo(sequence.anum, terms).guide
+    ? genericGuide(sequence.anum, terms)
     : "Horizontal axis = index $n$. Vertical axis = $a(n)$ (log-scaled when values are huge).";
   return {
     live:

@@ -4,8 +4,9 @@
 // animation: construction order carries no information here (Tversky 2002).
 
 import React, { useMemo } from "react";
-import { Canvas, Path as SkiaPath, Skia, Circle } from "@shopify/react-native-skia";
+import { Canvas, Path as SkiaPath, Circle } from "@shopify/react-native-skia";
 import { hslToHex } from "../theme";
+import { makePolylinePath } from "../playback/smoothPath";
 import { pairPoints, type PairMode } from "./pairPoints";
 
 interface Props {
@@ -22,13 +23,10 @@ export default function PairPlot({ termsA, termsB, mode, width, height }: Props)
     [termsA, termsB, mode, width, height]
   );
 
-  const path = useMemo(() => {
-    const p = Skia.Path.Make();
-    if (!points.length) return p;
-    p.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) p.lineTo(points[i].x, points[i].y);
-    return p;
-  }, [points]);
+  const path = useMemo(
+    () => makePolylinePath(points, Math.max(points.length - 1, 0)),
+    [points]
+  );
 
   const dots = useMemo(() => {
     const every = Math.max(1, Math.floor(points.length / 40));

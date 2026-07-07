@@ -63,7 +63,8 @@ export async function playNotes(notes: NoteSpec[]) {
   for (const note of notes) {
     try {
       const player = await loadPlayer(note);
-      player.seekTo(0);
+      // must complete before play(), or a finished player replays truncated
+      await player.seekTo(0);
       player.volume = note.gain;
       player.play();
     } catch {

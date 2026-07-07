@@ -4,7 +4,7 @@
 
 import type { OEISFullEntry, OeisJsonRecord } from "./entryTypes";
 import { formatAnum, normalizeAnum, parseKeywords } from "./entryText";
-import { OEIS_BASE } from "./baseUrl";
+import { OEIS_BASE, OEIS_HEADERS } from "./baseUrl";
 
 const cache = new Map<string, OEISFullEntry>();
 
@@ -40,7 +40,9 @@ export async function fetchOeisEntry(anum: string): Promise<OEISFullEntry | null
   if (hit) return hit;
 
   try {
-    const res = await fetch(`${OEIS_BASE}/search?q=id:${key}&fmt=json`);
+    const res = await fetch(`${OEIS_BASE}/search?q=id:${key}&fmt=json`, {
+      headers: OEIS_HEADERS,
+    });
     if (!res.ok) return null;
     const data = (await res.json()) as OeisJsonRecord[];
     if (!Array.isArray(data) || data.length === 0) return null;

@@ -31,10 +31,10 @@ export default function PairPlot({ termsA, termsB, mode, width, height }: Props)
       ctx.stroke();
 
       const every = Math.max(1, Math.floor(points.length / 40));
-      points.forEach((p, i) => {
-        if (i % every !== 0) return;
+      const dots = points.filter((_, i) => i % every === 0);
+      dots.forEach((p, i) => {
         ctx.beginPath();
-        ctx.fillStyle = hslString((i * 360) / points.length, 90, 62);
+        ctx.fillStyle = hslString((i * 360) / Math.max(dots.length, 1), 90, 62);
         ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
         ctx.fill();
       });

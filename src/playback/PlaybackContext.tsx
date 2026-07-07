@@ -11,7 +11,7 @@ import React, {
 } from "react";
 import { useSharedValue, type SharedValue } from "react-native-reanimated";
 
-import { nextProgress } from "./progress";
+import { nextProgress, scrubTarget } from "./progress";
 
 export { STEP_MS } from "./progressConstants";
 
@@ -124,17 +124,12 @@ export function PlaybackProvider({ children }: { children: React.ReactNode }) {
   const stepBy = useCallback(
     (delta: number) => {
       setPlaying(false);
-      // floor of 1 when stepping back: step 0 while paused means "idle",
-      // which renders the finished viz — not what a scrubbing user wants
-      const next = Math.max(
-        delta < 0 ? 1 : 0,
-        Math.min(maxSteps, Math.round(progressRef.current) + delta)
-      );
+      const next = scrubTarget(progressRef.current, step, delta, maxSteps);
       progressRef.current = next;
       progressSV.value = next;
       setStep(next);
     },
-    [maxSteps, progressSV]
+    [step, maxSteps, progressSV]
   );
 
   const togglePlay = useCallback(() => {

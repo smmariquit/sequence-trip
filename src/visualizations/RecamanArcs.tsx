@@ -10,6 +10,8 @@ import {
 } from "@shopify/react-native-skia";
 import { hslToHex, useThemeColors } from "../theme";
 import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
+import { recaman } from "../sequences/generators";
+import { layoutRecaman } from "./recamanLayout";
 
 interface Props {
   width: number;
@@ -19,18 +21,6 @@ interface Props {
 }
 
 type Arc = { path: ReturnType<typeof Skia.Path.Make>; hue: number };
-
-function buildRecamanSeq(n: number): number[] {
-  const s = [0];
-  const seen = new Set([0]);
-  for (let i = 1; i < n; i++) {
-    const back = s[i - 1] - i;
-    if (back > 0 && !seen.has(back)) s.push(back);
-    else s.push(s[i - 1] + i);
-    seen.add(s[i]);
-  }
-  return s;
-}
 
 // Semicircle between consecutive terms, centered on the number line (midY).
 // Above arcs sweep left→top→right, below arcs right→bottom→left — both start
@@ -65,14 +55,7 @@ function buildArcs(
   height: number,
   preview: boolean
 ): { arcs: Arc[]; head: { x: number; y: number } | null } {
-  const basePad = preview ? 8 : 24;
-  const axisY = height - (preview ? 14 : 56);
-  const usable = axisY - (preview ? 6 : 16);
-  const midY = usable / 2 + (preview ? 3 : 8);
-  const maxVal = Math.max(...seq, 1);
-  const fullSpan = width - basePad * 2;
-  const scaleX = Math.min(fullSpan, usable) / maxVal;
-  const pad = basePad + (fullSpan - maxVal * scaleX) / 2;
+  const { x0: pad, midY, scaleX } = layoutRecaman(seq, width, height, preview);
 
   const arcs = seq.slice(0, -1).map((val, i) => {
     const next = seq[i + 1];
@@ -88,7 +71,7 @@ function buildArcs(
 }
 
 export function RecamanArcsPreview({ width, height }: { width: number; height: number }) {
-  const seq = useMemo(() => buildRecamanSeq(20), []);
+  const seq = useMemo(() => recaman(20), []);
   const { arcs, head } = useMemo(
     () => buildArcs(seq, width, height, true),
     [seq, width, height]
@@ -118,26 +101,16 @@ export function RecamanArcsFull({ width, height, count = 64 }: Omit<Props, "prev
   const { progressSV, step: visible } = useBuildAnimation(Math.max(n - 1, 0), false);
   const growEnd = useItemFrac(progressSV, visible);
 
-  const seq = useMemo(() => buildRecamanSeq(n), [n]);
+  const seq = useMemo(() => recaman(n), [n]);
 
-  // Static scale over the whole walk — rescaling every step reads as jumpy.
-  // Walk line centered above the axis so both arc halves always fit;
-  // axis sits clear of the caption overlay at the bottom.
-  const layout = useMemo(() => {
-    const pad = 24;
-    const axisY = height - 56;
-    const usable = axisY - 16;
-    const midY = usable / 2 + 8;
-    const maxVal = Math.max(...seq, 1);
-    const span = width - pad * 2;
-    const scaleX = Math.min(span, usable) / maxVal;
-    const xOffset = pad + (span - maxVal * scaleX) / 2;
-    return { pad: xOffset, axisY, midY, span: maxVal * scaleX, scaleX };
-  }, [seq, width, height]);
+  const layout = useMemo(
+    () => layoutRecaman(seq, width, height, false),
+    [seq, width, height]
+  );
 
   // completed arcs + the in-progress one (trimmed by fractional progress)
   const arcs = useMemo(() => {
-    const { pad, midY, scaleX } = layout;
+    const { x0: pad, midY, scaleX } = layout;
     return seq.slice(0, -1).slice(0, visible + 1).map((val, i) => {
       const next = seq[i + 1];
       const left = Math.min(val, next);
@@ -150,14 +123,14 @@ export function RecamanArcsFull({ width, height, count = 64 }: Omit<Props, "prev
   const head = useMemo(() => {
     if (visible <= 0) return null;
     const term = seq[Math.min(visible, seq.length - 1)];
-    return { x: term * layout.scaleX + layout.pad, y: layout.midY };
+    return { x: term * layout.scaleX + layout.x0, y: layout.midY };
   }, [seq, layout, visible]);
 
   const tickLines = useMemo(() => {
-    const { pad, axisY, span } = layout;
+    const { x0, axisY, span } = layout;
     const ticks = 5;
     return Array.from({ length: ticks + 1 }, (_, i) => ({
-      x: pad + (span * i) / ticks,
+      x: x0 + (span * i) / ticks,
       y: axisY,
     }));
   }, [layout]);
@@ -175,8 +148,8 @@ export function RecamanArcsFull({ width, height, count = 64 }: Omit<Props, "prev
         />
       ))}
       <Line
-        p1={{ x: layout.pad, y: layout.axisY }}
-        p2={{ x: layout.pad + layout.span, y: layout.axisY }}
+        p1={{ x: layout.x0, y: layout.axisY }}
+        p2={{ x: layout.x0 + layout.span, y: layout.axisY }}
         color={colors.textMuted}
         opacity={0.6}
         strokeWidth={1}

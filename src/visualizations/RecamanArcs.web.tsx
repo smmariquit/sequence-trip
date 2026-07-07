@@ -6,6 +6,8 @@ import { useThemeColors } from "../theme";
 import { useBuildAnimation } from "../playback/useBuildAnimation";
 import { splitProgress, strokeRecamanArc } from "../playback/drawProgress";
 import { drawNumberLine } from "./canvasAxes";
+import { recaman } from "../sequences/generators";
+import { layoutRecaman } from "./recamanLayout";
 
 interface Props {
   width: number;
@@ -18,34 +20,21 @@ export default function RecamanArcs({ width, height, count = 64, preview }: Prop
   const colors = useThemeColors();
   const n = preview ? 28 : count;
 
-  const seq = useMemo(() => {
-    const s = [0];
-    const seen = new Set([0]);
-    for (let i = 1; i < n; i++) {
-      const back = s[i - 1] - i;
-      if (back > 0 && !seen.has(back)) s.push(back);
-      else s.push(s[i - 1] + i);
-      seen.add(s[i]);
-    }
-    return s;
-  }, [n]);
+  const seq = useMemo(() => recaman(n), [n]);
+
+  // layout is constant per sequence/canvas — keep it out of the rAF loop
+  const layout = useMemo(
+    () => layoutRecaman(seq, width, height, !!preview),
+    [seq, width, height, preview]
+  );
 
   const { progressRef } = useBuildAnimation(Math.max(seq.length - 1, 0), preview);
 
   const draw = useCallback(
-    (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => {
+    (ctx: CanvasRenderingContext2D, time: number) => {
       const progress = progressRef.current;
-      const basePad = preview ? 8 : 24;
-      const axisY = h - (preview ? 14 : 56);
-      const usable = axisY - (preview ? 6 : 16);
-      const midY = usable / 2 + (preview ? 3 : 8);
+      const { x0: pad, axisY, midY, scaleX, span, maxVal } = layout;
       const { complete, frac } = splitProgress(progress);
-      // static full-walk scale — per-step rescaling reads as jumpy
-      const maxVal = Math.max(...seq, 1);
-      const fullSpan = w - basePad * 2;
-      const scaleX = Math.min(fullSpan, usable) / maxVal;
-      const pad = basePad + (fullSpan - maxVal * scaleX) / 2;
-      const span = maxVal * scaleX;
       const hueOffset = (time * 45) % 360;
       const breathe = Math.sin(time * 2.1) * 0.5 + 0.5;
 
@@ -126,7 +115,7 @@ export default function RecamanArcs({ width, height, count = 64, preview }: Prop
         }
       }
     },
-    [seq, preview, progressRef, colors.textMuted]
+    [seq, layout, preview, progressRef, colors.textMuted]
   );
 
   const ref = useWebCanvas(width, height, draw, !preview);

@@ -3,7 +3,7 @@
 // Point math for two-sequence comparison plots (OEIS plot2 modes):
 // phase — b(n) vs a(n) in symlog space; ratio — log10(a(n)/b(n)) over n.
 
-import { normalize } from "../sequences/normalize";
+import { normalize, signedLogs } from "../sequences/normalize";
 
 export type PairMode = "phase" | "ratio";
 
@@ -35,14 +35,18 @@ export function pairPoints(
     }));
   }
 
-  // ratio: log10|a/b| ≈ |logs difference| in plain-log space; symlog logs are
-  // close enough for pixels and finite for any term.
-  const ratios = Array.from({ length: n }, (_, i) => a.logs[i] - b.logs[i]);
+  // ratio must use threshold-free logs: normalize() fits a per-sequence
+  // symlog threshold, and subtracting logs with different thresholds bends
+  // a genuinely constant ratio into a fake trend.
+  const la = signedLogs(termsA);
+  const lb = signedLogs(termsB);
+  const m = Math.min(n, la.length, lb.length);
+  const ratios = Array.from({ length: m }, (_, i) => la[i] - lb[i]);
   const min = Math.min(...ratios);
   const max = Math.max(...ratios);
   const r = max - min || 1;
   return ratios.map((v, i) => ({
-    x: pad + ((width - pad * 2) * i) / Math.max(n - 1, 1),
+    x: pad + ((width - pad * 2) * i) / Math.max(m - 1, 1),
     y: height - pad - ((v - min) / r) * (height - pad * 2),
   }));
 }

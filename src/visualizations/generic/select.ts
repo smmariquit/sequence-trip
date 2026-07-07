@@ -53,8 +53,10 @@ export function pickGenericVizInfo(anum: string, terms: string[]): GenericVizInf
   }
   const pick = VARIED[hashStr(anum) % VARIED.length];
   // A turtle whose turns never vary just draws a polygon — meaningless.
+  // Judge on the first 48 terms (the stable DB prefix) so loading more terms
+  // can't flip the chosen viz mid-session.
   if (pick.Component === TurtleWalk) {
-    const turns = new Set(stats.terms.map((t) => termMod(t, 4)));
+    const turns = new Set(stats.terms.slice(0, 48).map((t) => termMod(t, 4)));
     if (turns.size < 2) return VARIED[0];
   }
   return pick;
