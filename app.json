@@ -19,7 +19,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#07060E"
       },
-      "versionCode": 9
+      "versionCode": 10
     },
     "ios": {
       "bundleIdentifier": "dev.stimmie.oeisvisualizations",
