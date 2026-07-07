@@ -3,41 +3,41 @@
 import type { NoteSpec } from "./types";
 import { toneToWavUri } from "./wav";
 
-type Sound = import("expo-av").Audio.Sound;
+type AudioPlayer = import("expo-audio").AudioPlayer;
 
 let configured = false;
-let audioModule: typeof import("expo-av") | null = null;
+let audioModule: typeof import("expo-audio") | null = null;
 
 async function getAudio() {
   if (!audioModule) {
-    audioModule = await import("expo-av");
+    audioModule = await import("expo-audio");
   }
-  return audioModule.Audio;
+  return audioModule;
 }
 
 async function ensureAudioMode() {
   if (configured) return;
-  const Audio = await getAudio();
-  await Audio.setAudioModeAsync({
-    playsInSilentModeIOS: true,
-    shouldDuckAndroid: true,
+  const { setAudioModeAsync } = await getAudio();
+  await setAudioModeAsync({
+    playsInSilentMode: true,
+    interruptionModeAndroid: "duckOthers",
   });
   configured = true;
 }
 
-const cache = new Map<string, Sound>();
+const cache = new Map<string, AudioPlayer>();
 
 function cacheKey(note: NoteSpec): string {
   if (note.drum) return `drum:${note.drum}`;
   return `tone:${Math.round(note.frequency)}:${note.wave}`;
 }
 
-async function loadSound(note: NoteSpec): Promise<Sound> {
+async function loadPlayer(note: NoteSpec): Promise<AudioPlayer> {
   const key = cacheKey(note);
   const hit = cache.get(key);
   if (hit) return hit;
 
-  const Audio = await getAudio();
+  const { createAudioPlayer } = await getAudio();
   const uri =
     note.drum === "kick"
       ? toneToWavUri(80, 0.12)
@@ -47,9 +47,10 @@ async function loadSound(note: NoteSpec): Promise<Sound> {
           ? toneToWavUri(9000, 0.04)
           : toneToWavUri(note.frequency, Math.max(0.05, note.duration));
 
-  const { sound } = await Audio.Sound.createAsync({ uri }, { volume: note.gain });
-  cache.set(key, sound);
-  return sound;
+  const player = createAudioPlayer({ uri });
+  player.volume = note.gain;
+  cache.set(key, player);
+  return player;
 }
 
 export async function playNotes(notes: NoteSpec[]) {
@@ -61,16 +62,16 @@ export async function playNotes(notes: NoteSpec[]) {
   }
   for (const note of notes) {
     try {
-      const sound = await loadSound(note);
-      await sound.setPositionAsync(0);
-      await sound.setVolumeAsync(note.gain);
-      await sound.playAsync();
+      const player = await loadPlayer(note);
+      player.seekTo(0);
+      player.volume = note.gain;
+      player.play();
     } catch {
-      // Ignore playback failures when expo-av is unavailable.
+      // Ignore playback failures when expo-audio is unavailable.
     }
   }
 }
 
 export function setAudioSuspended(_suspended: boolean) {
-  // expo-av handles focus; no-op for now.
+  // expo-audio handles focus; no-op for now.
 }

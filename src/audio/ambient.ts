@@ -18,26 +18,25 @@ export const AMBIENT_VOLUME: Record<Exclude<AmbientLevel, "off">, number> = {
 const PAD_FREQS = [110, 165, 220, 330];
 const PAD_LOOP_SEC = 4;
 
-type Sound = import("expo-av").Audio.Sound;
-let sound: Sound | null = null;
+type AudioPlayer = import("expo-audio").AudioPlayer;
+let player: AudioPlayer | null = null;
 let starting: Promise<void> | null = null;
 
 async function ensureStarted(volume: number): Promise<void> {
   if (Platform.OS === "web") return;
-  if (sound) return;
+  if (player) return;
   if (!starting) {
     starting = (async () => {
-      const { Audio } = await import("expo-av");
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
+      const { createAudioPlayer, setAudioModeAsync } = await import("expo-audio");
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        interruptionModeAndroid: "duckOthers",
       });
-      const { sound: s } = await Audio.Sound.createAsync(
-        { uri: padToWavUri(PAD_FREQS, PAD_LOOP_SEC) },
-        { isLooping: true, volume }
-      );
-      sound = s;
-      await s.playAsync();
+      const p = createAudioPlayer({ uri: padToWavUri(PAD_FREQS, PAD_LOOP_SEC) });
+      p.loop = true;
+      p.volume = volume;
+      player = p;
+      p.play();
     })().catch(() => {
       // ponytail: audio unavailable → silent app, not a crash
       starting = null;
@@ -50,13 +49,13 @@ export async function setAmbientLevel(level: AmbientLevel): Promise<void> {
   if (Platform.OS === "web") return;
   try {
     if (level === "off") {
-      if (sound) await sound.pauseAsync();
+      player?.pause();
       return;
     }
     await ensureStarted(AMBIENT_VOLUME[level]);
-    if (sound) {
-      await sound.setVolumeAsync(AMBIENT_VOLUME[level]);
-      await sound.playAsync();
+    if (player) {
+      player.volume = AMBIENT_VOLUME[level];
+      player.play();
     }
   } catch {
     // ignore — never let ambience break the app
