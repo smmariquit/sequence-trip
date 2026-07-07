@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sequence Trip",
     "slug": "sequence-trip",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "sequencetrip",
@@ -19,7 +19,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#07060E"
       },
-      "versionCode": 3
+      "versionCode": 4
     },
     "ios": {
       "bundleIdentifier": "dev.stimmie.oeisvisualizations",
@@ -29,7 +29,12 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
       "output": "single",
-      "backgroundColor": "#07060E"
+      "backgroundColor": "#07060E",
+      "name": "Sequence Trip",
+      "shortName": "SeqTrip",
+      "description": "Explore and animate 397k+ OEIS integer sequences.",
+      "themeColor": "#07060E",
+      "lang": "en"
     },
     "plugins": [
       "expo-router",
