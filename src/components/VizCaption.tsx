@@ -14,6 +14,10 @@ import MathText from "./MathText";
 import PlainText from "./PlainText";
 import { captionForSequence } from "./vizCaptionText";
 import type { GenericVizKey } from "../visualizations/generic/select";
+import { useMusic } from "../audio/MusicContext";
+import { termsAtStep } from "../audio/termsAtStep";
+import { indexToNoteName } from "../audio/scales";
+import { termMod } from "../sequences/normalize";
 import AppIcon from "./ui/AppIcon";
 
 function CaptionLine({
@@ -52,15 +56,23 @@ export default function VizCaption({
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 
   const { step } = usePlayback();
+  const { enabled: musicOn } = useMusic();
   const { live, guide } = captionForSequence(sequence, step, termCount, genericVizKey);
   const [guideOpen, setGuideOpen] = useState(false);
+
+  // music on: pin the melody note to the live readout — a(n) mod 25 picks it
+  let liveText = live;
+  if (musicOn && step > 0) {
+    const t = termsAtStep(sequence, step);
+    if (t) liveText += `  ·  ♪ ${indexToNoteName(termMod(t.term, 25))}`;
+  }
 
   return (
     <View style={styles.overlay} pointerEvents="box-none" testID="viz-caption">
       <View style={styles.bar} pointerEvents="auto">
         <View style={styles.liveRow}>
           <CaptionLine
-            text={live}
+            text={liveText}
             style={styles.live}
             numberOfLines={2}
           />
@@ -84,7 +96,15 @@ export default function VizCaption({
           </Pressable>
         </View>
         {guideOpen ? (
-          <CaptionLine text={guide} style={styles.guide} />
+          <>
+            <CaptionLine text={guide} style={styles.guide} />
+            {musicOn ? (
+              <CaptionLine
+                text="♪ Pitch: $a(n) \bmod 25$ picks a note on a C-pentatonic scale — larger remainder, higher note. Bass follows $a(n) \bmod 15$; the digit voice plays the term's last digits."
+                style={styles.guide}
+              />
+            ) : null}
+          </>
         ) : null}
       </View>
     </View>

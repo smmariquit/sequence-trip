@@ -25,8 +25,15 @@ export function layoutRecaman(
   const usable = axisY - (preview ? 6 : 16);
   const midY = usable / 2 + (preview ? 3 : 8);
   const maxVal = Math.max(...seq, 1);
+  // vertical constraint: the tallest SEMICIRCLE (radius = jump·scale/2) must
+  // fit the half-height, not the whole number line — capping by maxVal
+  // squeezed the walk to a fraction of the canvas width
+  let maxJump = 1;
+  for (let i = 1; i < seq.length; i++) {
+    maxJump = Math.max(maxJump, Math.abs(seq[i] - seq[i - 1]));
+  }
   const fullSpan = width - basePad * 2;
-  const scaleX = Math.min(fullSpan, usable) / maxVal;
+  const scaleX = Math.min(fullSpan / maxVal, usable / maxJump);
   const x0 = basePad + (fullSpan - maxVal * scaleX) / 2;
   return { x0, axisY, midY, scaleX, span: maxVal * scaleX, maxVal };
 }

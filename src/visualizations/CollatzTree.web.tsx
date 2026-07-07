@@ -4,7 +4,7 @@ import React, { useMemo, useCallback } from "react";
 import { useWebCanvas, hslString } from "./useWebCanvas";
 import { useBuildAnimation } from "../playback/useBuildAnimation";
 import { strokePolylineProgress } from "../playback/drawProgress";
-import { collatzSequence } from "../sequences/generators";
+import { buildCollatzBranches, fitCollatz } from "./collatzLayout";
 
 interface Props {
   width: number;
@@ -18,30 +18,17 @@ export default function CollatzTree({ width, height, count = 40, preview }: Prop
   const { progressRef } = useBuildAnimation(n, preview);
 
   const branches = useMemo(() => {
-    const stepLen = preview ? 4 : 7;
-    const evenAngle = Math.PI / 12;
-    const oddAngle = -Math.PI / 7;
-
-    return Array.from({ length: n }, (_, i) => {
-      const seq = collatzSequence(i + 2);
-      const pts: { x: number; y: number }[] = [];
-      let x = 0, y = 0, angle = -Math.PI / 2;
-      pts.push({ x, y });
-      for (let j = 0; j < seq.length - 1 && j < 120; j++) {
-        angle += seq[j] % 2 === 0 ? evenAngle : oddAngle;
-        x += Math.cos(angle) * stepLen;
-        y += Math.sin(angle) * stepLen;
-        pts.push({ x, y });
-      }
-      return { pts, hue: (i * 360) / n };
-    });
-  }, [n, preview]);
+    const raw = buildCollatzBranches(n);
+    const { scale, dx, dy } = fitCollatz(raw, width, height, !!preview);
+    return raw.map((b) => ({
+      hue: b.hue,
+      pts: b.pts.map((p) => ({ x: dx + p.x * scale, y: dy + p.y * scale })),
+    }));
+  }, [n, width, height, preview]);
 
   const draw = useCallback(
-    (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => {
+    (ctx: CanvasRenderingContext2D, time: number) => {
       const progress = progressRef.current;
-      const cx = w / 2;
-      const startY = h - 30;
       const hueShift = (time * 30) % 360;
       const breathe = Math.sin(time * 1.57) * 0.5 + 0.5;
 
@@ -63,8 +50,7 @@ export default function CollatzTree({ width, height, count = 40, preview }: Prop
           ctx.shadowBlur = 4;
         }
 
-        const shifted = branch.pts.map((p) => ({ x: cx + p.x, y: startY + p.y }));
-        strokePolylineProgress(ctx, shifted, branchProgress);
+        strokePolylineProgress(ctx, branch.pts, branchProgress);
         ctx.shadowBlur = 0;
       }
     },

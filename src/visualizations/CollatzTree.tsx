@@ -6,9 +6,9 @@ import {
   Path as SkiaPath,
   Skia,
 } from "@shopify/react-native-skia";
-import { collatzSequence } from "../sequences/generators";
 import { hslToHex } from "../theme";
 import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
+import { buildCollatzBranches, fitCollatz } from "./collatzLayout";
 
 interface Props {
   width: number;
@@ -22,35 +22,25 @@ type Branch = {
   hue: number;
 };
 
-function buildBranches(width: number, height: number, n: number, stepLen: number): Branch[] {
-  const cx = width / 2;
-  const startY = height - 30;
-  const evenAngle = Math.PI / 12;
-  const oddAngle = -Math.PI / 7;
+function buildBranches(width: number, height: number, n: number, preview: boolean): Branch[] {
+  const raw = buildCollatzBranches(n);
+  const { scale, dx, dy } = fitCollatz(raw, width, height, preview);
 
-  return Array.from({ length: n }, (_, i) => {
-    const seq = collatzSequence(i + 2);
+  return raw.map((b) => {
     const path = Skia.Path.Make();
-
-    let x = cx;
-    let y = startY;
-    let angle = -Math.PI / 2;
-    path.moveTo(x, y);
-
-    for (let j = 0; j < seq.length - 1 && j < 120; j++) {
-      angle += seq[j] % 2 === 0 ? evenAngle : oddAngle;
-      x += Math.cos(angle) * stepLen;
-      y += Math.sin(angle) * stepLen;
-      path.lineTo(x, y);
-    }
-
-    return { path, hue: (i * 360) / n };
+    b.pts.forEach((p, i) => {
+      const x = dx + p.x * scale;
+      const y = dy + p.y * scale;
+      if (i === 0) path.moveTo(x, y);
+      else path.lineTo(x, y);
+    });
+    return { path, hue: b.hue };
   });
 }
 
 export function CollatzTreePreview({ width, height }: { width: number; height: number }) {
   const branches = useMemo(
-    () => buildBranches(width, height, 14, 4),
+    () => buildBranches(width, height, 14, true),
     [width, height]
   );
 
@@ -76,7 +66,7 @@ export function CollatzTreeFull({ width, height, count = 40 }: Omit<Props, "prev
   const growEnd = useItemFrac(progressSV, visible);
 
   const branches = useMemo(
-    () => buildBranches(width, height, count, 7),
+    () => buildBranches(width, height, count, false),
     [count, width, height]
   );
 

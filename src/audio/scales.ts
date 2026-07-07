@@ -9,10 +9,22 @@ export function midiToHz(midi: number): number {
   return A4 * Math.pow(2, (midi - 69) / 12);
 }
 
-/** Map a non-negative index into a pentatonic frequency (baseMidi ≈ C4). */
-export function indexToFreq(index: number, baseMidi = 60): number {
+function indexToMidi(index: number, baseMidi: number): number {
   const i = ((index % 25) + 25) % 25;
   const octave = Math.floor(i / 5);
   const degree = PENTATONIC[i % 5];
-  return midiToHz(baseMidi + octave * 12 + degree);
+  return baseMidi + octave * 12 + degree;
+}
+
+/** Map a non-negative index into a pentatonic frequency (baseMidi ≈ C4). */
+export function indexToFreq(index: number, baseMidi = 60): number {
+  return midiToHz(indexToMidi(index, baseMidi));
+}
+
+const NOTE_NAMES = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+
+/** Note name (e.g. "E4") for the same mapping as indexToFreq. */
+export function indexToNoteName(index: number, baseMidi = 60): string {
+  const midi = indexToMidi(index, baseMidi);
+  return `${NOTE_NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`;
 }
