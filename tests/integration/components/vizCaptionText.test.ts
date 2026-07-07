@@ -22,7 +22,9 @@ describe("captionForSequence", () => {
     };
     const { live, guide } = genericCaption(seq, 2);
     expect(live).toMatch(/a\(2\) = 2/);
-    expect(guide).toMatch(/Horizontal axis/);
+    // guide must describe the viz actually picked for this anum
+    const { pickGenericVizInfo } = require("../../../src/visualizations/generic/select");
+    expect(guide).toBe(pickGenericVizInfo(seq.anum, seq.terms).guide);
   });
 
   it("routes featured viz types", () => {

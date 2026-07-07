@@ -2,6 +2,7 @@
 
 import type { OEISSequence } from "../sequences/types";
 import { recaman, collatzSequence } from "../sequences/generators";
+import { pickGenericVizInfo } from "../visualizations/generic/select";
 
 export interface CaptionText {
   /** One-line playback status — always visible. */
@@ -46,13 +47,16 @@ export function recamanCaption(step: number, terms?: string[]): CaptionText {
 
 export function genericCaption(sequence: OEISSequence, step: number): CaptionText {
   const terms = sequence.terms ?? [];
+  // same deterministic pick as VizPreview, so the guide matches what's drawn
+  const guide = terms.length
+    ? pickGenericVizInfo(sequence.anum, terms).guide
+    : "Horizontal axis = index $n$. Vertical axis = $a(n)$ (log-scaled when values are huge).";
   return {
     live:
       step <= 0 || terms.length === 0
         ? "Press Play to reveal terms one by one"
         : `Term ${Math.min(step, terms.length)}: a(${Math.min(step, terms.length)}) = ${terms[Math.min(step, terms.length) - 1]}`,
-    guide:
-      "Horizontal axis = index $n$. Vertical axis = $a(n)$ (log-scaled when values are huge).",
+    guide,
   };
 }
 
