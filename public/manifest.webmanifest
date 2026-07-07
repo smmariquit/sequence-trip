@@ -1,0 +1,22 @@
+{
+  "name": "Sequence Trip",
+  "short_name": "SeqTrip",
+  "description": "Visualizations of all 397,167 OEIS integer sequences",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07060E",
+  "theme_color": "#07060E",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

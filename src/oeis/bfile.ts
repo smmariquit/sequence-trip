@@ -8,7 +8,9 @@ import { OEIS_BASE, OEIS_HEADERS } from "./baseUrl";
 
 export const MAX_BFILE_TERMS = 2000;
 
+// in-memory fallback; Cache API persists across refreshes when available
 const webCache = new Map<string, string>();
+const WEB_CACHE_NAME = "bfiles-v1";
 
 function parseBfile(text: string): string[] | null {
   const terms: string[] = [];
@@ -37,11 +39,30 @@ async function downloadBfile(anum: string): Promise<string | null> {
 
 async function fetchMoreTermsWeb(anum: string): Promise<string[] | null> {
   let text = webCache.get(anum);
+
+  // persistent cache (#2): survives refresh, works offline
+  const cacheKey = `/bfile-cache/${anum}.txt`;
+  if (!text && "caches" in globalThis) {
+    try {
+      const cache = await caches.open(WEB_CACHE_NAME);
+      const hit = await cache.match(cacheKey);
+      if (hit) text = await hit.text();
+    } catch {
+      // Cache API unavailable (private mode etc.) — memory cache still works
+    }
+  }
+
   if (!text) {
     text = (await downloadBfile(anum)) ?? undefined;
     if (!text) return null;
-    webCache.set(anum, text);
+    if ("caches" in globalThis) {
+      try {
+        const cache = await caches.open(WEB_CACHE_NAME);
+        await cache.put(cacheKey, new Response(text));
+      } catch {}
+    }
   }
+  webCache.set(anum, text);
   return parseBfile(text);
 }
 

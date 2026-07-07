@@ -42,7 +42,8 @@ test.describe("Search", () => {
   test("name search returns results", async ({ page }) => {
     await page.goto("/");
     await page.getByTestId("search-input").pressSequentially("fibonacci", { delay: 60 });
-    await expect(page.getByText(/Fibonacci numbers/i).first()).toBeVisible({ timeout: 30_000 });
+    // first search downloads the 130MB db; slow under parallel test load
+    await expect(page.getByText(/Fibonacci numbers/i).first()).toBeVisible({ timeout: 90_000 });
   });
 });
 
@@ -52,5 +53,16 @@ test.describe("Deep link back", () => {
     await expect(page.getByTestId("visualize-screen")).toBeVisible();
     await page.getByTestId("controls-back").click();
     await expect(page.getByTestId("home-title")).toBeVisible({ timeout: 15_000 });
+  });
+});
+
+test.describe("Offline", () => {
+  test("banner appears when connectivity drops", async ({ page, context }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("home-title")).toBeVisible({ timeout: 30_000 });
+    await context.setOffline(true);
+    await expect(page.getByTestId("offline-banner")).toBeVisible();
+    await context.setOffline(false);
+    await expect(page.getByTestId("offline-banner")).not.toBeVisible();
   });
 });
