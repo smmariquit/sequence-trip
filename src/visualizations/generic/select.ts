@@ -7,11 +7,12 @@ import { normalize } from "../../sequences/normalize";
 import BarWaveform from "./BarWaveform";
 import LinePlot from "./LinePlot";
 import ModGrid from "./ModGrid";
+import PhasePlane from "./PhasePlane";
 import PolarSpiral from "./PolarSpiral";
 import TurtleWalk from "./TurtleWalk";
 import type { GenericVizProps } from "./types";
 
-const VARIED = [LinePlot, PolarSpiral, TurtleWalk];
+const VARIED = [LinePlot, PolarSpiral, TurtleWalk, PhasePlane];
 
 function hashStr(s: string): number {
   let h = 0;

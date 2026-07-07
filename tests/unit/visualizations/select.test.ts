@@ -2,6 +2,7 @@ import { pickGenericViz } from "../../../src/visualizations/generic/select";
 import BarWaveform from "../../../src/visualizations/generic/BarWaveform";
 import ModGrid from "../../../src/visualizations/generic/ModGrid";
 import LinePlot from "../../../src/visualizations/generic/LinePlot";
+import PhasePlane from "../../../src/visualizations/generic/PhasePlane";
 
 describe("pickGenericViz", () => {
   it("picks BarWaveform for negative terms", () => {
@@ -21,11 +22,12 @@ describe("pickGenericViz", () => {
 
   it("varies across anums for non-binary sequences", () => {
     const terms = ["1", "2", "3", "4", "5", "6"];
-    const picks = new Set([
-      pickGenericViz("A000001", terms),
-      pickGenericViz("A000002", terms),
-      pickGenericViz("A000003", terms),
-    ]);
+    const picks = new Set(
+      ["A000001", "A000002", "A000003", "A000004"].map((a) =>
+        pickGenericViz(a, terms)
+      )
+    );
     expect(picks.has(LinePlot)).toBe(true);
+    expect(picks.has(PhasePlane)).toBe(true);
   });
 });
