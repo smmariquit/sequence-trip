@@ -76,9 +76,9 @@ export function drawPlotAxes(
 
   ctx.strokeStyle = ink;
   ctx.fillStyle = ink;
-  ctx.globalAlpha = 0.7;
+  ctx.globalAlpha = 0.85;
   ctx.lineWidth = 1;
-  ctx.font = "11px system-ui, sans-serif";
+  ctx.font = "12px system-ui, sans-serif";
 
   ctx.beginPath();
   ctx.moveTo(left, bottom);
@@ -107,7 +107,7 @@ export function drawPlotAxes(
     ctx.moveTo(left, t.pos);
     ctx.lineTo(right, t.pos);
     ctx.stroke();
-    ctx.globalAlpha = 0.7;
+    ctx.globalAlpha = 0.85;
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     ctx.fillText(t.label, left - 8, t.pos);

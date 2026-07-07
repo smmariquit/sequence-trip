@@ -2,47 +2,62 @@
 
 import React, { useCallback, useMemo } from "react";
 import { useWebCanvas, hslString } from "../useWebCanvas";
+import { useThemeColors } from "../../theme";
 import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { itemRevealAlpha } from "../../playback/drawProgress";
 import { normalize } from "../../sequences/normalize";
+import { layoutPolar } from "./polarLayout";
+import { formatTermLabel } from "./linePlotLayout";
 import type { GenericVizProps } from "./types";
 
-const GOLDEN_ANGLE = (137.508 * Math.PI) / 180;
-
 export default function PolarSpiral({ terms, width, height, preview }: GenericVizProps) {
+  const colors = useThemeColors();
   const stats = useMemo(() => normalize(terms), [terms]);
   const { progressRef } = useBuildAnimation(stats.logs.length, preview);
 
-  const points = useMemo(() => {
-    const n = stats.logs.length;
-    const maxR = Math.min(width, height) * 0.44;
-    const range = stats.maxLog - stats.minLog || 1;
-    return stats.logs.map((v, i) => {
-      const norm = (v - stats.minLog) / range;
-      return {
-        angle: i * GOLDEN_ANGLE,
-        r: maxR * (0.12 + 0.88 * norm),
-        hue: (i * 360) / Math.max(n, 1),
-        size: (preview ? 1.5 : 3) + norm * (preview ? 1.5 : 4),
-        i,
-      };
-    });
-  }, [stats, width, height, preview]);
+  const layout = useMemo(
+    () => layoutPolar(stats, width, height, !!preview),
+    [stats, width, height, preview]
+  );
+  const { cx, cy, points, rings } = layout;
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number) => {
       const progress = progressRef.current;
-      const cx = width / 2;
-      const cy = height / 2;
       const rotation = time * 0.2618;
 
-      for (const pt of points) {
-        const alpha = itemRevealAlpha(progress, pt.i);
+      // reference rings: distance from center = size of a(n)
+      if (!preview) {
+        ctx.strokeStyle = colors.textMuted;
+        ctx.fillStyle = colors.textMuted;
+        ctx.font = "11px system-ui, sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.setLineDash([3, 5]);
+        ctx.globalAlpha = 0.5;
+        for (const ring of rings) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, ring.r, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.fillText(`a = ${ring.label}`, cx + ring.r + 5, cy);
+        }
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 0.6;
+        ctx.textAlign = "center";
+        ctx.fillText("each dot turns 137.5° from the last · farther out = bigger value", cx, 14);
+        ctx.globalAlpha = 1;
+      }
+
+      let headPos: { x: number; y: number; i: number } | null = null;
+      for (let i = 0; i < points.length; i++) {
+        const pt = points[i];
+        const alpha = itemRevealAlpha(progress, i);
         if (alpha <= 0) continue;
 
         const a = pt.angle + rotation;
         const x = cx + pt.r * Math.cos(a);
         const y = cy + pt.r * Math.sin(a);
+        headPos = { x, y, i };
 
         ctx.globalAlpha = alpha;
         ctx.beginPath();
@@ -56,8 +71,20 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
         ctx.shadowBlur = 0;
       }
       ctx.globalAlpha = 1;
+
+      // head label rides the newest dot
+      if (!preview && headPos) {
+        const label = `a(${headPos.i}) = ${formatTermLabel(stats.terms[headPos.i])}`;
+        ctx.font = "600 13px system-ui, sans-serif";
+        const tw = ctx.measureText(label).width;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = colors.text;
+        const lx = headPos.x + 10 + tw > width ? headPos.x - 10 - tw : headPos.x + 10;
+        ctx.fillText(label, lx, headPos.y);
+      }
     },
-    [points, width, height, preview, progressRef]
+    [points, rings, cx, cy, preview, progressRef, stats.terms, width, colors.textMuted, colors.text]
   );
 
   const ref = useWebCanvas(width, height, draw, !preview);

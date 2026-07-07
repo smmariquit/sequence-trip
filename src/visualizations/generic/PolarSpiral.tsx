@@ -1,9 +1,18 @@
 // src/visualizations/generic/PolarSpiral.tsx
 //
 // Term i at golden angle, radius scaled by signed-log value. Slow rotation.
+// Full view: labeled reference rings make the radius→value mapping visible.
 
 import React, { useMemo, useEffect } from "react";
-import { Canvas, Circle, Group, BlurMask } from "@shopify/react-native-skia";
+import { Platform } from "react-native";
+import {
+  Canvas,
+  Circle,
+  Group,
+  BlurMask,
+  Text as SkiaText,
+  matchFont,
+} from "@shopify/react-native-skia";
 import {
   useDerivedValue,
   useSharedValue,
@@ -11,16 +20,21 @@ import {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-import { hslToHex } from "../../theme";
+import { hslToHex, useThemeColors } from "../../theme";
 import { useAnimSpeed } from "../../playback/PlaybackContext";
 import { useBuildAnimation, useItemFrac } from "../../playback/useBuildAnimation";
 import { normalize } from "../../sequences/normalize";
+import { layoutPolar } from "./polarLayout";
+import { formatTermLabel } from "./linePlotLayout";
 import type { GenericVizProps } from "./types";
 
-const GOLDEN_ANGLE = (137.508 * Math.PI) / 180;
+const fontFamily = Platform.select({ ios: "Helvetica", default: "sans-serif" });
+const tickFont = matchFont({ fontFamily, fontSize: 11 });
+const labelFont = matchFont({ fontFamily, fontSize: 13, fontWeight: "600" });
 
 export default function PolarSpiral({ terms, width, height, preview }: GenericVizProps) {
   const speed = useAnimSpeed();
+  const colors = useThemeColors();
   const stats = useMemo(() => normalize(terms), [terms]);
   const { progressSV, step: visible } = useBuildAnimation(stats.logs.length, preview);
   const fade = useItemFrac(progressSV, visible);
@@ -34,27 +48,61 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
     );
   }, [speed]);
 
-  const points = useMemo(() => {
-    const n = stats.logs.length;
-    const maxR = Math.min(width, height) * 0.44;
-    const range = stats.maxLog - stats.minLog || 1;
-    return stats.logs.map((v, i) => {
-      const norm = (v - stats.minLog) / range;
-      return {
-        angle: i * GOLDEN_ANGLE,
-        r: maxR * (0.12 + 0.88 * norm),
-        hue: (i * 360) / Math.max(n, 1),
-        size: (preview ? 1.5 : 3) + norm * (preview ? 1.5 : 4),
-      };
-    });
-  }, [stats, width, height, preview]);
+  const layout = useMemo(
+    () => layoutPolar(stats, width, height, !!preview),
+    [stats, width, height, preview]
+  );
+  const { cx, cy, points, rings } = layout;
 
-  const cx = width / 2;
-  const cy = height / 2;
   const transform = useDerivedValue(() => [{ rotate: rotation.value }]);
+
+  const headIdx = Math.min(visible, points.length - 1);
+  const headLabel =
+    !preview && headIdx >= 0 ? `a(${headIdx}) = ${formatTermLabel(stats.terms[headIdx])}` : "";
 
   return (
     <Canvas style={{ width, height }}>
+      {!preview && (
+        <>
+          {rings.map((ring, i) => (
+            <React.Fragment key={i}>
+              <Circle
+                cx={cx}
+                cy={cy}
+                r={ring.r}
+                style="stroke"
+                strokeWidth={1}
+                color={colors.textMuted}
+                opacity={0.35}
+              />
+              <SkiaText
+                x={cx + ring.r + 5}
+                y={cy + 4}
+                text={`a = ${ring.label}`}
+                font={tickFont}
+                color={colors.textMuted}
+              />
+            </React.Fragment>
+          ))}
+          <SkiaText
+            x={cx - tickFont.measureText("each dot turns 137.5° from the last · farther out = bigger value").width / 2}
+            y={14}
+            text="each dot turns 137.5° from the last · farther out = bigger value"
+            font={tickFont}
+            color={colors.textMuted}
+            opacity={0.7}
+          />
+          {headLabel !== "" && (
+            <SkiaText
+              x={12}
+              y={height - 68}
+              text={headLabel}
+              font={labelFont}
+              color={colors.text}
+            />
+          )}
+        </>
+      )}
       <Group origin={{ x: cx, y: cy }} transform={transform}>
         {points.slice(0, visible).map((pt, i) => (
           <Circle

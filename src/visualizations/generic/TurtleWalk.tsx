@@ -1,9 +1,19 @@
 // src/visualizations/generic/TurtleWalk.tsx
 //
 // Turtle turns by term mod 4 each step — every sequence draws its own path.
+// Full view: legend + turtle arrowhead + current-turn readout, matching web.
 
 import React, { useMemo, useEffect } from "react";
-import { Canvas, Path as SkiaPath, BlurMask } from "@shopify/react-native-skia";
+import { Platform } from "react-native";
+import {
+  Canvas,
+  Path as SkiaPath,
+  BlurMask,
+  Text as SkiaText,
+  Group,
+  Skia,
+  matchFont,
+} from "@shopify/react-native-skia";
 import {
   useDerivedValue,
   useSharedValue,
@@ -11,16 +21,33 @@ import {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-import { hslToHex } from "../../theme";
+import { hslToHex, useThemeColors } from "../../theme";
 import { useAnimSpeed } from "../../playback/PlaybackContext";
 import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { makePolylinePath } from "../../playback/smoothPath";
-import { termMod } from "../../sequences/normalize";
+import { layoutTurtle, TURN_LABELS } from "./turtleLayout";
 import type { GenericVizProps } from "./types";
+
+const fontFamily = Platform.select({ ios: "Helvetica", default: "sans-serif" });
+const tickFont = matchFont({ fontFamily, fontSize: 11 });
+const labelFont = matchFont({ fontFamily, fontSize: 13, fontWeight: "600" });
+
+const LEGEND =
+  "turn by a(n) mod 4:  0 = hard left · 1 = soft left · 2 = soft right · 3 = hard right";
+
+function arrowPath(): ReturnType<typeof Skia.Path.Make> {
+  const p = Skia.Path.Make();
+  p.moveTo(9, 0);
+  p.lineTo(-5, 5.5);
+  p.lineTo(-5, -5.5);
+  p.close();
+  return p;
+}
 
 export default function TurtleWalk({ terms, width, height, preview }: GenericVizProps) {
   const speed = useAnimSpeed();
-  const { progressSV } = useBuildAnimation(terms.length, preview);
+  const colors = useThemeColors();
+  const { progressSV, step } = useBuildAnimation(terms.length, preview);
   const hueShift = useSharedValue(0);
 
   useEffect(() => {
@@ -31,35 +58,36 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
     );
   }, [speed]);
 
-  const points = useMemo(() => {
-    const pts: { x: number; y: number }[] = [{ x: 0, y: 0 }];
-    let x = 0;
-    let y = 0;
-    let angle = 0;
-    for (const t of terms) {
-      angle += (termMod(t, 4) - 1.5) * (Math.PI / 3);
-      x += Math.cos(angle);
-      y += Math.sin(angle);
-      pts.push({ x, y });
-    }
-    const minX = Math.min(...pts.map((p) => p.x));
-    const maxX = Math.max(...pts.map((p) => p.x));
-    const minY = Math.min(...pts.map((p) => p.y));
-    const maxY = Math.max(...pts.map((p) => p.y));
-    const pad = preview ? 10 : 30;
-    const sx = (width - pad * 2) / (maxX - minX || 1);
-    const sy = (height - pad * 2) / (maxY - minY || 1);
-    const s = Math.min(sx, sy);
-    const ox = (width - (maxX - minX) * s) / 2;
-    const oy = (height - (maxY - minY) * s) / 2;
-    return pts.map((p) => ({ x: ox + (p.x - minX) * s, y: oy + (p.y - minY) * s }));
-  }, [terms, width, height, preview]);
+  const layout = useMemo(
+    () => layoutTurtle(terms, width, height, !!preview),
+    [terms, width, height, preview]
+  );
+  const { points, mods, headings } = layout;
 
   const path = useDerivedValue(() => makePolylinePath(points, progressSV.value));
   const color = useDerivedValue(() => hslToHex(hueShift.value % 360, 85, 58));
+  const arrow = useMemo(() => arrowPath(), []);
+
+  const i = Math.min(step, points.length - 1);
+  const stepIdx = Math.max(Math.min(i - 1, mods.length - 1), 0);
+  const head = points[i];
+  const heading = headings[stepIdx] ?? 0;
+  const m = mods[stepIdx];
+  const headLabel = !preview && i > 0 ? `a(${stepIdx}) mod 4 = ${m}  →  ${TURN_LABELS[m]}` : "";
+  const headLabelW = headLabel ? labelFont.measureText(headLabel).width : 0;
 
   return (
     <Canvas style={{ width, height }}>
+      {!preview && (
+        <SkiaText
+          x={width / 2 - tickFont.measureText(LEGEND).width / 2}
+          y={20}
+          text={LEGEND}
+          font={tickFont}
+          color={colors.textMuted}
+          opacity={0.85}
+        />
+      )}
       <SkiaPath
         path={path}
         style="stroke"
@@ -70,6 +98,31 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
       >
         {!preview && <BlurMask blur={2.5} style="solid" />}
       </SkiaPath>
+      {!preview && head && (
+        <>
+          <Group
+            origin={{ x: 0, y: 0 }}
+            transform={[
+              { translateX: head.x },
+              { translateY: head.y },
+              { rotate: heading },
+            ]}
+          >
+            <SkiaPath path={arrow} color={color}>
+              <BlurMask blur={4} style="solid" />
+            </SkiaPath>
+          </Group>
+          {headLabel !== "" && (
+            <SkiaText
+              x={head.x + 14 + headLabelW > width ? head.x - 14 - headLabelW : head.x + 14}
+              y={head.y - 12}
+              text={headLabel}
+              font={labelFont}
+              color={colors.text}
+            />
+          )}
+        </>
+      )}
     </Canvas>
   );
 }

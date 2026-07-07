@@ -2,41 +2,42 @@
 
 import React, { useCallback, useMemo } from "react";
 import { useWebCanvas, hslString } from "../useWebCanvas";
+import { useThemeColors } from "../../theme";
 import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { strokePolylineProgress } from "../../playback/drawProgress";
-import { termMod } from "../../sequences/normalize";
+import { layoutTurtle, TURN_LABELS } from "./turtleLayout";
 import type { GenericVizProps } from "./types";
 
 export default function TurtleWalk({ terms, width, height, preview }: GenericVizProps) {
+  const colors = useThemeColors();
   const { progressRef } = useBuildAnimation(terms.length, preview);
 
-  const points = useMemo(() => {
-    const pts: { x: number; y: number }[] = [{ x: 0, y: 0 }];
-    let x = 0;
-    let y = 0;
-    let angle = 0;
-    for (const t of terms) {
-      angle += (termMod(t, 4) - 1.5) * (Math.PI / 3);
-      x += Math.cos(angle);
-      y += Math.sin(angle);
-      pts.push({ x, y });
-    }
-    const minX = Math.min(...pts.map((p) => p.x));
-    const maxX = Math.max(...pts.map((p) => p.x));
-    const minY = Math.min(...pts.map((p) => p.y));
-    const maxY = Math.max(...pts.map((p) => p.y));
-    const pad = preview ? 10 : 30;
-    const sx = (width - pad * 2) / (maxX - minX || 1);
-    const sy = (height - pad * 2) / (maxY - minY || 1);
-    const s = Math.min(sx, sy);
-    const ox = (width - (maxX - minX) * s) / 2;
-    const oy = (height - (maxY - minY) * s) / 2;
-    return pts.map((p) => ({ x: ox + (p.x - minX) * s, y: oy + (p.y - minY) * s }));
-  }, [terms, width, height, preview]);
+  const layout = useMemo(
+    () => layoutTurtle(terms, width, height, !!preview),
+    [terms, width, height, preview]
+  );
+  const { points, mods, headings } = layout;
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, time: number) => {
-      if (points.length === 0 || progressRef.current <= 0) return;
+      const progress = progressRef.current;
+
+      if (!preview) {
+        // legend: the rule that steers the walker
+        ctx.font = "12px system-ui, sans-serif";
+        ctx.fillStyle = colors.textMuted;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.globalAlpha = 0.85;
+        ctx.fillText(
+          "each step turns by a(n) mod 4:   0 = hard left   1 = soft left   2 = soft right   3 = hard right",
+          width / 2,
+          10
+        );
+        ctx.globalAlpha = 1;
+      }
+      if (points.length === 0 || progress <= 0) return;
+
       const hue = (time * 40) % 360;
       ctx.strokeStyle = hslString(hue, 85, 58);
       ctx.lineWidth = preview ? 1 : 2;
@@ -46,10 +47,44 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
         ctx.shadowColor = hslString(hue, 85, 58);
         ctx.shadowBlur = 2.5;
       }
-      strokePolylineProgress(ctx, points, progressRef.current);
+      strokePolylineProgress(ctx, points, progress);
       ctx.shadowBlur = 0;
+
+      if (!preview) {
+        // turtle: arrowhead at the walk front, pointing along the heading
+        const i = Math.min(Math.floor(progress), points.length - 1);
+        const stepIdx = Math.max(Math.min(i - 1, mods.length - 1), 0);
+        const p = points[i];
+        const a = headings[stepIdx] ?? 0;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(a);
+        ctx.beginPath();
+        ctx.moveTo(9, 0);
+        ctx.lineTo(-5, 5.5);
+        ctx.lineTo(-5, -5.5);
+        ctx.closePath();
+        ctx.fillStyle = hslString(hue, 100, 70);
+        ctx.shadowColor = hslString(hue, 100, 70);
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.restore();
+        ctx.shadowBlur = 0;
+
+        if (i > 0) {
+          const m = mods[stepIdx];
+          const label = `a(${stepIdx}) mod 4 = ${m}  →  ${TURN_LABELS[m]}`;
+          ctx.font = "600 13px system-ui, sans-serif";
+          const tw = ctx.measureText(label).width;
+          ctx.textAlign = "left";
+          ctx.textBaseline = "alphabetic";
+          ctx.fillStyle = colors.text;
+          const lx = p.x + 14 + tw > width ? p.x - 14 - tw : p.x + 14;
+          ctx.fillText(label, lx, p.y - 12);
+        }
+      }
     },
-    [points, preview, progressRef]
+    [points, mods, headings, preview, progressRef, width, colors.textMuted, colors.text]
   );
 
   const ref = useWebCanvas(width, height, draw, !preview);
