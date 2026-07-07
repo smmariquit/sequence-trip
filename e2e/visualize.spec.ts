@@ -78,3 +78,19 @@ test.describe("Generic viz switcher", () => {
     ).toBeVisible();
   });
 });
+
+test.describe("Viz colors", () => {
+  test("palette sheet opens and applies", async ({ page }) => {
+    await page.goto("/visualize/A005132");
+    await expect(page.getByTestId("visualize-screen")).toBeVisible();
+    await page.getByTestId("viz-colors-toggle").click();
+    await expect(page.getByTestId("viz-color-sheet")).toBeVisible();
+    await page.getByTestId("viz-palette-ocean").click();
+    // persists as the global default
+    const stored = await page.evaluate(() => localStorage.getItem("viz-colors"));
+    expect(stored).toContain('"paletteId":"ocean"');
+    await page.getByTestId("viz-color-glow").click();
+    const stored2 = await page.evaluate(() => localStorage.getItem("viz-colors"));
+    expect(stored2).toContain('"glow":false');
+  });
+});

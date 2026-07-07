@@ -14,6 +14,7 @@ import MathText from "./MathText";
 import PlainText from "./PlainText";
 import MusicBar from "./MusicBar";
 import MetaChips from "./MetaChips";
+import VizColorSheet from "./VizColorSheet";
 import PlaybackProgressBar from "./PlaybackProgressBar";
 import {
   BackButton,
@@ -45,6 +46,7 @@ export default function Controls({
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 
   const [speedIdx, setSpeedIdx] = useState(SPEEDS.indexOf(1));
+  const [colorsOpen, setColorsOpen] = useState(false);
   const { setSpeed, playing, togglePlay, restart, stepBy, maxSteps } = usePlayback();
   const { enabled: musicOn, toggleEnabled: toggleMusic } = useMusic();
 
@@ -92,6 +94,14 @@ export default function Controls({
             onPress={toggleMusic}
             testID="music-toggle"
             accessibilityLabel={musicOn ? "Mute sequence music" : "Play sequence music"}
+          />
+          <PillButton
+            variant="icon"
+            icon="color-palette-outline"
+            iconPosition="only"
+            onPress={() => setColorsOpen(true)}
+            testID="viz-colors-toggle"
+            accessibilityLabel="Customize visualization colors"
           />
           {onEntryPress ? (
             <PillButton
@@ -185,6 +195,7 @@ export default function Controls({
 
       {maxSteps > 0 ? <PlaybackProgressBar /> : null}
       <MusicBar showHeader={false} />
+      <VizColorSheet anum={oeis} visible={colorsOpen} onClose={() => setColorsOpen(false)} />
     </View>
   );
 }

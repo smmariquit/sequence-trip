@@ -3,6 +3,7 @@
 // Brand palette + viz generators. UI chrome uses semantic aliases below.
 
 import { useColorScheme } from "react-native";
+import { resolveVizColor } from "./visualizations/vizColorStore";
 
 export const darkColors = {
   // Surfaces
@@ -82,35 +83,15 @@ export function useThemeColors(): Colors {
   return scheme === 'light' ? lightColors : darkColors;
 }
 
-export const palettes = {
-  rainbow: [
-    "#FF0040", "#FF4000", "#FF8000", "#FFC000",
-    "#FFFF00", "#80FF00", "#00FF40", "#00FFB0",
-    "#00FFFF", "#0080FF", "#4000FF", "#8000FF",
-    "#FF00FF", "#FF0080",
-  ],
-  neon: [
-    "#FF10F0", "#B44AFF", "#4A6AFF", "#00F5FF",
-    "#39FF14", "#FFE62B", "#FF6B2B", "#FF4A8D",
-  ],
-  acid: [
-    "#00FF00", "#39FF14", "#7FFF00", "#ADFF2F",
-    "#DFFF00", "#FFE62B", "#FF6B2B", "#FF0040",
-  ],
-  ocean: [
-    "#001B48", "#003B73", "#0074B7", "#00A8CC",
-    "#00F5FF", "#7FECFF", "#C4F5FC", "#00FFCC",
-  ],
-  plasma: [
-    "#0D0887", "#46039F", "#7201A8", "#9C179E",
-    "#BD3786", "#D8576B", "#ED7953", "#FB9F3A",
-    "#FDCA26", "#F0F921",
-  ],
-};
+export { palettes } from "./theme/palettes";
 
 export function hslToHex(h: number, s: number, l: number): string {
   "worklet";
-  h = ((h % 360) + 360) % 360;
+  // route through viz color settings; worklet copies refresh on remount
+  // (VizPreview keys every viz by the color-settings version)
+  const resolved = resolveVizColor(h);
+  if (resolved.kind === "hex") return resolved.hex;
+  h = resolved.hue;
   s = Math.max(0, Math.min(100, s));
   l = Math.max(0, Math.min(100, l));
 

@@ -18,6 +18,7 @@ import VizPreview from "../../src/components/VizPreview";
 import VizCaption from "../../src/components/VizCaption";
 import VizSwitcher from "../../src/components/VizSwitcher";
 import { rankGenericViz, type GenericVizKey } from "../../src/visualizations/generic/select";
+import { setActiveAnum } from "../../src/visualizations/vizColorStore";
 import SequenceEntryPanel from "../../src/components/SequenceEntryPanel";
 import { CenteredState } from "../../src/components/ui";
 import { useSequenceTermCount } from "../../src/hooks/useSequenceTermCount";
@@ -35,6 +36,11 @@ export default function VisualizeScreen() {
   const [vizKey, setVizKey] = useState<GenericVizKey | undefined>();
 
   useEffect(() => setVizKey(undefined), [id]);
+  // per-sequence color overrides key off the active sequence
+  useEffect(() => {
+    setActiveAnum(id ?? null);
+    return () => setActiveAnum(null);
+  }, [id]);
 
   const seq = catalogSeq ?? dbSeq;
 

@@ -12,10 +12,15 @@ import ErrorBoundary from "../src/components/ErrorBoundary";
 import WebPageShell from "../src/components/WebPageShell";
 import { AmbientProvider } from "../src/audio/AmbientContext";
 import { useThemeColors } from "../src/theme";
+import { loadVizColorPrefs } from "../src/visualizations/vizColorStore";
 
 export default function RootLayout() {
   const colors = useThemeColors();
   const scheme = useColorScheme();
+
+  React.useEffect(() => {
+    void loadVizColorPrefs();
+  }, []);
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 
   const appTheme = React.useMemo(() => {

@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useCallback } from "react";
 import { usePlayback } from "../playback/PlaybackContext";
+import { resolveVizColor, vizGlowEnabled } from "./vizColorStore";
 
 type DrawFn = (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => void;
 
@@ -38,6 +39,18 @@ export function useWebCanvas(
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+    // glow setting (#11): gate every draw's shadowBlur in one place instead
+    // of threading the toggle through each viz
+    const proto = Object.getPrototypeOf(ctx);
+    const blurDesc = Object.getOwnPropertyDescriptor(proto, "shadowBlur");
+    if (blurDesc?.set) {
+      Object.defineProperty(ctx, "shadowBlur", {
+        get: () => blurDesc.get!.call(ctx),
+        set: (v: number) => blurDesc.set!.call(ctx, vizGlowEnabled() ? v : 0),
+        configurable: true,
+      });
+    }
+
     if (!animated) {
       ctx.clearRect(0, 0, width, height);
       draw(ctx, 0, width, height);
@@ -62,5 +75,7 @@ export function useWebCanvas(
 }
 
 export function hslString(h: number, s: number, l: number): string {
-  return `hsl(${((h % 360) + 360) % 360}, ${s}%, ${l}%)`;
+  const resolved = resolveVizColor(h);
+  if (resolved.kind === "hex") return resolved.hex;
+  return `hsl(${resolved.hue}, ${s}%, ${l}%)`;
 }
