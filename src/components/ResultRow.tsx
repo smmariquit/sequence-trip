@@ -10,6 +10,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import VizPreview from "./VizPreview";
 import { AnumBadge, BodyText, CardSurface, PressableCard, AppIcon } from "./ui";
 import PlainText from "./PlainText";
+import MetaChips from "./MetaChips";
 
 const PREVIEW_W = Platform.OS === "web" ? 120 : 80;
 const PREVIEW_H = Platform.OS === "web" ? 72 : 52;
@@ -42,6 +43,7 @@ function ResultRow({ sequence, showPreview = true }: Props) {
               {sequence.terms.slice(0, 12).join(", ")}...
             </BodyText>
           )}
+          <MetaChips anum={sequence.anum} name={sequence.name} compact />
         </View>
         {showPreview ? (
           <View style={styles.previewWrap} importantForAccessibility="no-hide-descendants">

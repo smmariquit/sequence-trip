@@ -11,6 +11,7 @@ import PlainText from "./PlainText";
 import { containsLatexDelimiters } from "../math/latexDelimiters";
 import VizPreview from "./VizPreview";
 import { AnumBadge, CardSurface, PressableCard, cardBorderStyles } from "./ui";
+import MetaChips from "./MetaChips";
 import { radii, spacing } from "../theme/tokens";
 
 const PREVIEW_H = Platform.OS === "web" ? 200 : 180;
@@ -76,6 +77,7 @@ function SequenceCard({ sequence, cardWidth }: Props) {
               </PlainText>
             )
           ) : null}
+          <MetaChips anum={sequence.anum} name={sequence.name} />
         </View>
       </CardSurface>
     </PressableCard>

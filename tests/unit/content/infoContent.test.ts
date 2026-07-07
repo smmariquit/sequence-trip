@@ -9,6 +9,7 @@ describe("infoContent", () => {
       "oeis",
       "help",
       "viz",
+      "glossary",
       "offline",
       "credits",
       "source",

@@ -13,6 +13,7 @@ import { spacing } from "../theme/tokens";
 import MathText from "./MathText";
 import PlainText from "./PlainText";
 import MusicBar from "./MusicBar";
+import MetaChips from "./MetaChips";
 import PlaybackProgressBar from "./PlaybackProgressBar";
 import {
   BackButton,
@@ -81,6 +82,7 @@ export default function Controls({
             label={oeis}
             inline
           />
+          <MetaChips anum={oeis} name={title} compact />
         </View>
         <View style={styles.navActions}>
           <PillButton

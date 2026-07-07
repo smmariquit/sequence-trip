@@ -1,5 +1,7 @@
 // src/sequences/collections.ts
 
+import { anumsByDifficulty } from "./metadata";
+
 export interface SequenceCollection {
   title: string;
   description: string;
@@ -7,6 +9,21 @@ export interface SequenceCollection {
 }
 
 export const COLLECTIONS: SequenceCollection[] = [
+  {
+    title: "Start here",
+    description: "Beginner-friendly rules you can follow with basic counting.",
+    anums: anumsByDifficulty("beginner").slice(0, 6),
+  },
+  {
+    title: "Next steps",
+    description: "A little math vocabulary helps — the visualizations carry you.",
+    anums: anumsByDifficulty("intermediate").slice(0, 6),
+  },
+  {
+    title: "Deep dives",
+    description: "Easy to state, deeply subtle. Advanced rabbit holes.",
+    anums: anumsByDifficulty("advanced").slice(0, 6),
+  },
   {
     title: "Classics",
     description: "Spirals, squares, and the sequences every math person knows.",

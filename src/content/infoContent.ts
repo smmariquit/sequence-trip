@@ -75,6 +75,27 @@ export const INFO_SECTIONS: InfoSection[] = [
     ],
   },
   {
+    id: "glossary",
+    title: "Tags & difficulty",
+    body: [
+      "Sequences carry small tags so you can tell at a glance what area of math they touch and how approachable they are.",
+      "Difficulty measures how easy the rule is to understand — not how hard the open problems are.",
+    ],
+    bullets: [
+      "Beginner — you can follow this with basic counting.",
+      "Intermediate — some math vocabulary helps, but the viz carries you.",
+      "Advanced — easy to state, deeply subtle to grasp.",
+      "Number theory — primes, divisors, and the hidden structure of whole numbers.",
+      "Combinatorics — counting arrangements: how many ways can things combine?",
+      "Geometry — shapes, spirals, and where numbers land in space.",
+      "Analysis — constants like π and e, limits, and digit expansions.",
+      "Algebra — polynomials, coefficients, and symbolic structure.",
+      "Probability — randomness, expected values, and statistical patterns.",
+      "Recreational — puzzles and playful rules, math for the fun of it.",
+      "Fractals — self-similar patterns that repeat at every scale.",
+    ],
+  },
+  {
     id: "offline",
     title: "Offline & privacy",
     body: [
