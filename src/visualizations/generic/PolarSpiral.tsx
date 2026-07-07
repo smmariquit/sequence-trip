@@ -13,7 +13,7 @@ import {
 } from "react-native-reanimated";
 import { hslToHex } from "../../theme";
 import { useAnimSpeed } from "../../playback/PlaybackContext";
-import { useBuildAnimation } from "../../playback/useBuildAnimation";
+import { useBuildAnimation, useItemFrac } from "../../playback/useBuildAnimation";
 import { normalize } from "../../sequences/normalize";
 import type { GenericVizProps } from "./types";
 
@@ -22,7 +22,8 @@ const GOLDEN_ANGLE = (137.508 * Math.PI) / 180;
 export default function PolarSpiral({ terms, width, height, preview }: GenericVizProps) {
   const speed = useAnimSpeed();
   const stats = useMemo(() => normalize(terms), [terms]);
-  const { step: visible } = useBuildAnimation(stats.logs.length, preview);
+  const { progressSV, step: visible } = useBuildAnimation(stats.logs.length, preview);
+  const fade = useItemFrac(progressSV, visible);
   const rotation = useSharedValue(0);
 
   useEffect(() => {
@@ -66,6 +67,18 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
             {!preview && <BlurMask blur={3} style="solid" />}
           </Circle>
         ))}
+        {points[visible] && (
+          <Group opacity={fade}>
+            <Circle
+              cx={cx + points[visible].r * Math.cos(points[visible].angle)}
+              cy={cy + points[visible].r * Math.sin(points[visible].angle)}
+              r={points[visible].size}
+              color={hslToHex(points[visible].hue, 95, 62)}
+            >
+              {!preview && <BlurMask blur={3} style="solid" />}
+            </Circle>
+          </Group>
+        )}
       </Group>
     </Canvas>
   );

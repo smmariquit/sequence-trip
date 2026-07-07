@@ -36,12 +36,13 @@ function ExploreCard({ sequence }: Props) {
   return (
     <PressableCard
       onPress={() => router.push(`/visualize/${sequence.anum}`)}
+      accessibilityLabel={`Visualize ${sequence.name}, ${sequence.anum}`}
       style={styles.outer}
       pressedScale={0.98}
     >
       <CardSurface variant="card" style={styles.card}>
-        <View style={styles.previewWrap}>
-          {sequence.vizType ? (
+        <View style={styles.previewWrap} importantForAccessibility="no-hide-descendants">
+          {sequence.vizType || sequence.terms?.length ? (
             <ErrorBoundary fallbackText="Preview unavailable">
               <VizPreview
                 sequence={sequence}

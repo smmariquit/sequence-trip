@@ -4,9 +4,10 @@ import React, { useMemo } from "react";
 import {
   Canvas,
   Circle,
+  Group,
 } from "@shopify/react-native-skia";
 import { hslToHex } from "../theme";
-import { useBuildAnimation } from "../playback/useBuildAnimation";
+import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
 
 const GOLDEN_ANGLE = 137.508;
 
@@ -45,7 +46,8 @@ export function FibonacciSpiralPreview({ width, height }: { width: number; heigh
 }
 
 export function FibonacciSpiralFull({ width, height, count = 300 }: Omit<Props, "preview">) {
-  const { step: visible } = useBuildAnimation(count, false);
+  const { progressSV, step: visible } = useBuildAnimation(count, false);
+  const fade = useItemFrac(progressSV, visible);
   const cx = width / 2;
   const cy = height / 2;
   const maxR = Math.min(width, height) * 0.45;
@@ -67,6 +69,16 @@ export function FibonacciSpiralFull({ width, height, count = 300 }: Omit<Props, 
       {points.slice(0, visible).map((pt, i) => (
         <Circle key={i} cx={pt.x} cy={pt.y} r={3} color={pt.color} />
       ))}
+      {points[visible] && (
+        <Group opacity={fade}>
+          <Circle
+            cx={points[visible].x}
+            cy={points[visible].y}
+            r={3}
+            color={points[visible].color}
+          />
+        </Group>
+      )}
     </Canvas>
   );
 }

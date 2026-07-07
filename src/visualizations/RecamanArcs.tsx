@@ -9,7 +9,7 @@ import {
   Line,
 } from "@shopify/react-native-skia";
 import { hslToHex } from "../theme";
-import { useBuildAnimation } from "../playback/useBuildAnimation";
+import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
 
 interface Props {
   width: number;
@@ -32,6 +32,33 @@ function buildRecamanSeq(n: number): number[] {
   return s;
 }
 
+// Semicircle between consecutive terms, centered on the number line (midY).
+// Above arcs sweep left→top→right, below arcs right→bottom→left — both start
+// where the previous arc ended, so trim-from-start animates the walk.
+export function makeArcPath(
+  left: number,
+  right: number,
+  scaleX: number,
+  pad: number,
+  midY: number,
+  above: boolean
+) {
+  const radius = ((right - left) * scaleX) / 2;
+  const cx = left * scaleX + pad + radius;
+  const path = Skia.Path.Make();
+  path.addArc(
+    {
+      x: cx - radius,
+      y: midY - radius,
+      width: radius * 2,
+      height: radius * 2,
+    },
+    above ? 180 : 0,
+    180
+  );
+  return path;
+}
+
 function buildArcs(
   seq: number[],
   width: number,
@@ -49,20 +76,7 @@ function buildArcs(
     const next = seq[i + 1];
     const left = Math.min(val, next);
     const right = Math.max(val, next);
-    const radius = ((right - left) * scaleX) / 2;
-    const cx = left * scaleX + pad + radius;
-    const above = i % 2 === 0;
-    const path = Skia.Path.Make();
-    path.addArc(
-      {
-        x: cx - radius,
-        y: above ? midY - radius : midY,
-        width: radius * 2,
-        height: radius * 2,
-      },
-      above ? 180 : 0,
-      180
-    );
+    const path = makeArcPath(left, right, scaleX, pad, midY, i % 2 === 0);
     return { path, hue: (i * 360) / seq.length };
   });
 
@@ -98,7 +112,8 @@ export function RecamanArcsPreview({ width, height }: { width: number; height: n
 
 export function RecamanArcsFull({ width, height, count = 64 }: Omit<Props, "preview">) {
   const n = count;
-  const { step: visible } = useBuildAnimation(Math.max(n - 1, 0), false);
+  const { progressSV, step: visible } = useBuildAnimation(Math.max(n - 1, 0), false);
+  const growEnd = useItemFrac(progressSV, visible);
 
   const seq = useMemo(() => buildRecamanSeq(n), [n]);
 
@@ -112,26 +127,14 @@ export function RecamanArcsFull({ width, height, count = 64 }: Omit<Props, "prev
     return { pad, axisY, midY, span, scaleX };
   }, [seq, width, height, visible]);
 
+  // completed arcs + the in-progress one (trimmed by fractional progress)
   const arcs = useMemo(() => {
     const { pad, midY, scaleX } = layout;
-    return seq.slice(0, -1).slice(0, visible).map((val, i) => {
+    return seq.slice(0, -1).slice(0, visible + 1).map((val, i) => {
       const next = seq[i + 1];
       const left = Math.min(val, next);
       const right = Math.max(val, next);
-      const radius = ((right - left) * scaleX) / 2;
-      const cx = left * scaleX + pad + radius;
-      const above = i % 2 === 0;
-      const path = Skia.Path.Make();
-      path.addArc(
-        {
-          x: cx - radius,
-          y: above ? midY - radius : midY,
-          width: radius * 2,
-          height: radius * 2,
-        },
-        above ? 180 : 0,
-        180
-      );
+      const path = makeArcPath(left, right, scaleX, pad, midY, i % 2 === 0);
       return { path, hue: (i * 360) / seq.length };
     });
   }, [seq, layout, visible]);
@@ -175,6 +178,8 @@ export function RecamanArcsFull({ width, height, count = 64 }: Omit<Props, "prev
           style="stroke"
           strokeWidth={2.5}
           color={hslToHex(arc.hue, 90, 55)}
+          start={0}
+          end={i < visible ? 1 : growEnd}
         />
       ))}
       {head && (

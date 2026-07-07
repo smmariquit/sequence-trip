@@ -4,6 +4,7 @@
 // b-file format: "n a(n)" per line, # comments.
 
 import { Platform } from "react-native";
+import { OEIS_BASE } from "./baseUrl";
 
 export const MAX_BFILE_TERMS = 2000;
 
@@ -24,7 +25,7 @@ function parseBfile(text: string): string[] | null {
 async function downloadBfile(anum: string): Promise<string | null> {
   const num = anum.slice(1);
   try {
-    const res = await fetch(`https://oeis.org/${anum}/b${num}.txt`);
+    const res = await fetch(`${OEIS_BASE}/${anum}/b${num}.txt`);
     if (!res.ok) return null;
     return await res.text();
   } catch {

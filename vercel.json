@@ -3,5 +3,8 @@
   "framework": null,
   "buildCommand": "node scripts/build-db.mjs && npx expo export -p web",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/oeis/:path*", "destination": "https://oeis.org/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

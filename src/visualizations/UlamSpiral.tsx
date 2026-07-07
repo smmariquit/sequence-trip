@@ -4,10 +4,11 @@ import React, { useMemo } from "react";
 import {
   Canvas,
   Circle,
+  Group,
 } from "@shopify/react-native-skia";
 import { ulamSpiralCoords } from "../sequences/generators";
 import { hslToHex } from "../theme";
-import { useBuildAnimation } from "../playback/useBuildAnimation";
+import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
 
 interface Props {
   width: number;
@@ -63,7 +64,8 @@ export function UlamSpiralPreview({ width, height }: { width: number; height: nu
 }
 
 export function UlamSpiralFull({ width, height, count = 2000 }: Omit<Props, "preview">) {
-  const { step: visible } = useBuildAnimation(count, false);
+  const { progressSV, step: visible } = useBuildAnimation(count, false);
+  const fade = useItemFrac(progressSV, visible);
   const coords = useMemo(() => ulamSpiralCoords(count), [count]);
 
   const maxCoord = useMemo(() => {
@@ -95,6 +97,25 @@ export function UlamSpiralFull({ width, height, count = 2000 }: Omit<Props, "pre
           />
         );
       })}
+      {coords[visible]?.prime && (
+        <Group opacity={fade}>
+          <Circle
+            cx={cx + coords[visible].x * cellSize}
+            cy={cy + coords[visible].y * cellSize}
+            r={cellSize * 0.45}
+            color={hslToHex(
+              (Math.sqrt(
+                coords[visible].x * coords[visible].x +
+                  coords[visible].y * coords[visible].y
+              ) *
+                12) %
+                360,
+              100,
+              65
+            )}
+          />
+        </Group>
+      )}
     </Canvas>
   );
 }

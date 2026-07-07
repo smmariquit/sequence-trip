@@ -4,7 +4,11 @@
 // Web canvas reads progressRef each frame; native Skia uses progressSV.
 
 import { useEffect, useRef, useState } from "react";
-import { useSharedValue, type SharedValue } from "react-native-reanimated";
+import {
+  useDerivedValue,
+  useSharedValue,
+  type SharedValue,
+} from "react-native-reanimated";
 import { usePlayback } from "./PlaybackContext";
 
 export interface BuildAnimation {
@@ -57,4 +61,15 @@ export function useBuildAnimation(totalSteps: number, preview?: boolean): BuildA
   const local = useLocalBuildAnimation(totalSteps, !!preview);
   const ctx = useContextBuildAnimation(totalSteps, !preview);
   return preview ? local : ctx;
+}
+
+/** 0→1 reveal fraction for the item at `index`, driven on the UI thread. */
+export function useItemFrac(
+  progressSV: SharedValue<number>,
+  index: number
+): SharedValue<number> {
+  return useDerivedValue(() => {
+    const v = progressSV.value - index;
+    return v <= 0 ? 0 : v >= 1 ? 1 : v;
+  }, [index]);
 }

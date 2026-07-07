@@ -4,6 +4,7 @@
 
 import type { OEISFullEntry, OeisJsonRecord } from "./entryTypes";
 import { formatAnum, normalizeAnum, parseKeywords } from "./entryText";
+import { OEIS_BASE } from "./baseUrl";
 
 const cache = new Map<string, OEISFullEntry>();
 
@@ -39,9 +40,7 @@ export async function fetchOeisEntry(anum: string): Promise<OEISFullEntry | null
   if (hit) return hit;
 
   try {
-    const res = await fetch(`https://oeis.org/search?q=id:${key}&fmt=json`, {
-      headers: { "User-Agent": "sequence-trip/1.0 (OEIS visualization app)" },
-    });
+    const res = await fetch(`${OEIS_BASE}/search?q=id:${key}&fmt=json`);
     if (!res.ok) return null;
     const data = (await res.json()) as OeisJsonRecord[];
     if (!Array.isArray(data) || data.length === 0) return null;

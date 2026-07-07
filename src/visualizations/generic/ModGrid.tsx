@@ -13,14 +13,15 @@ import {
 } from "react-native-reanimated";
 import { hslToHex } from "../../theme";
 import { useAnimSpeed } from "../../playback/PlaybackContext";
-import { useBuildAnimation } from "../../playback/useBuildAnimation";
+import { useBuildAnimation, useItemFrac } from "../../playback/useBuildAnimation";
 import { termMod } from "../../sequences/normalize";
 import type { GenericVizProps } from "./types";
 
 export default function ModGrid({ terms, width, height, preview }: GenericVizProps) {
   const speed = useAnimSpeed();
   const breathe = useSharedValue(0.8);
-  const { step: visible } = useBuildAnimation(terms.length, preview);
+  const { progressSV, step: visible } = useBuildAnimation(terms.length, preview);
+  const fade = useItemFrac(progressSV, visible);
   const mod = 10;
 
   useEffect(() => {
@@ -61,6 +62,21 @@ export default function ModGrid({ terms, width, height, preview }: GenericVizPro
             color={c.m === 0 ? "rgba(40, 35, 70, 0.6)" : hslToHex((c.m * 360) / 10, 85, 55)}
           />
         ))}
+        {cells[visible] && (
+          <Group opacity={fade}>
+            <Rect
+              x={cells[visible].x}
+              y={cells[visible].y}
+              width={cells[visible].w}
+              height={cells[visible].h}
+              color={
+                cells[visible].m === 0
+                  ? "rgba(40, 35, 70, 0.6)"
+                  : hslToHex((cells[visible].m * 360) / 10, 85, 55)
+              }
+            />
+          </Group>
+        )}
       </Group>
     </Canvas>
   );

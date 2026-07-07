@@ -7,6 +7,7 @@ import { Skia, type SkPath } from "@shopify/react-native-skia";
 type Point = { x: number; y: number };
 
 export function makePolylinePath(points: Point[], progress: number): SkPath {
+  "worklet"; // called from useDerivedValue on the UI thread — crashes without this
   const p = Skia.Path.Make();
   if (points.length === 0 || progress <= 0) return p;
 

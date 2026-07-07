@@ -8,7 +8,7 @@ import {
 } from "@shopify/react-native-skia";
 import { collatzSequence } from "../sequences/generators";
 import { hslToHex } from "../theme";
-import { useBuildAnimation } from "../playback/useBuildAnimation";
+import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
 
 interface Props {
   width: number;
@@ -72,7 +72,8 @@ export function CollatzTreePreview({ width, height }: { width: number; height: n
 }
 
 export function CollatzTreeFull({ width, height, count = 40 }: Omit<Props, "preview">) {
-  const { step: visible } = useBuildAnimation(count, false);
+  const { progressSV, step: visible } = useBuildAnimation(count, false);
+  const growEnd = useItemFrac(progressSV, visible);
 
   const branches = useMemo(
     () => buildBranches(width, height, count, 7),
@@ -81,7 +82,7 @@ export function CollatzTreeFull({ width, height, count = 40 }: Omit<Props, "prev
 
   return (
     <Canvas style={{ width, height }}>
-      {branches.slice(0, visible).map((branch, i) => (
+      {branches.slice(0, visible + 1).map((branch, i) => (
         <SkiaPath
           key={i}
           path={branch.path}
@@ -90,6 +91,8 @@ export function CollatzTreeFull({ width, height, count = 40 }: Omit<Props, "prev
           color={hslToHex(branch.hue, 85, 55)}
           strokeCap="round"
           strokeJoin="round"
+          start={0}
+          end={i < visible ? 1 : growEnd}
         />
       ))}
     </Canvas>

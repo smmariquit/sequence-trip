@@ -3,10 +3,11 @@
 import React, { useMemo } from "react";
 import {
   Canvas,
+  Group,
   Rect,
 } from "@shopify/react-native-skia";
 import { hslToHex } from "../theme";
-import { useBuildAnimation } from "../playback/useBuildAnimation";
+import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
 
 interface Props {
   width: number;
@@ -82,23 +83,27 @@ export function PascalFractalPreview({ width, height }: { width: number; height:
 }
 
 export function PascalFractalFull({ width, height, count = 128 }: Omit<Props, "preview">) {
-  const { step: visible } = useBuildAnimation(count, false);
+  const { progressSV, step: visible } = useBuildAnimation(count, false);
   const cells = useMemo(() => buildCells(count, width, height), [count, width, height]);
+  const rowFade = useItemFrac(progressSV, visible);
+
+  const cellRect = (cell: Cell, i: number) => (
+    <Rect
+      key={i}
+      x={cell.x}
+      y={cell.y}
+      width={cell.w}
+      height={cell.h}
+      color={hslToHex((cell.row * 3.5 + cell.col * 7) % 360, 90, 58)}
+    />
+  );
 
   return (
     <Canvas style={{ width, height }}>
-      {cells
-        .filter((cell) => cell.row < visible)
-        .map((cell, i) => (
-          <Rect
-            key={i}
-            x={cell.x}
-            y={cell.y}
-            width={cell.w}
-            height={cell.h}
-            color={hslToHex((cell.row * 3.5 + cell.col * 7) % 360, 90, 58)}
-          />
-        ))}
+      {cells.filter((cell) => cell.row < visible).map(cellRect)}
+      <Group opacity={rowFade}>
+        {cells.filter((cell) => cell.row === visible).map(cellRect)}
+      </Group>
     </Canvas>
   );
 }
