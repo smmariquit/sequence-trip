@@ -39,13 +39,6 @@ export async function exportWallpaper(
     return;
   }
   try {
-    const MediaLibrary = await import("expo-media-library");
-    const { status } = await MediaLibrary.requestPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission needed", "Allow photo access to save the wallpaper.");
-      return;
-    }
-
     setExporting(true);
     // let Skia render a frame into the offscreen view before capturing
     await new Promise((r) => setTimeout(r, 600));
@@ -57,10 +50,21 @@ export async function exportWallpaper(
       width: WALLPAPER_W,
       height: WALLPAPER_H,
     });
-    await MediaLibrary.saveToLibraryAsync(uri);
-    Alert.alert("Saved", "Wallpaper saved to your gallery.");
+
+    // Share sheet instead of a direct gallery write: no photo permission
+    // (which would trigger a Google Play permissions declaration) and it
+    // still offers "Save to Photos" / set-as-wallpaper on both platforms.
+    const Sharing = await import("expo-sharing");
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(uri, {
+        mimeType: "image/png",
+        dialogTitle: "Save or set your sequence wallpaper",
+      });
+    } else {
+      Alert.alert("Saved", `Image ready at ${uri}`);
+    }
   } catch (err) {
-    Alert.alert("Could not save", "Something went wrong exporting the image.");
+    Alert.alert("Could not export", "Something went wrong creating the image.");
     console.warn("export failed", err);
   } finally {
     setExporting(false);
