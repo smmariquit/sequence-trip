@@ -44,25 +44,35 @@ export function drawNumberLine(
   ctx.textAlign = "left";
 }
 
+export interface AxisTick {
+  /** Pixel position: x for xTicks, y for yTicks. */
+  pos: number;
+  label: string;
+}
+
 export function drawPlotAxes(
   ctx: CanvasRenderingContext2D,
   opts: {
-    pad: number;
+    pad: number | { left: number; right: number; top: number; bottom: number };
     width: number;
     height: number;
     xLabel: string;
     yLabel: string;
     preview?: boolean;
     ink?: string;
+    xTicks?: AxisTick[];
+    yTicks?: AxisTick[];
   }
 ) {
   const { pad, width, height, xLabel, yLabel, preview, ink = "rgba(240, 236, 255, 0.5)" } = opts;
   if (preview) return;
 
-  const left = pad;
-  const bottom = height - pad;
-  const right = width - pad;
-  const top = pad;
+  const p =
+    typeof pad === "number" ? { left: pad, right: pad, top: pad, bottom: pad } : pad;
+  const left = p.left;
+  const bottom = height - p.bottom;
+  const right = width - p.right;
+  const top = p.top;
 
   ctx.strokeStyle = ink;
   ctx.fillStyle = ink;
@@ -77,13 +87,53 @@ export function drawPlotAxes(
   ctx.lineTo(left, top);
   ctx.stroke();
 
-  ctx.textAlign = "center";
-  ctx.fillText(xLabel, (left + right) / 2, bottom + 10);
-  ctx.save();
-  ctx.translate(left - 14, (top + bottom) / 2);
-  ctx.rotate(-Math.PI / 2);
-  ctx.fillText(yLabel, 0, 0);
-  ctx.restore();
+  for (const t of opts.xTicks ?? []) {
+    ctx.beginPath();
+    ctx.moveTo(t.pos, bottom);
+    ctx.lineTo(t.pos, bottom + 5);
+    ctx.stroke();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(t.label, t.pos, bottom + 8);
+  }
+  for (const t of opts.yTicks ?? []) {
+    ctx.beginPath();
+    ctx.moveTo(left - 5, t.pos);
+    ctx.lineTo(left, t.pos);
+    ctx.stroke();
+    // faint gridline so the eye can carry the value across the plot
+    ctx.globalAlpha = 0.15;
+    ctx.beginPath();
+    ctx.moveTo(left, t.pos);
+    ctx.lineTo(right, t.pos);
+    ctx.stroke();
+    ctx.globalAlpha = 0.7;
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.fillText(t.label, left - 8, t.pos);
+  }
+  ctx.textBaseline = "alphabetic";
+
+  if (opts.xTicks?.length) {
+    // title above the axis at the right end — below it sits the caption overlay
+    ctx.textAlign = "right";
+    ctx.fillText(xLabel, right - 4, bottom - 8);
+  } else {
+    ctx.textAlign = "center";
+    ctx.fillText(xLabel, (left + right) / 2, bottom + 10);
+  }
+  if (opts.yTicks?.length) {
+    // horizontal title above the axis — a rotated one collides with wide
+    // value labels like 3.81×10^15
+    ctx.textAlign = "left";
+    ctx.fillText(yLabel, left, top - 10);
+  } else {
+    ctx.save();
+    ctx.translate(left - 14, (top + bottom) / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText(yLabel, 0, 0);
+    ctx.restore();
+  }
   ctx.globalAlpha = 1;
   ctx.textAlign = "left";
 }

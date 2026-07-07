@@ -29,6 +29,11 @@ jest.mock("@shopify/react-native-skia", () => ({
   Group: "Group",
   BlurMask: "BlurMask",
   Line: "Line",
+  Text: "Text",
+  vec: (x: number, y: number) => ({ x, y }),
+  matchFont: jest.fn(() => ({
+    measureText: jest.fn(() => ({ width: 0 })),
+  })),
 }));
 
 jest.mock("expo-router", () => ({
