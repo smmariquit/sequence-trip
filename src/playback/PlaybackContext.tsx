@@ -11,7 +11,6 @@ import React, {
 } from "react";
 import { useSharedValue, type SharedValue } from "react-native-reanimated";
 
-import { STEP_MS } from "./progressConstants";
 import { nextProgress } from "./progress";
 
 export { STEP_MS } from "./progressConstants";
@@ -30,6 +29,8 @@ interface Playback {
   pause: () => void;
   restart: () => void;
   togglePlay: () => void;
+  /** Pause and move to an adjacent integer step (manual scrubbing). */
+  stepBy: (delta: number) => void;
 }
 
 const defaultProgressRef = { current: 0 };
@@ -48,6 +49,7 @@ const Ctx = createContext<Playback>({
   pause: () => {},
   restart: () => {},
   togglePlay: () => {},
+  stepBy: () => {},
 });
 
 function useProgressTicker(
@@ -119,6 +121,22 @@ export function PlaybackProvider({ children }: { children: React.ReactNode }) {
     setPlaying(true);
   }, [progressSV]);
 
+  const stepBy = useCallback(
+    (delta: number) => {
+      setPlaying(false);
+      // floor of 1 when stepping back: step 0 while paused means "idle",
+      // which renders the finished viz — not what a scrubbing user wants
+      const next = Math.max(
+        delta < 0 ? 1 : 0,
+        Math.min(maxSteps, Math.round(progressRef.current) + delta)
+      );
+      progressRef.current = next;
+      progressSV.value = next;
+      setStep(next);
+    },
+    [maxSteps, progressSV]
+  );
+
   const togglePlay = useCallback(() => {
     setPlaying((wasPlaying) => {
       if (wasPlaying) return false;
@@ -162,6 +180,7 @@ export function PlaybackProvider({ children }: { children: React.ReactNode }) {
       pause,
       restart,
       togglePlay,
+      stepBy,
     }),
     [
       speed,
@@ -173,6 +192,7 @@ export function PlaybackProvider({ children }: { children: React.ReactNode }) {
       pause,
       restart,
       togglePlay,
+      stepBy,
       progressRef,
       progressSV,
     ]

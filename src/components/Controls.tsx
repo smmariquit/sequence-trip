@@ -43,8 +43,8 @@ export default function Controls({
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 
-  const [speedIdx, setSpeedIdx] = useState(1);
-  const { setSpeed, playing, togglePlay, restart, maxSteps } = usePlayback();
+  const [speedIdx, setSpeedIdx] = useState(SPEEDS.indexOf(1));
+  const { setSpeed, playing, togglePlay, restart, stepBy, maxSteps } = usePlayback();
   const { enabled: musicOn, toggleEnabled: toggleMusic } = useMusic();
 
   const cycleSpeed = () => {
@@ -126,6 +126,28 @@ export default function Controls({
             haptic();
           }}
           accessibilityLabel="Restart animation"
+        />
+        <PillButton
+          variant="icon"
+          icon="play-skip-back"
+          iconPosition="only"
+          onPress={() => {
+            stepBy(-1);
+            haptic();
+          }}
+          testID="controls-step-back"
+          accessibilityLabel="Previous term"
+        />
+        <PillButton
+          variant="icon"
+          icon="play-skip-forward"
+          iconPosition="only"
+          onPress={() => {
+            stepBy(1);
+            haptic();
+          }}
+          testID="controls-step-forward"
+          accessibilityLabel="Next term"
         />
         <PillButton
           variant="speed"
