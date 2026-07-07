@@ -100,7 +100,7 @@ export default function VizCaption({
             <CaptionLine text={guide} style={styles.guide} />
             {musicOn ? (
               <CaptionLine
-                text="♪ Pitch: $a(n) \bmod 25$ picks a note on a C-pentatonic scale — larger remainder, higher note. Bass follows $a(n) \bmod 15$; the digit voice plays the term's last digits."
+                text="♪ Pitch: $a(n) \bmod 25$ picks a note on a C-pentatonic scale: larger remainder, higher note. Bass follows $a(n) \bmod 15$; the digit voice plays the term's last digits."
                 style={styles.guide}
               />
             ) : null}
@@ -157,9 +157,9 @@ const makeStyles = (colors: any) => StyleSheet.create({
     opacity: 0.85,
   },
   guide: {
-    color: colors.textDim,
-    fontSize: 14,
-    lineHeight: 20,
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 22,
     marginTop: spacing.sm,
     paddingTop: spacing.sm,
     borderTopWidth: 1,

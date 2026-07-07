@@ -30,7 +30,7 @@ export const MATH_FIELDS: Record<MathFieldId, MathField> = {
   },
   combinatorics: {
     label: "Combinatorics",
-    description: "Counting arrangements — how many ways can things combine?",
+    description: "Counting arrangements: how many ways can things combine?",
     color: "#39FF14",
   },
   geometry: {
@@ -55,7 +55,7 @@ export const MATH_FIELDS: Record<MathFieldId, MathField> = {
   },
   recreational: {
     label: "Recreational",
-    description: "Puzzles and playful rules — math for the fun of it.",
+    description: "Puzzles and playful rules. Math for the fun of it.",
     color: "#B44AFF",
   },
   fractals: {
@@ -88,7 +88,7 @@ export const DIFFICULTY: Record<DifficultyId, Difficulty> = {
   },
   advanced: {
     label: "Advanced",
-    description: "Deep waters — easy to state, subtle to grasp.",
+    description: "Deep waters: easy to state, subtle to grasp.",
     color: "#F0ABFC",
   },
 };
@@ -154,6 +154,51 @@ export function metadataFor(anum: string, name?: string): SequenceMeta {
   const curated = CURATED[anum];
   if (curated) return curated;
   return { fields: name ? fieldsFromName(name) : [] };
+}
+
+/** One-line plain-language explanations for browse cards. OEIS names are
+ * definitions, not introductions; beginners need to know what the thing IS. */
+const BLURBS: Record<string, string> = {
+  A000045: "Each number is the sum of the previous two. Shows up in pinecones and sunflowers.",
+  A005132: "Jump backward if you can, forward if you must. Never lands on the same number twice.",
+  A000040: "The primes: numbers only divisible by 1 and themselves.",
+  A006577: "Halve if even, triple-plus-one if odd. Counts the steps until you hit 1.",
+  A007318: "Pascal's triangle: every entry is the sum of the two above it.",
+  A000796: "The digits of π, one at a time.",
+  A000079: "Doubling: 1, 2, 4, 8, 16. Growth by powers of two.",
+  A000142: "Factorials: multiply all numbers up to n. Counts ways to order things.",
+  A000108: "Catalan numbers: count valid bracketings, mountain paths, and much more.",
+  A000217: "Triangular numbers: dots stacked in triangles, 1, 3, 6, 10.",
+  A000002: "A sequence that describes its own run lengths. Deeply strange.",
+  A004001: "A recursion that feeds on itself. Chaotic then oddly regular.",
+  A005185: "Hofstadter's Q: like Fibonacci but the offsets come from the sequence itself.",
+  A006336: "Grows by its own count of earlier terms. Geometry hides inside.",
+  A001113: "The digits of e, the base of natural growth.",
+  A002193: "The digits of the square root of 2, the first known irrational.",
+  A010060: "Thue-Morse: flip 0s and 1s forever. Never repeats a block three times.",
+  A007376: "Write the counting numbers in a row and read the digits: 1, 2, 3, ..., 1, 0, 1, 1.",
+  A023811: "Base-b repunits: numbers written as all 1s, generalized.",
+  A001358: "Semiprimes: products of exactly two primes.",
+  A000961: "Prime powers: primes and their squares, cubes, and beyond.",
+  A002378: "Oblong numbers: n times (n+1). Twice the triangular numbers.",
+  A001097: "Twin primes: primes that differ by 2, like 11 and 13.",
+  A005384: "Sophie Germain primes: p where 2p+1 is also prime.",
+  A000035: "0, 1, 0, 1: the parity of n. The simplest possible pattern.",
+  A000959: "Lucky numbers: survivors of a sieve like the primes', but by position.",
+  A000032: "Lucas numbers: Fibonacci's sibling, starting 2, 1 instead of 0, 1.",
+  A000290: "The perfect squares: 1, 4, 9, 16.",
+  A000326: "Pentagonal numbers: dots arranged in nested pentagons.",
+  A000120: "How many 1s are in n written in binary.",
+  A003188: "Gray code: each number differs from the last by a single binary digit.",
+  A000931: "Padovan: like Fibonacci, but you add the terms two and three back.",
+  A001608: "Perrin: a(n) = a(n-2) + a(n-3). Detects primes in a surprising way.",
+  A005843: "The even numbers.",
+  A000292: "Tetrahedral numbers: cannonballs stacked in triangular pyramids.",
+};
+
+/** Plain-language one-liner for a sequence, when curated. */
+export function blurbFor(anum: string): string | undefined {
+  return BLURBS[anum];
 }
 
 /** A-numbers curated at a given difficulty — for browse groupings (#10). */

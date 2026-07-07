@@ -12,6 +12,7 @@ import MathText from "./MathText";
 import PlainText from "./PlainText";
 import VizPreview from "./VizPreview";
 import { AnumBadge, BodyText, CardSurface, PressableCard, AppIcon } from "./ui";
+import { blurbFor } from "../sequences/metadata";
 
 export const EXPLORE_CARD_W = 268;
 const PREVIEW_H = 148;
@@ -32,6 +33,7 @@ function ExploreCard({ sequence }: Props) {
   const termsLine = sequence.terms?.length
     ? `${sequence.terms.slice(0, 10).join(", ")}…`
     : null;
+  const blurb = blurbFor(sequence.anum);
 
   return (
     <PressableCard
@@ -68,6 +70,11 @@ function ExploreCard({ sequence }: Props) {
               {sequence.name}
             </PlainText>
           )}
+          {blurb ? (
+            <PlainText style={styles.blurb} numberOfLines={3}>
+              {blurb}
+            </PlainText>
+          ) : null}
           {termsLine ? (
             <BodyText variant="caption" style={styles.terms} numberOfLines={1}>
               {termsLine}
@@ -112,5 +119,10 @@ const makeStyles = (colors: any) => StyleSheet.create({
   terms: {
     fontVariant: ["tabular-nums"],
     marginBottom: 0,
+  },
+  blurb: {
+    color: colors.textDim,
+    fontSize: 14,
+    lineHeight: 20,
   },
 });

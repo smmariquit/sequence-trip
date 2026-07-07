@@ -58,7 +58,10 @@ export function strokeRecamanArc(
   const t = Math.min(1, frac);
   ctx.beginPath();
   if (above) {
-    ctx.arc(cx, midY, radius, Math.PI, Math.PI * (1 - t), true);
+    // canvas y grows downward: the top half-circle is the (PI, 2PI) sweep.
+    // The old (PI -> 0, anticlockwise) sweep passed through PI/2 and drew
+    // BELOW the line, so no arc ever rendered above it.
+    ctx.arc(cx, midY, radius, Math.PI, Math.PI * (1 + t), false);
   } else {
     ctx.arc(cx, midY, radius, 0, Math.PI * t, false);
   }

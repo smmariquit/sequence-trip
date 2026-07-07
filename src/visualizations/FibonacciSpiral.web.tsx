@@ -2,8 +2,10 @@
 
 import React, { useMemo, useCallback } from "react";
 import { useWebCanvas, hslString } from "./useWebCanvas";
+import { useThemeColors } from "../theme";
 import { useBuildAnimation } from "../playback/useBuildAnimation";
 import { itemRevealAlpha } from "../playback/drawProgress";
+import { drawBackedLabel } from "./canvasAxes";
 
 const GOLDEN_ANGLE = 137.508;
 
@@ -15,6 +17,7 @@ interface Props {
 }
 
 export default function FibonacciSpiral({ width, height, count = 300, preview }: Props) {
+  const colors = useThemeColors();
   const n = preview ? 120 : count;
   const { progressRef } = useBuildAnimation(n, preview);
 
@@ -36,6 +39,20 @@ export default function FibonacciSpiral({ width, height, count = 300, preview }:
       const hueShift = (time * 60) % 360;
       const pulse = Math.sin(time * 3.14) * 0.5 + 0.5;
 
+      if (!preview) {
+        drawBackedLabel(ctx, {
+          text: "dot n sits at angle n × 137.5° and radius √n: sunflower-seed packing",
+          x: cx,
+          y: 18,
+          fg: colors.textMuted,
+          bg: colors.bg,
+          size: 14,
+          weight: "400",
+          align: "center",
+        });
+      }
+
+      let head: { x: number; y: number; i: number } | null = null;
       for (let i = 0; i < basePoints.length; i++) {
         const alpha = itemRevealAlpha(progress, i);
         if (alpha <= 0) continue;
@@ -59,10 +76,16 @@ export default function FibonacciSpiral({ width, height, count = 300, preview }:
         }
         ctx.fill();
         ctx.shadowBlur = 0;
+        head = { x, y, i };
       }
       ctx.globalAlpha = 1;
+
+      if (!preview && head) {
+        const lx = head.x + 12 > w - 140 ? head.x - 12 - 90 : head.x + 12;
+        drawBackedLabel(ctx, { text: `n = ${head.i}`, x: lx, y: head.y, fg: colors.text, bg: colors.bg, size: 15 });
+      }
     },
-    [basePoints, preview, progressRef]
+    [basePoints, preview, progressRef, colors.text, colors.textMuted, colors.bg]
   );
 
   const ref = useWebCanvas(width, height, draw, !preview);

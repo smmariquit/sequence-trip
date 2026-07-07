@@ -12,12 +12,14 @@ import AppIcon, { type AppIconName } from "../ui/AppIcon";
 const TAB_ICONS: Record<string, { active: AppIconName; inactive: AppIconName }> = {
   index: { active: "home", inactive: "home-outline" },
   explore: { active: "compass", inactive: "compass-outline" },
+  settings: { active: "settings", inactive: "settings-outline" },
   about: { active: "information-circle", inactive: "information-circle-outline" },
 };
 
 const TAB_TEST_IDS: Record<string, string> = {
   index: "tab-home",
   explore: "tab-explore",
+  settings: "tab-settings",
   about: "tab-about",
 };
 

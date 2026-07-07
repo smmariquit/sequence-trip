@@ -2,7 +2,9 @@
 
 import React, { useMemo, useCallback } from "react";
 import { useWebCanvas, hslString } from "./useWebCanvas";
+import { useThemeColors } from "../theme";
 import { useBuildAnimation } from "../playback/useBuildAnimation";
+import { drawBackedLabel } from "./canvasAxes";
 import { itemRevealAlpha } from "../playback/drawProgress";
 import { ulamSpiralCoords } from "../sequences/generators";
 
@@ -14,6 +16,7 @@ interface Props {
 }
 
 export default function UlamSpiral({ width, height, count = 2000, preview }: Props) {
+  const colors = useThemeColors();
   const n = preview ? 400 : count;
   const { progressRef } = useBuildAnimation(n, preview);
 
@@ -33,6 +36,20 @@ export default function UlamSpiral({ width, height, count = 2000, preview }: Pro
       const hueShift = (time * 36) % 360;
       const glowPulse = Math.sin(time * 4.2) * 0.5 + 0.5;
 
+      if (!preview) {
+        drawBackedLabel(ctx, {
+          text: "integers spiral outward from 1 at the center; bright dots are primes",
+          x: cx,
+          y: 18,
+          fg: colors.textMuted,
+          bg: colors.bg,
+          size: 14,
+          weight: "400",
+          align: "center",
+        });
+      }
+
+      let head: { x: number; y: number; i: number; prime: boolean } | null = null;
       for (let i = 0; i < data.coords.length; i++) {
         const alpha = itemRevealAlpha(progress, i);
         if (alpha <= 0) continue;
@@ -41,6 +58,7 @@ export default function UlamSpiral({ width, height, count = 2000, preview }: Pro
         const px = cx + c.x * cellSize;
         const py = cy + c.y * cellSize;
 
+        head = { x: px, y: py, i, prime: c.prime };
         if (!c.prime) {
           if (preview && i % 3 !== 0) continue;
           ctx.globalAlpha = alpha * 0.15;
@@ -67,8 +85,17 @@ export default function UlamSpiral({ width, height, count = 2000, preview }: Pro
         ctx.shadowBlur = 0;
       }
       ctx.globalAlpha = 1;
+
+      if (!preview) {
+        drawBackedLabel(ctx, { text: "1", x: cx + 8, y: cy, fg: colors.textMuted, bg: colors.bg, size: 13 });
+        if (head) {
+          const label = `n = ${head.i + 1}${head.prime ? ", prime" : ""}`;
+          const lx = head.x + 12 > w - 150 ? head.x - 12 - 110 : head.x + 12;
+          drawBackedLabel(ctx, { text: label, x: lx, y: head.y - 14, fg: colors.text, bg: colors.bg, size: 15 });
+        }
+      }
     },
-    [data, preview, progressRef]
+    [data, preview, progressRef, colors.text, colors.textMuted, colors.bg]
   );
 
   const ref = useWebCanvas(width, height, draw, !preview);

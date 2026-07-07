@@ -14,6 +14,8 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
   const colors = useThemeColors();
   const stats = useMemo(() => normalize(terms), [terms]);
   const { progressRef } = useBuildAnimation(stats.logs.length, preview);
+  // mouse position in canvas CSS pixels; null when the pointer is outside
+  const mouseRef = React.useRef<{ x: number; y: number } | null>(null);
 
   const layout = useMemo(
     () => layoutLinePlot(stats, width, height, !!preview),
@@ -62,6 +64,36 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
         ctx.fill();
       });
 
+      // hover: nearest plotted point within reach shows its coordinates
+      if (!preview && mouseRef.current) {
+        const m = mouseRef.current;
+        let best = -1;
+        let bestD = 14 * 14;
+        for (let i = 0; i < visible && i < points.length; i++) {
+          const dx = points[i].x - m.x;
+          const dy = points[i].y - m.y;
+          const d = dx * dx + dy * dy;
+          if (d < bestD) {
+            bestD = d;
+            best = i;
+          }
+        }
+        if (best >= 0) {
+          const p = points[best];
+          ctx.beginPath();
+          ctx.strokeStyle = colors.text;
+          ctx.lineWidth = 1.5;
+          ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+          ctx.stroke();
+          const label = `(n = ${best}, a(n) = ${formatTermLabel(stats.terms[best])})`;
+          ctx.font = "600 15px system-ui, sans-serif";
+          const tw = ctx.measureText(label).width;
+          const lx = p.x + 12 + tw > width - layout.pad.right ? p.x - 12 - tw : p.x + 12;
+          const ly = p.y < layout.pad.top + 40 ? p.y + 24 : p.y - 18;
+          drawBackedLabel(ctx, { text: label, x: lx, y: ly, fg: colors.text, bg: colors.bg });
+        }
+      }
+
       // head marker: pulsing dot + "a(n) = value" pinned to the newest term,
       // so the caption readout is visibly anchored to a point on the line
       if (!preview) {
@@ -92,5 +124,19 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
   );
 
   const ref = useWebCanvas(width, height, draw, !preview);
-  return <canvas ref={ref} style={{ width, height, display: "block" }} />;
+  const setRef = React.useCallback(
+    (el: HTMLCanvasElement | null) => {
+      ref(el);
+      if (!el || preview) return;
+      el.onmousemove = (e) => {
+        const rect = el.getBoundingClientRect();
+        mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      };
+      el.onmouseleave = () => {
+        mouseRef.current = null;
+      };
+    },
+    [ref, preview]
+  );
+  return <canvas ref={setRef} style={{ width, height, display: "block" }} />;
 }

@@ -126,7 +126,7 @@ export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
                       <Text style={styles.chipText}>{k}</Text>
                     </View>
                     <Text style={styles.keywordMeaning}>
-                      {keywordMeaning(k) ?? "No standard meaning — see oeis.org/wiki/Keywords."}
+                      {keywordMeaning(k) ?? "No standard meaning. See oeis.org/wiki/Keywords."}
                     </Text>
                   </View>
                 ))}

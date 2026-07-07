@@ -24,10 +24,10 @@ export function collatzCaption(step: number, maxBranches = 40): CaptionText {
   return {
     live:
       branch === 0
-        ? "Press Play — paths appear one starting number at a time (n = 2, 3, 4, …)"
+        ? "Press Play. Paths appear one starting number at a time (n = 2, 3, 4, …)"
         : `Path ${branch}/${maxBranches} · start n = ${startN}: ${formatCollatzTrail(startN)}`,
     guide:
-      "Collatz rule: even → divide by 2; odd → $3n+1$; repeat until $1$. Each colored branch is one full journey. Turns mark odd/even steps along the way. (OEIS A006577 lists how many steps each journey takes — this view draws the journeys.)",
+      "Collatz rule: even → divide by 2; odd → $3n+1$; repeat until $1$. Each colored branch is one full journey. Turns mark odd/even steps along the way. (OEIS A006577 lists how many steps each journey takes. This view draws the journeys.)",
   };
 }
 
@@ -38,7 +38,7 @@ export function recamanCaption(step: number, terms?: string[]): CaptionText {
   return {
     live:
       step === 0
-        ? "Press Play — semicircles build the sequence from a(0) = 0"
+        ? "Press Play. Semicircles build the sequence from a(0) = 0"
         : `Step ${i}: a(${i}) = ${seq[i]}`,
     guide:
       "Values sit on a number line. Each semicircle connects $a(n-1)$ to $a(n)$ with radius $n$. Even steps arc up, odd steps arc down.",
@@ -81,11 +81,11 @@ export function genericCaption(
 
 const GUIDES: Partial<Record<string, string>> = {
   "fibonacci-spiral":
-    "Dots at successive golden-angle turns — the same spacing as sunflower seed heads.",
+    "Dots at successive golden-angle turns, the same spacing as sunflower seed heads.",
   "ulam-spiral":
     "Integers spiral out from $1$; bright dots are primes, added one integer at a time.",
   "pascal-fractal":
-    "Pascal's triangle mod $2$ — odd entries light up, row by row (Sierpiński triangle).",
+    "Pascal's triangle mod $2$: odd entries light up, row by row (Sierpiński triangle).",
   "digit-flow":
     "Each digit of $\\pi$ steers the walker; the path extends one digit at a time.",
 };

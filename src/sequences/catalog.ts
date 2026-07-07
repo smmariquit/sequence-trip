@@ -32,7 +32,7 @@ export const sequences: OEISSequence[] = [
     anum: "A006577",
     name: "Collatz Trajectories",
     description:
-      "The Collatz conjecture: repeat “halve if even, otherwise 3n+1” until you reach 1 — believed to always work, but unproven. This viz draws each starting number’s path as a branch; the OEIS entry counts steps to finish.",
+      "The Collatz conjecture: repeat “halve if even, otherwise 3n+1” until you reach 1. Believed to always work, but unproven. This viz draws each starting number’s path as a branch; the OEIS entry counts steps to finish.",
     vizType: "collatz-tree",
     generate: (n) => gen.collatzLengths(n),
   },

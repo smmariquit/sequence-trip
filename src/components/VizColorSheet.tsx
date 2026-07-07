@@ -31,32 +31,23 @@ function swatchColors(id: PaletteId, hueOffset: number): string[] {
   return palettes[id].filter((_, i) => i % 2 === 0).slice(0, 4);
 }
 
-export default function VizColorSheet({
-  anum,
-  visible,
-  onClose,
-}: {
-  anum: string;
-  visible: boolean;
-  onClose: () => void;
-}) {
+/** Palette / hue / glow controls. With an anum, edits can be saved per
+ * sequence; without one they always edit the global default. */
+export function VizColorControls({ anum }: { anum?: string }) {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
   useSyncExternalStore(subscribeVizColors, vizColorVersion, vizColorVersion);
 
   const settings = activeVizColors();
-  const overridden = hasPerSequenceOverride(anum);
+  const overridden = anum ? hasPerSequenceOverride(anum) : false;
 
   const update = (patch: Partial<VizColorSettings>) => {
     // editing writes to the scope currently in effect
-    setVizColors({ ...settings, ...patch }, overridden ? { anum } : {});
+    setVizColors({ ...settings, ...patch }, overridden && anum ? { anum } : {});
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close color settings">
-        <Pressable style={styles.sheet} onPress={() => {}} testID="viz-color-sheet">
-          <PlainText style={styles.heading}>Visualization colors</PlainText>
+    <>
 
           <View style={styles.paletteRow}>
             {PALETTE_IDS.map((id) => {
@@ -116,20 +107,44 @@ export default function VizColorSheet({
             </Pressable>
           </View>
 
-          <Pressable
-            onPress={() =>
-              overridden ? clearPerSequenceOverride(anum) : setVizColors(settings, { anum })
-            }
-            style={[styles.scopeBtn, overridden && styles.scopeBtnOn]}
-            accessibilityRole="button"
-            testID="viz-color-scope"
-          >
-            <PlainText style={overridden ? styles.toggleTextOn : styles.toggleText}>
-              {overridden
-                ? `Saved for ${anum} — tap to use global colors`
-                : `Save just for ${anum}`}
-            </PlainText>
-          </Pressable>
+      {anum ? (
+        <Pressable
+          onPress={() =>
+            overridden ? clearPerSequenceOverride(anum) : setVizColors(settings, { anum })
+          }
+          style={[styles.scopeBtn, overridden && styles.scopeBtnOn]}
+          accessibilityRole="button"
+          testID="viz-color-scope"
+        >
+          <PlainText style={overridden ? styles.toggleTextOn : styles.toggleText}>
+            {overridden
+              ? `Saved for ${anum}. Tap to use global colors`
+              : `Save just for ${anum}`}
+          </PlainText>
+        </Pressable>
+      ) : null}
+    </>
+  );
+}
+
+export default function VizColorSheet({
+  anum,
+  visible,
+  onClose,
+}: {
+  anum: string;
+  visible: boolean;
+  onClose: () => void;
+}) {
+  const colors = useThemeColors();
+  const styles = React.useMemo(() => makeStyles(colors), [colors]);
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close color settings">
+        <Pressable style={styles.sheet} onPress={() => {}} testID="viz-color-sheet">
+          <PlainText style={styles.heading}>Visualization colors</PlainText>
+          <VizColorControls anum={anum} />
         </Pressable>
       </Pressable>
     </Modal>
@@ -141,20 +156,23 @@ const makeStyles = (colors: any) => StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.55)",
     justifyContent: "flex-end",
+    alignItems: "center",
   },
   sheet: {
     backgroundColor: colors.bgElevated,
-    borderTopLeftRadius: radii.xl,
-    borderTopRightRadius: radii.xl,
+    borderRadius: radii.xl,
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.lg,
     paddingBottom: spacing.xl,
     gap: spacing.sm,
+    width: "100%",
+    maxWidth: 520,
+    marginBottom: spacing.lg,
   },
   heading: {
     color: colors.text,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "700",
     marginBottom: spacing.xs,
   },
@@ -187,17 +205,17 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   paletteLabel: {
     color: colors.textMuted,
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "600",
   },
   paletteLabelActive: {
     color: colors.primary,
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "600",
   },
   label: {
-    color: colors.textDim,
-    fontSize: 13,
+    color: colors.text,
+    fontSize: 15,
     fontWeight: "600",
     marginTop: spacing.xs,
   },
@@ -224,12 +242,12 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   toggleText: {
     color: colors.textMuted,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
   },
   toggleTextOn: {
     color: colors.primary,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
   },
   scopeBtn: {

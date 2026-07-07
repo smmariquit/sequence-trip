@@ -107,9 +107,9 @@ const makeStyles = (colors: any) => StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   infoText: {
-    color: colors.textDim,
-    fontSize: 13,
-    lineHeight: 19,
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 22,
   },
   chip: {
     paddingHorizontal: spacing.sm,
@@ -128,12 +128,12 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   label: {
     color: colors.textMuted,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
   },
   labelActive: {
     color: colors.primary,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
   },
 });

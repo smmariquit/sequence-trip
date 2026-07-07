@@ -18,7 +18,7 @@ export function drawBackedLabel(
     align?: "left" | "center";
   }
 ) {
-  const { text, x, y, fg, bg, size = 13, weight = "600", align = "left" } = opts;
+  const { text, x, y, fg, bg, size = 15, weight = "600", align = "left" } = opts;
   ctx.font = `${weight} ${size}px system-ui, sans-serif`;
   const w = ctx.measureText(text).width;
   const padX = 5;
@@ -116,7 +116,7 @@ export function drawPlotAxes(
   ctx.fillStyle = ink;
   ctx.globalAlpha = 0.85;
   ctx.lineWidth = 1;
-  ctx.font = "12px system-ui, sans-serif";
+  ctx.font = "13px system-ui, sans-serif";
 
   ctx.beginPath();
   ctx.moveTo(left, bottom);
