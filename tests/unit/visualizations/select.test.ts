@@ -1,52 +1,71 @@
-import { pickGenericViz, pickGenericVizInfo } from "../../../src/visualizations/generic/select";
+import {
+  pickGenericViz,
+  pickGenericVizInfo,
+  rankGenericViz,
+} from "../../../src/visualizations/generic/select";
 import TurtleWalk from "../../../src/visualizations/generic/TurtleWalk";
 import BarWaveform from "../../../src/visualizations/generic/BarWaveform";
 import ModGrid from "../../../src/visualizations/generic/ModGrid";
 import LinePlot from "../../../src/visualizations/generic/LinePlot";
 import PhasePlane from "../../../src/visualizations/generic/PhasePlane";
 
-describe("pickGenericViz", () => {
-  it("picks BarWaveform for negative terms", () => {
-    expect(pickGenericViz("A000001", ["1", "-1", "2"])).toBe(BarWaveform);
+describe("rankGenericViz heuristics", () => {
+  it("defaults to BarWaveform for signed data", () => {
+    expect(pickGenericViz(["1", "-1", "2"])).toBe(BarWaveform);
   });
 
-  it("picks ModGrid for binary sequences", () => {
-    expect(pickGenericViz("A007318", ["0", "1", "1", "0", "1"])).toBe(ModGrid);
+  it("defaults to ModGrid for binary sequences", () => {
+    expect(pickGenericViz(["0", "1", "1", "0", "1"])).toBe(ModGrid);
   });
 
-  it("is stable for the same anum", () => {
+  it("defaults to LinePlot for monotone growth", () => {
+    expect(pickGenericViz(["1", "2", "4", "8", "16", "32"])).toBe(LinePlot);
+  });
+
+  it("defaults to TurtleWalk for bounded small-range data", () => {
+    // digits-like: bounded, few distinct values, non-monotone
+    expect(pickGenericViz(["3", "1", "4", "1", "5", "9", "2", "6"])).toBe(TurtleWalk);
+  });
+
+  it("defaults to PhasePlane for oscillating wide-range data", () => {
+    const terms = ["1", "1000", "3", "999999", "7", "123456789", "2"];
+    expect(pickGenericViz(terms)).toBe(PhasePlane);
+  });
+
+  it("is deterministic for the same terms", () => {
     const terms = ["1", "2", "4", "8", "16"];
-    const a = pickGenericViz("A000079", terms);
-    const b = pickGenericViz("A000079", terms);
-    expect(a).toBe(b);
+    expect(pickGenericViz(terms)).toBe(pickGenericViz(terms));
   });
 
-  it("varies across anums for non-binary sequences", () => {
-    const terms = ["1", "2", "3", "4", "5", "6"];
-    const picks = new Set(
-      ["A000001", "A000002", "A000003", "A000004"].map((a) =>
-        pickGenericViz(a, terms)
-      )
-    );
-    expect(picks.has(LinePlot)).toBe(true);
-    expect(picks.has(PhasePlane)).toBe(true);
-  });
-
-  it("never draws a turtle walk when every turn is identical (polygon trap)", () => {
-    // find an anum that hashes to TurtleWalk, then feed it mod-4-constant terms
-    const varied = ["1", "2", "3", "5", "8", "13"];
-    let turtleAnum = "";
-    for (let i = 1; i < 50 && !turtleAnum; i++) {
-      const anum = `A${String(i).padStart(6, "0")}`;
-      if (pickGenericViz(anum, varied) === TurtleWalk) turtleAnum = anum;
-    }
-    expect(turtleAnum).not.toBe("");
+  it("never offers a turtle walk when every turn is identical (polygon trap)", () => {
     const constMod4 = ["4", "8", "16", "40", "104"]; // all ≡ 0 (mod 4)
-    expect(pickGenericViz(turtleAnum, constMod4)).toBe(LinePlot);
+    const keys = rankGenericViz(constMod4).map((c) => c.key);
+    expect(keys).not.toContain("turtle");
+  });
+
+  it("only offers a color grid for small-range data", () => {
+    const wide = ["1", "50", "5000", "123456789"];
+    expect(rankGenericViz(wide).map((c) => c.key)).not.toContain("grid");
+  });
+
+  it("always offers at least two choices with labels and guides", () => {
+    const ranked = rankGenericViz(["1", "2", "3"]);
+    expect(ranked.length).toBeGreaterThanOrEqual(2);
+    for (const c of ranked) {
+      expect(c.label).toBeTruthy();
+      expect(c.guide).toBeTruthy();
+    }
   });
 
   it("returns a guide describing the picked encoding", () => {
-    const info = pickGenericVizInfo("A000001", ["1", "-2", "3"]);
-    expect(info.guide).toMatch(/negative/);
+    expect(pickGenericVizInfo(["1", "-2", "3"]).guide).toMatch(/negative/);
+  });
+
+  it("judges only the stable 48-term prefix so load-more can't flip the viz", () => {
+    const prefix = Array.from({ length: 48 }, (_, i) => String(i + 1)); // monotone
+    const before = pickGenericViz(prefix);
+    const after = pickGenericViz([...prefix, "1"]); // term 49 breaks monotonicity
+    expect(after).toBe(before);
+    expect(before).toBe(LinePlot);
   });
 });

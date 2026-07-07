@@ -16,6 +16,8 @@ import { MusicProvider } from "../../src/audio/MusicContext";
 import { useThemeColors } from "../../src/theme";
 import VizPreview from "../../src/components/VizPreview";
 import VizCaption from "../../src/components/VizCaption";
+import VizSwitcher from "../../src/components/VizSwitcher";
+import { rankGenericViz, type GenericVizKey } from "../../src/visualizations/generic/select";
 import SequenceEntryPanel from "../../src/components/SequenceEntryPanel";
 import { CenteredState } from "../../src/components/ui";
 import { useSequenceTermCount } from "../../src/hooks/useSequenceTermCount";
@@ -30,6 +32,9 @@ export default function VisualizeScreen() {
   const [loading, setLoading] = useState(() => !catalogSeq && !!id);
   const [vizSize, setVizSize] = useState({ width: 0, height: 0 });
   const [entryOpen, setEntryOpen] = useState(false);
+  const [vizKey, setVizKey] = useState<GenericVizKey | undefined>();
+
+  useEffect(() => setVizKey(undefined), [id]);
 
   const seq = catalogSeq ?? dbSeq;
 
@@ -82,6 +87,14 @@ export default function VisualizeScreen() {
     };
   }, [id, catalogSeq]);
 
+  const vizChoices = useMemo(
+    () =>
+      !seq?.vizType && displaySequence?.terms?.length
+        ? rankGenericViz(displaySequence.terms)
+        : [],
+    [seq?.vizType, displaySequence?.terms]
+  );
+
   if (loading) {
     return <CenteredState loading />;
   }
@@ -118,8 +131,14 @@ export default function VisualizeScreen() {
                   height={vizSize.height}
                   preview={false}
                   count={seq.vizType ? termCount : undefined}
+                  genericVizKey={vizKey}
                 />
-                <VizCaption sequence={displaySequence} termCount={termCount} />
+                <VizSwitcher choices={vizChoices} active={vizKey} onSelect={setVizKey} />
+                <VizCaption
+                  sequence={displaySequence}
+                  termCount={termCount}
+                  genericVizKey={vizKey}
+                />
               </>
             )}
           </View>

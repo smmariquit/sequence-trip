@@ -2,7 +2,7 @@
 
 import type { OEISSequence } from "../sequences/types";
 import { recaman, collatzSequence } from "../sequences/generators";
-import { pickGenericVizInfo } from "../visualizations/generic/select";
+import { rankGenericViz, type GenericVizKey } from "../visualizations/generic/select";
 
 export interface CaptionText {
   /** One-line playback status — always visible. */
@@ -45,25 +45,30 @@ export function recamanCaption(step: number, terms?: string[]): CaptionText {
   };
 }
 
-// pickGenericVizInfo runs normalize() over every term; the caption re-renders
+// rankGenericViz runs normalize() over every term; the caption re-renders
 // each playback step, so cache the (constant per sequence) guide string.
 const guideCache = new Map<string, string>();
 
-function genericGuide(anum: string, terms: string[]): string {
-  const key = `${anum}:${terms.length}`;
+function genericGuide(anum: string, terms: string[], vizKey?: GenericVizKey): string {
+  const key = `${anum}:${terms.length}:${vizKey ?? ""}`;
   let guide = guideCache.get(key);
   if (!guide) {
-    guide = pickGenericVizInfo(anum, terms).guide;
+    const ranked = rankGenericViz(terms);
+    guide = (ranked.find((c) => c.key === vizKey) ?? ranked[0]).guide;
     guideCache.set(key, guide);
   }
   return guide;
 }
 
-export function genericCaption(sequence: OEISSequence, step: number): CaptionText {
+export function genericCaption(
+  sequence: OEISSequence,
+  step: number,
+  vizKey?: GenericVizKey
+): CaptionText {
   const terms = sequence.terms ?? [];
-  // same deterministic pick as VizPreview, so the guide matches what's drawn
+  // same pick as VizPreview, so the guide matches what's drawn
   const guide = terms.length
-    ? genericGuide(sequence.anum, terms)
+    ? genericGuide(sequence.anum, terms, vizKey)
     : "Horizontal axis = index $n$. Vertical axis = $a(n)$ (log-scaled when values are huge).";
   return {
     live:
@@ -88,7 +93,8 @@ const GUIDES: Partial<Record<string, string>> = {
 export function captionForSequence(
   sequence: OEISSequence,
   step: number,
-  termCount?: number
+  termCount?: number,
+  genericVizKey?: GenericVizKey
 ): CaptionText {
   if (sequence.vizType === "recaman-arcs") {
     return recamanCaption(step, sequence.terms);
@@ -103,5 +109,5 @@ export function captionForSequence(
       guide: GUIDES[sequence.vizType] ?? generic.guide,
     };
   }
-  return genericCaption(sequence, step);
+  return genericCaption(sequence, step, genericVizKey);
 }

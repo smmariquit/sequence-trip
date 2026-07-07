@@ -10,7 +10,7 @@ import {
   PascalFractal,
   DigitFlow,
 } from "../visualizations";
-import { pickGenericViz } from "../visualizations/generic/select";
+import { rankGenericViz, type GenericVizKey } from "../visualizations/generic/select";
 
 interface Props {
   sequence: OEISSequence;
@@ -19,9 +19,11 @@ interface Props {
   preview?: boolean;
   /** Full-screen featured viz: how many terms/steps to build. */
   count?: number;
+  /** User-selected generic viz; defaults to the heuristic pick. */
+  genericVizKey?: GenericVizKey;
 }
 
-function VizPreview({ sequence, width, height, preview = true, count }: Props) {
+function VizPreview({ sequence, width, height, preview = true, count, genericVizKey }: Props) {
   const isPreview = preview !== false;
 
   switch (sequence.vizType) {
@@ -45,7 +47,8 @@ function VizPreview({ sequence, width, height, preview = true, count }: Props) {
       return <DigitFlow width={width} height={height} count={count} preview={isPreview} />;
     default: {
       if (!sequence.terms?.length) return null;
-      const Viz = pickGenericViz(sequence.anum, sequence.terms);
+      const ranked = rankGenericViz(sequence.terms);
+      const Viz = (ranked.find((c) => c.key === genericVizKey) ?? ranked[0]).Component;
       return <Viz terms={sequence.terms} width={width} height={height} preview={isPreview} />;
     }
   }

@@ -13,6 +13,7 @@ import { containsLatexDelimiters } from "../math/latexDelimiters";
 import MathText from "./MathText";
 import PlainText from "./PlainText";
 import { captionForSequence } from "./vizCaptionText";
+import type { GenericVizKey } from "../visualizations/generic/select";
 import AppIcon from "./ui/AppIcon";
 
 function CaptionLine({
@@ -41,15 +42,17 @@ function CaptionLine({
 export default function VizCaption({
   sequence,
   termCount,
+  genericVizKey,
 }: {
   sequence: OEISSequence;
   termCount?: number;
+  genericVizKey?: GenericVizKey;
 }) {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 
   const { step } = usePlayback();
-  const { live, guide } = captionForSequence(sequence, step, termCount);
+  const { live, guide } = captionForSequence(sequence, step, termCount, genericVizKey);
   const [guideOpen, setGuideOpen] = useState(false);
 
   return (

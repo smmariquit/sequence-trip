@@ -49,3 +49,32 @@ test.describe("Visualize", () => {
     await expect(page.getByText("96 terms")).toBeVisible();
   });
 });
+
+test.describe("Generic viz switcher", () => {
+  test("switches viz and guide follows selection", async ({ page }) => {
+    // A000108 (Catalan numbers) has no hand-crafted vizType — generic path
+    await page.goto("/visualize/A000108");
+    // db-backed sequence: first hit downloads the OEIS db in the browser
+    await expect(page.getByTestId("visualize-screen")).toBeVisible({ timeout: 60_000 });
+
+    const switcher = page.getByTestId("viz-switcher");
+    await expect(switcher).toBeVisible();
+    // monotone growth: heuristic default is the line plot
+    await expect(page.getByTestId("viz-switcher-line")).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+
+    await page.getByTestId("viz-switcher-phase").click();
+    await expect(page.getByTestId("viz-switcher-phase")).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+
+    // guide must describe the selected viz, not the default
+    await page.getByTestId("viz-caption-guide").click();
+    await expect(
+      page.getByTestId("viz-caption").getByText(/pairs consecutive terms/i)
+    ).toBeVisible();
+  });
+});
