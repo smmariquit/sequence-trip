@@ -26,6 +26,7 @@ function ResultRow({ sequence, showPreview = true }: Props) {
   return (
     <PressableCard
       onPress={() => router.push(`/visualize/${sequence.anum}`)}
+      accessibilityLabel={`Visualize ${sequence.name}, ${sequence.anum}`}
       pressedOpacity={0.8}
       pressedScale={1}
       style={styles.outer}
@@ -43,7 +44,7 @@ function ResultRow({ sequence, showPreview = true }: Props) {
           )}
         </View>
         {showPreview ? (
-          <View style={styles.previewWrap}>
+          <View style={styles.previewWrap} importantForAccessibility="no-hide-descendants">
             <ErrorBoundary fallbackText="Preview unavailable">
               <VizPreview
                 sequence={sequence}

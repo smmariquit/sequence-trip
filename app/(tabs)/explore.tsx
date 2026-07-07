@@ -52,7 +52,7 @@ export default function ExploreScreen() {
   }, []);
 
   return (
-    <View style={styles.container} testID="explore-screen">
+    <View style={styles.container} testID="explore-screen" nativeID="main">
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}

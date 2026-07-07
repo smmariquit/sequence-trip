@@ -93,7 +93,7 @@ export default function VisualizeScreen() {
   return (
     <PlaybackProvider>
       <MusicProvider sequence={displaySequence}>
-        <View style={styles.container} testID="visualize-screen">
+        <View style={styles.container} testID="visualize-screen" nativeID="main">
           <Controls
             title={seq.name}
             oeis={seq.anum}
@@ -103,7 +103,13 @@ export default function VisualizeScreen() {
             loadingMore={loadingMore}
             onLoadMore={loadMore}
           />
-          <View style={styles.vizArea} onLayout={onVizLayout}>
+          <View
+            style={styles.vizArea}
+            onLayout={onVizLayout}
+            accessible
+            accessibilityRole="image"
+            accessibilityLabel={`Animated visualization of ${seq.name}`}
+          >
             {vizSize.width > 0 && vizSize.height > 0 && (
               <>
                 <VizPreview

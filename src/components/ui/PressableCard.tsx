@@ -14,6 +14,7 @@ interface Props {
   style?: StyleProp<ViewStyle>;
   pressedOpacity?: number;
   pressedScale?: number;
+  accessibilityLabel?: string;
 }
 
 export default function PressableCard({
@@ -22,10 +23,13 @@ export default function PressableCard({
   style,
   pressedOpacity = 0.85,
   pressedScale = 0.98,
+  accessibilityLabel,
 }: Props) {
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       style={({ pressed }) => [
         style,
         pressed && {

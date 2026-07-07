@@ -31,10 +31,14 @@ function SequenceCard({ sequence, cardWidth }: Props) {
   return (
     <PressableCard
       onPress={handlePress}
+      accessibilityLabel={`Visualize ${sequence.name}, ${sequence.anum}`}
       style={[styles.cardOuter, { width: cardWidth }]}
     >
       <CardSurface variant="card" style={styles.card}>
-        <View style={[styles.previewContainer, { width: cardWidth }]}>
+        <View
+          style={[styles.previewContainer, { width: cardWidth }]}
+          importantForAccessibility="no-hide-descendants"
+        >
           <ErrorBoundary fallbackText={`Preview: ${sequence.name}`}>
             <VizPreview
               sequence={sequence}

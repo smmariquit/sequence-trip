@@ -27,6 +27,7 @@ export default function SearchField({
       <AppIcon name="search" size={touch.iconSizeSm} color={colors.textMuted} />
       <TextInput
         testID={testID}
+        accessibilityLabel="Search sequences by name, A-number, or terms"
         style={styles.input}
         value={value}
         onChangeText={onChangeText}

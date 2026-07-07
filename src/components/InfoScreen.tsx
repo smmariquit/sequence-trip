@@ -27,6 +27,7 @@ export default function InfoScreen() {
       style={styles.container}
       contentContainerStyle={styles.content}
       testID="info-screen"
+      nativeID="main"
     >
       <View style={styles.topRow}>
         <LogoTitleRow title="About" subtitle={APP_NAME} size="page" />

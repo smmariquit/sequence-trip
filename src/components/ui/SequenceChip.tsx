@@ -21,7 +21,12 @@ export default function SequenceChip({ anum, onPress }: Props) {
   const handlePress = onPress ?? (() => router.push(`/visualize/${anum}`));
 
   return (
-    <PressableCard onPress={handlePress} pressedScale={0.97} pressedOpacity={0.9}>
+    <PressableCard
+      onPress={handlePress}
+      accessibilityLabel={`Open sequence ${anum}`}
+      pressedScale={0.97}
+      pressedOpacity={0.9}
+    >
       <CardSurface variant="chip">
         <View style={styles.row}>
           <Text style={styles.text}>{anum}</Text>

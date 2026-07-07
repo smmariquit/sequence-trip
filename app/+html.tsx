@@ -39,12 +39,31 @@ export default function Root({ children }: PropsWithChildren) {
         <ScrollViewStyleReset />
         <style dangerouslySetInnerHTML={{ __html: webStyles }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <a href="#main" className="skip-link">
+          Skip to main content
+        </a>
+        {children}
+      </body>
     </html>
   );
 }
 
 const webStyles = `
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 100;
+  background: #F0ECFF;
+  color: #07060E;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: system-ui, sans-serif;
+}
+.skip-link:focus {
+  left: 8px;
+  top: 8px;
+}
 html, body {
   height: 100%;
   background-color: #07060E;
