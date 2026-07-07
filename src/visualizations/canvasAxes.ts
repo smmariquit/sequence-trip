@@ -4,11 +4,20 @@
 
 export function drawNumberLine(
   ctx: CanvasRenderingContext2D,
-  opts: { x0: number; y: number; span: number; maxVal: number; preview?: boolean }
+  opts: {
+    x0: number;
+    y: number;
+    span: number;
+    maxVal: number;
+    preview?: boolean;
+    /** Theme ink for axis lines/labels — hardcoded light ink vanishes on light bg. */
+    ink?: string;
+  }
 ) {
-  const { x0, y, span, maxVal, preview } = opts;
-  ctx.strokeStyle = "rgba(240, 236, 255, 0.35)";
-  ctx.fillStyle = "rgba(240, 236, 255, 0.55)";
+  const { x0, y, span, maxVal, preview, ink = "rgba(240, 236, 255, 0.55)" } = opts;
+  ctx.strokeStyle = ink;
+  ctx.fillStyle = ink;
+  ctx.globalAlpha = 0.75;
   ctx.lineWidth = 1;
   ctx.font = preview ? "9px system-ui, sans-serif" : "12px system-ui, sans-serif";
   ctx.textAlign = "center";
@@ -31,6 +40,7 @@ export function drawNumberLine(
       ctx.fillText(String(v), x, y + 8);
     }
   }
+  ctx.globalAlpha = 1;
   ctx.textAlign = "left";
 }
 
@@ -43,9 +53,10 @@ export function drawPlotAxes(
     xLabel: string;
     yLabel: string;
     preview?: boolean;
+    ink?: string;
   }
 ) {
-  const { pad, width, height, xLabel, yLabel, preview } = opts;
+  const { pad, width, height, xLabel, yLabel, preview, ink = "rgba(240, 236, 255, 0.5)" } = opts;
   if (preview) return;
 
   const left = pad;
@@ -53,8 +64,9 @@ export function drawPlotAxes(
   const right = width - pad;
   const top = pad;
 
-  ctx.strokeStyle = "rgba(240, 236, 255, 0.3)";
-  ctx.fillStyle = "rgba(240, 236, 255, 0.5)";
+  ctx.strokeStyle = ink;
+  ctx.fillStyle = ink;
+  ctx.globalAlpha = 0.7;
   ctx.lineWidth = 1;
   ctx.font = "11px system-ui, sans-serif";
 
@@ -72,5 +84,6 @@ export function drawPlotAxes(
   ctx.rotate(-Math.PI / 2);
   ctx.fillText(yLabel, 0, 0);
   ctx.restore();
+  ctx.globalAlpha = 1;
   ctx.textAlign = "left";
 }

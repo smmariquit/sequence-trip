@@ -96,7 +96,7 @@ const makeStyles = (colors: any) => StyleSheet.create({
     bottom: 0,
   },
   bar: {
-    backgroundColor: "rgba(14, 12, 24, 0.94)",
+    backgroundColor: colors.bgElevated,
     borderTopWidth: 1,
     borderTopColor: colors.borderSubtle,
     paddingHorizontal: spacing.lg,

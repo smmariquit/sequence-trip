@@ -2,6 +2,7 @@
 
 import React, { useMemo, useCallback } from "react";
 import { useWebCanvas, hslString } from "./useWebCanvas";
+import { useThemeColors } from "../theme";
 import { useBuildAnimation } from "../playback/useBuildAnimation";
 import { splitProgress, strokeRecamanArc } from "../playback/drawProgress";
 import { drawNumberLine } from "./canvasAxes";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function RecamanArcs({ width, height, count = 64, preview }: Props) {
+  const colors = useThemeColors();
   const n = preview ? 28 : count;
 
   const seq = useMemo(() => {
@@ -48,8 +50,8 @@ export default function RecamanArcs({ width, height, count = 64, preview }: Prop
       const breathe = Math.sin(time * 2.1) * 0.5 + 0.5;
 
       if (!preview) {
-        drawNumberLine(ctx, { x0: pad, y: axisY, span, maxVal });
-        ctx.fillStyle = "rgba(240, 236, 255, 0.45)";
+        drawNumberLine(ctx, { x0: pad, y: axisY, span, maxVal, ink: colors.textMuted });
+        ctx.fillStyle = colors.textMuted;
         ctx.font = "11px system-ui, sans-serif";
         ctx.fillText("value on number line (low to high)", pad, axisY - 6);
       }
@@ -124,7 +126,7 @@ export default function RecamanArcs({ width, height, count = 64, preview }: Prop
         }
       }
     },
-    [seq, preview, progressRef]
+    [seq, preview, progressRef, colors.textMuted]
   );
 
   const ref = useWebCanvas(width, height, draw, !preview);

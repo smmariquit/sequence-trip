@@ -2,6 +2,7 @@
 
 import React, { useCallback, useMemo } from "react";
 import { useWebCanvas, hslString } from "../useWebCanvas";
+import { useThemeColors } from "../../theme";
 import { useBuildAnimation } from "../../playback/useBuildAnimation";
 import { strokePolylineProgress } from "../../playback/drawProgress";
 import { normalize } from "../../sequences/normalize";
@@ -9,6 +10,7 @@ import { drawPlotAxes } from "../canvasAxes";
 import type { GenericVizProps } from "./types";
 
 export default function PhasePlane({ terms, width, height, preview }: GenericVizProps) {
+  const colors = useThemeColors();
   const stats = useMemo(() => normalize(terms), [terms]);
 
   const points = useMemo(() => {
@@ -38,6 +40,7 @@ export default function PhasePlane({ terms, width, height, preview }: GenericViz
           xLabel: "a(n)",
           yLabel: "a(n+1)",
           preview,
+          ink: colors.textMuted,
         });
       }
       if (points.length === 0 || progress <= 0) return;
@@ -62,7 +65,7 @@ export default function PhasePlane({ terms, width, height, preview }: GenericViz
         ctx.fill();
       }
     },
-    [points, preview, progressRef, width, height]
+    [points, preview, progressRef, width, height, colors.textMuted]
   );
 
   const ref = useWebCanvas(width, height, draw, !preview);

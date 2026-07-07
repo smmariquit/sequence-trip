@@ -8,7 +8,7 @@ import {
   Circle,
   Line,
 } from "@shopify/react-native-skia";
-import { hslToHex } from "../theme";
+import { hslToHex, useThemeColors } from "../theme";
 import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
 
 interface Props {
@@ -113,6 +113,7 @@ export function RecamanArcsPreview({ width, height }: { width: number; height: n
 }
 
 export function RecamanArcsFull({ width, height, count = 64 }: Omit<Props, "preview">) {
+  const colors = useThemeColors();
   const n = count;
   const { progressSV, step: visible } = useBuildAnimation(Math.max(n - 1, 0), false);
   const growEnd = useItemFrac(progressSV, visible);
@@ -168,14 +169,16 @@ export function RecamanArcsFull({ width, height, count = 64 }: Omit<Props, "prev
           key={`tick-${i}`}
           p1={{ x: t.x, y: t.y - 5 }}
           p2={{ x: t.x, y: t.y + 5 }}
-          color="rgba(240, 236, 255, 0.35)"
+          color={colors.textMuted}
+          opacity={0.6}
           strokeWidth={1}
         />
       ))}
       <Line
         p1={{ x: layout.pad, y: layout.axisY }}
         p2={{ x: layout.pad + layout.span, y: layout.axisY }}
-        color="rgba(240, 236, 255, 0.35)"
+        color={colors.textMuted}
+        opacity={0.6}
         strokeWidth={1}
       />
       {arcs.map((arc, i) => (
