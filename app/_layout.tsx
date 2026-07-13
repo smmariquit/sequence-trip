@@ -19,6 +19,7 @@ import { loadMusicSettings } from "../src/audio/musicSettings";
 import { loadNotifySettings } from "../src/notifications/notifyStore";
 import { rescheduleDaily } from "../src/notifications/scheduler";
 import { writeWidgetSnapshot } from "../src/widget/snapshot";
+import { loadGameProgress } from "../src/game/progressStore";
 
 // show a banner when a scheduled notification fires while the app is foregrounded
 if (Platform.OS !== "web") {
@@ -40,6 +41,7 @@ export default function RootLayout() {
     void loadVizColorPrefs();
     void loadMusicSettings();
     void loadNotifySettings().then(rescheduleDaily);
+    void loadGameProgress();
     void writeWidgetSnapshot();
   }, []);
 

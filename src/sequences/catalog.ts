@@ -46,7 +46,7 @@ export const sequences: OEISSequence[] = [
   },
   {
     anum: "A000796",
-    name: "Digit River of $\\pi$",
+    name: "Digit River of pi",
     description:
       "Each digit of $\\pi$ turns a walker left, right, or straight. The digits pass every statistical test for randomness applied so far, but no proof of that randomness exists.",
     vizType: "digit-flow",
