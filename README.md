@@ -9,7 +9,7 @@ Visualize [OEIS](https://oeis.org) integer sequences as animated constructions: 
 
 ## What this is
 
-**Sequence Trip** (package name `sequence-trip`) is an Expo app that turns OEIS sequences into watchable visualizations. Browse featured classics, search 397k+ sequences by name or terms, and step through constructions with play/pause controls and LaTeX captions.
+**Sequence Trip** (package name `sequence-trip`) is an Expo app that turns OEIS sequences into watchable visualizations. Play the daily OEISdle puzzle, browse featured classics, search 397k+ sequences by name or terms, and step through constructions with playback and zoom controls.
 
 Works on **web** (react-native-web + canvas), **Android**, and **iOS** (Skia native rendering).
 
@@ -19,10 +19,11 @@ Works on **web** (react-native-web + canvas), **Android**, and **iOS** (Skia nat
 | --- | --- |
 | Featured catalog | Curated sequences with dedicated viz types (Recamán, Fibonacci spiral, Ulam, Collatz, Pascal, digit flow) |
 | Full OEIS search | Bundled SQLite database built from official OEIS dumps |
+| Daily OEISdle | One shared puzzle each UTC day, with Easy, Normal, and Hard modes, streaks, and spoiler-free sharing |
 | Generic visualizations | Line plot, bar waveform, mod grid, polar spiral, turtle walk for arbitrary term lists |
 | Smooth construction | Fractional progress animation (not discrete step ticks) |
 | Math captions | KaTeX on web; stripped delimiters on native |
-| Playback controls | Play, pause, restart, speed presets |
+| Playback controls | Play, pause, restart, speed presets, pinch zoom, pan, and reset |
 
 ## Stack
 
@@ -118,7 +119,7 @@ GitHub Actions (`.github/workflows/`):
 
 EAS runs `npm run build:db` post-install (`eas-build-post-install` in `package.json`) so the OEIS database is included in native builds.
 
-Local EAS profiles are in [`eas.json`](eas.json). Android submit expects `google-services.json` (gitignored).
+Local EAS profiles are in [`eas.json`](eas.json). Android submit expects `play-service-account.json` (gitignored).
 
 ### Dependabot
 
@@ -127,9 +128,10 @@ Weekly npm and GitHub Actions update PRs (`.github/dependabot.yml`). Review and 
 ## Project layout
 
 ```
-app/                    expo-router screens (home, visualize/[id], about)
+app/                    expo-router screens (home, daily, visualize/[id], about)
 src/
   components/           UI (Controls, captions, cards, MathText)
+  game/                 Daily puzzle selection, mechanics, and progress
   oeis/                 SQLite access + b-file fetch
   playback/             Animation progress and PlaybackContext
   sequences/            Catalog, generators, normalization

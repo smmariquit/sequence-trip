@@ -28,13 +28,18 @@ import {
 } from "../../src/components/exportWallpaper";
 import { CenteredState } from "../../src/components/ui";
 import { useSequenceTermCount } from "../../src/hooks/useSequenceTermCount";
+import { dailyPuzzleByAnum } from "../../src/game/daily";
+import ZoomableViz from "../../src/components/ZoomableViz";
 
 export default function VisualizeScreen() {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 
   const { id } = useLocalSearchParams<{ id: string }>();
-  const catalogSeq = useMemo(() => getSequence(id ?? ""), [id]);
+  const catalogSeq = useMemo(
+    () => getSequence(id ?? "") ?? dailyPuzzleByAnum(id ?? ""),
+    [id]
+  );
   const [dbSeq, setDbSeq] = useState<OEISSequence | null>(null);
   const [loading, setLoading] = useState(() => !catalogSeq && !!id);
   const [vizSize, setVizSize] = useState({ width: 0, height: 0 });
@@ -142,14 +147,20 @@ export default function VisualizeScreen() {
           >
             {vizSize.width > 0 && vizSize.height > 0 && (
               <>
-                <VizPreview
-                  sequence={displaySequence}
+                <ZoomableViz
+                  key={`${id ?? ""}:${vizKey ?? "auto"}`}
                   width={vizSize.width}
                   height={vizSize.height}
-                  preview={false}
-                  count={seq.vizType ? termCount : undefined}
-                  genericVizKey={vizKey}
-                />
+                >
+                  <VizPreview
+                    sequence={displaySequence}
+                    width={vizSize.width}
+                    height={vizSize.height}
+                    preview={false}
+                    count={seq.vizType ? termCount : undefined}
+                    genericVizKey={vizKey}
+                  />
+                </ZoomableViz>
                 <VizSwitcher choices={vizChoices} active={vizKey} onSelect={setVizKey} />
                 <VizCaption
                   sequence={displaySequence}

@@ -34,6 +34,16 @@ test.describe("Visualize", () => {
     await expect(playBtn).toHaveAttribute("aria-label", "Play");
   });
 
+  test("zooms and resets the visualization", async ({ page }) => {
+    const level = page.getByTestId("viz-zoom-level");
+    await expect(level).toHaveText("100%");
+    await page.getByTestId("viz-zoom-in").click();
+    await expect(level).toHaveText("150%");
+    await page.getByTestId("viz-zoom-out").click();
+    await expect(level).toHaveText("100%");
+    await expect(page.getByTestId("viz-zoom-out")).toBeDisabled();
+  });
+
   test("back returns home", async ({ page }) => {
     await page.goto("/");
     await page.getByText("Recamán's Sequence").first().click();

@@ -15,4 +15,10 @@ describe("catalog", () => {
     expect(getVizType("A000045")).toBe("fibonacci-spiral");
     expect(getVizType("A999999")).toBeUndefined();
   });
+
+  it("keeps catalog titles plain for native headers", () => {
+    for (const sequence of sequences) {
+      expect(sequence.name).not.toMatch(/[$\\]/);
+    }
+  });
 });

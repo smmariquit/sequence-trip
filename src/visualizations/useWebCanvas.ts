@@ -21,8 +21,6 @@ export function useWebCanvas(
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number>(0);
   const speedRef = useRef(1);
-  // wheel zoom + drag pan (full views only); identity when untouched
-  const viewRef = useRef({ scale: 1, ox: 0, oy: 0 });
   const playback = usePlayback();
   if (animated) {
     speedRef.current = playback.speed ?? 1;
@@ -35,47 +33,6 @@ export function useWebCanvas(
       // surface the on-screen full-view canvas for image export
       currentWebCanvas = el;
       el.style.touchAction = "none";
-      el.onwheel = (e) => {
-        e.preventDefault();
-        const v = viewRef.current;
-        const rect = el.getBoundingClientRect();
-        const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
-        const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
-        const next = Math.min(10, Math.max(1, v.scale * factor));
-        const applied = next / v.scale;
-        // zoom around the cursor
-        v.ox = mx - (mx - v.ox) * applied;
-        v.oy = my - (my - v.oy) * applied;
-        v.scale = next;
-        if (v.scale === 1) {
-          v.ox = 0;
-          v.oy = 0;
-        }
-      };
-      let dragging = false;
-      let lastX = 0;
-      let lastY = 0;
-      el.onpointerdown = (e) => {
-        if (viewRef.current.scale === 1) return;
-        dragging = true;
-        lastX = e.clientX;
-        lastY = e.clientY;
-        el.setPointerCapture(e.pointerId);
-      };
-      el.onpointermove = (e) => {
-        if (!dragging) return;
-        viewRef.current.ox += e.clientX - lastX;
-        viewRef.current.oy += e.clientY - lastY;
-        lastX = e.clientX;
-        lastY = e.clientY;
-      };
-      el.onpointerup = () => {
-        dragging = false;
-      };
-      el.ondblclick = () => {
-        viewRef.current = { scale: 1, ox: 0, oy: 0 };
-      };
     },
     [animated]
   );
@@ -119,10 +76,8 @@ export function useWebCanvas(
         elapsed += ((now - last) / 1000) * speedRef.current;
       }
       last = now;
-      const v = viewRef.current;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
-      ctx.setTransform(dpr * v.scale, 0, 0, dpr * v.scale, dpr * v.ox, dpr * v.oy);
       draw(ctx, elapsed, width, height);
       rafRef.current = requestAnimationFrame(loop);
     };

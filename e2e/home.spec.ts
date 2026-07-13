@@ -7,6 +7,7 @@ test.describe("Home", () => {
     await expect(page.getByText("Recamán's Sequence").first()).toBeVisible();
     await expect(page.getByText("Featured")).toBeVisible();
     await expect(page.getByTestId("tab-home")).toBeVisible();
+    await expect(page.getByTestId("tab-daily")).toBeVisible();
     await expect(page.getByTestId("tab-explore")).toBeVisible();
     await expect(page.getByTestId("tab-about")).toBeVisible();
   });
