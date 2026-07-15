@@ -19,6 +19,7 @@ Read the linked doc for your task; do not rely on this file alone for detailed c
 | New or changed visualization | [AGENTS.md § Visualizations](#visualizations) |
 | OEIS data, search, b-file fetch | [AGENTS.md § OEIS data](#oeis-data) |
 | Playback and animation | [AGENTS.md § Playback](#playback) |
+| OTA (EAS Update) vs store builds | [docs/ota-compliance.md](docs/ota-compliance.md) |
 
 ## How to work
 
@@ -236,6 +237,7 @@ Things that cost real debugging time; check these first.
 - **Canvas arc direction (web):** canvas y grows **downward**, so the *top* half-circle is the `(PI, 2PI)` sweep, not `(PI, 0)`. A wrong sweep silently draws every arc on the same side (the long-standing Recamán "half" bug). Native Skia `addArc` uses degrees and was already correct — verify web against native with a pixel probe.
 - **Metro assetExts:** new binary asset types (e.g. `.ogg`) must be added to `config.resolver.assetExts` in `metro.config.js` or the web export fails to resolve them.
 - **EAS build/submit:** bump `expo.android.versionCode` every build. Submit track is `alpha` (closed testing) in `eas.json`. `--auto-submit` needs `play-service-account.json` on disk (gitignored); no key → build succeeds, submit step fails. Cancel + rebuild (new versionCode) if a JS fix must ride the same native build rather than shipping the known-bad one to testers.
+- **EAS Update (OTA):** `expo-updates` + channels in `eas.json`. JS/assets hotfixes only via `npm run update:production`; native/plugin/manifest/db changes need a store build. Policy: [docs/ota-compliance.md](docs/ota-compliance.md). `runtimeVersion` policy is `appVersion`; bump `expo.version` when native code changes.
 
 ## UX guardrails
 
