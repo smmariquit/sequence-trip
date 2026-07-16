@@ -4,7 +4,7 @@
 
 import React from "react";
 import { Text, type StyleProp, type TextStyle } from "react-native";
-import { stripLatexDelimiters } from "../math/stripLatexDelimiters";
+import { latexToUnicode } from "../math/latexToUnicode";
 
 interface Props {
   children: string;
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function MathText({ children, style, numberOfLines }: Props) {
-  const plain = stripLatexDelimiters(children);
+  const plain = latexToUnicode(children);
   return (
     <Text style={style} numberOfLines={numberOfLines}>
       {plain}

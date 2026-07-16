@@ -9,6 +9,7 @@ import { Platform } from "react-native";
 import { notifySettings } from "./notifyStore";
 import { isoDate } from "../oeis/dayPick";
 import { picksForDates } from "../oeis/db";
+import { latexToUnicode } from "../math/latexToUnicode";
 
 const WINDOW_DAYS = 14;
 const HOUR = 9; // 09:00 local
@@ -44,7 +45,8 @@ export async function rescheduleDaily(): Promise<void> {
       await Notifications.scheduleNotificationAsync({
         content: {
           title: "Today's sequence",
-          body: `${p.anum}: ${p.name}`,
+          // OS notification text cannot render KaTeX; Unicode only.
+          body: `${p.anum}: ${latexToUnicode(p.name)}`,
           data: { anum: p.anum },
         },
         trigger: {

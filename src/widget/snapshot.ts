@@ -7,6 +7,7 @@
 import { Platform } from "react-native";
 import { isoDate } from "../oeis/dayPick";
 import { picksForDates } from "../oeis/db";
+import { latexToUnicode } from "../math/latexToUnicode";
 
 const SNAPSHOT_FILE = "widget-picks.json";
 const DAYS = 30;
@@ -26,7 +27,8 @@ export async function writeWidgetSnapshot(): Promise<void> {
     const slim: WidgetPick[] = picks.map((p) => ({
       date: p.date,
       anum: p.anum,
-      name: p.name,
+      // Widget TextWidget cannot render KaTeX.
+      name: latexToUnicode(p.name),
       terms: p.terms.slice(0, 10),
     }));
     const { File, Paths } = await import("expo-file-system");
