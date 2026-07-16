@@ -7,7 +7,7 @@ description: Guides agentic coding workflow in Sequence Trip (oeis-visualize), i
 
 Policy (commits, verification tiers, architecture, UX rules) lives in [AGENTS.md](../../AGENTS.md). This skill covers **session execution**.
 
-Domain skills (read when the task matches): [playwright-e2e](../playwright-e2e/SKILL.md), [agent-handoff](../agent-handoff/SKILL.md).
+Domain skills (read when the task matches): [expo-stack](../expo-stack/SKILL.md) (official Expo/EAS), [playwright-e2e](../playwright-e2e/SKILL.md), [agent-handoff](../agent-handoff/SKILL.md).
 
 ## Coding practices
 

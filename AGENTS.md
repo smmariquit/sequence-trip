@@ -11,6 +11,7 @@ Read the linked doc for your task; do not rely on this file alone for detailed c
 | When | Read |
 | --- | --- |
 | Starting a coding session, commit, or PR | [.cursor/skills/sequence-trip-agent-workflow/SKILL.md](.cursor/skills/sequence-trip-agent-workflow/SKILL.md) |
+| Expo Router, native UI, SDK upgrade, EAS store/OTA | [.cursor/skills/expo-stack/SKILL.md](.cursor/skills/expo-stack/SKILL.md) → matching `~/.agents/skills/expo-*` / `eas-*` |
 | Agent handoff to another session / model | [.cursor/skills/agent-handoff/SKILL.md](.cursor/skills/agent-handoff/SKILL.md) |
 | Output style, token efficiency, Caveman / Ponytail | [docs/agent-contract.md](docs/agent-contract.md) + `.cursor/rules/agent-contract.mdc` |
 | Playwright E2E, web dev server, CI | [.cursor/skills/playwright-e2e/SKILL.md](.cursor/skills/playwright-e2e/SKILL.md) |
