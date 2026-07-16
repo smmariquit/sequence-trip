@@ -65,7 +65,7 @@
     "react-native-worklets": "0.5.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.0",
+    "@babel/core": "^8.0.1",
     "@playwright/test": "^1.61.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
@@ -73,11 +73,11 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/katex": "^0.16.8",
     "@types/react": "~19.1.0",
-    "babel-preset-expo": "~54.0.10",
+    "babel-preset-expo": "~57.0.3",
     "better-sqlite3": "^12.11.1",
     "jest-environment-jsdom": "^30.4.1",
-    "react-test-renderer": "^19.1.0",
-    "typescript": "^5.3.0"
+    "react-test-renderer": "^19.2.7",
+    "typescript": "^7.0.2"
   },
   "private": true
 }
