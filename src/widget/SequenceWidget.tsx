@@ -39,7 +39,7 @@ export function SequenceWidget({ pick }: { pick: WidgetPick | null }) {
       <TextWidget
         text={(pick?.terms ?? []).join(", ")}
         maxLines={1}
-        style={{ color: "#B44AFF", fontSize: 12 }}
+        style={{ color: "#2EC4B6", fontSize: 12 }}
       />
     </FlexWidget>
   );

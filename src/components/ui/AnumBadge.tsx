@@ -36,14 +36,14 @@ const sizeStyles = StyleSheet.create({
 
 const makeStyles = (colors: any) => StyleSheet.create({
   badge: {
-    backgroundColor: colors.primaryDim,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.primaryBorder,
+    borderColor: colors.border,
     borderRadius: radii.sm,
     paddingVertical: 4,
   },
   text: {
-    color: colors.primary,
+    color: colors.interactive,
     ...typography.caption,
     fontWeight: "700",
     fontVariant: ["tabular-nums"],

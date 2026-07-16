@@ -31,7 +31,7 @@ import {
   safeAreaTop,
   tabBarScrollPadding,
 } from "../../src/theme/layout";
-import { spacing } from "../../src/theme/tokens";
+import { radii, spacing } from "../../src/theme/tokens";
 import * as oeis from "../../src/oeis/db";
 import PlainText from "../../src/components/PlainText";
 import { Pressable } from "react-native";
@@ -186,9 +186,21 @@ export default function HomeScreen() {
 
             <SectionHeading>Featured</SectionHeading>
             <View style={[styles.featuredGrid, twoCol && { gap: gridGap }]}>
-              {sequences.map((seq, i) => (
-                <SequenceCard key={seq.anum} sequence={seq} index={i} cardWidth={cardW} />
-              ))}
+              {sequences.map((seq, i) => {
+                // Hallmark: break equal-card grid — first featured is full bleed on web.
+                const width =
+                  twoCol && i === 0
+                    ? pageW - PAGE_PADDING * 2
+                    : cardW;
+                return (
+                  <SequenceCard
+                    key={seq.anum}
+                    sequence={seq}
+                    index={i}
+                    cardWidth={width}
+                  />
+                );
+              })}
             </View>
           </>
         )}
@@ -228,7 +240,7 @@ const makeStyles = (colors: any) => StyleSheet.create({
   filterChip: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
-    borderRadius: 999,
+    borderRadius: radii.md,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,

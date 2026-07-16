@@ -22,7 +22,7 @@ export default function PressableCard({
   children,
   style,
   pressedOpacity = 0.85,
-  pressedScale = 0.98,
+  pressedScale = 1,
   accessibilityLabel,
 }: Props) {
   return (
@@ -34,7 +34,7 @@ export default function PressableCard({
         style,
         pressed && {
           opacity: pressedOpacity,
-          transform: [{ scale: pressedScale }],
+          ...(pressedScale !== 1 ? { transform: [{ scale: pressedScale }] } : null),
         },
       ]}
     >

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sequence Trip",
     "slug": "sequence-trip",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "sequencetrip",
@@ -19,7 +19,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#07060E"
       },
-      "versionCode": 12
+      "versionCode": 13
     },
     "ios": {
       "bundleIdentifier": "dev.stimmie.oeisvisualizations",

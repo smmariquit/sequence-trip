@@ -21,18 +21,18 @@ export const darkColors = {
   // ≥4.5:1 (WCAG AA) on every dark surface up to surfaceLight
   textMuted: "#8680AA",
 
-  // Brand & interaction
-  primary: "#B44AFF",
-  primaryDim: "rgba(180, 74, 255, 0.14)",
-  primaryBorder: "rgba(180, 74, 255, 0.35)",
-  accent: "#B44AFF",
+  // Brand & interaction (teal chrome; neon purple stays viz-only in palettes)
+  primary: "#2EC4B6",
+  primaryDim: "rgba(46, 196, 182, 0.14)",
+  primaryBorder: "rgba(46, 196, 182, 0.4)",
+  accent: "#2EC4B6",
   accentAlt: "#FF4A8D",
-  interactive: "#C4B5FD",
+  interactive: "#5EEAD4",
 
   // Structure
   border: "#2E2948",
   borderSubtle: "rgba(255, 255, 255, 0.06)",
-  focusRing: "rgba(180, 74, 255, 0.45)",
+  focusRing: "rgba(46, 196, 182, 0.45)",
 
   // Legacy aliases (viz + gradual migration)
   neonCyan: "#56E8FF",
@@ -56,16 +56,16 @@ export const lightColors = {
   // ≥4.5:1 (WCAG AA) on white and light cards/surfaces
   textMuted: "#5C6678",
   
-  primary: "#9333EA",
-  primaryDim: "rgba(147, 51, 234, 0.1)",
-  primaryBorder: "rgba(147, 51, 234, 0.3)",
-  accent: "#9333EA",
+  primary: "#0D9488",
+  primaryDim: "rgba(13, 148, 136, 0.12)",
+  primaryBorder: "rgba(13, 148, 136, 0.35)",
+  accent: "#0D9488",
   accentAlt: "#E11D48",
-  interactive: "#6D28D9",
+  interactive: "#0F766E",
   
   border: "#E5E7EB",
   borderSubtle: "rgba(0, 0, 0, 0.06)",
-  focusRing: "rgba(147, 51, 234, 0.45)",
+  focusRing: "rgba(13, 148, 136, 0.45)",
   
   neonCyan: "#0891B2",
   neonGreen: "#16A34A",

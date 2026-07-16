@@ -1,10 +1,10 @@
 // src/components/ui/SectionHeading.tsx
 
 import React from "react";
-import { View, Text, StyleSheet, type StyleProp, type TextStyle } from "react-native";
+import { Text, StyleSheet, type StyleProp, type TextStyle } from "react-native";
 import { useThemeColors } from "../../theme";
 import { PAGE_PADDING } from "../../theme/layout";
-import { spacing } from "../../theme/tokens";
+import { fonts, spacing } from "../../theme/tokens";
 
 export type SectionHeadingSize = "page" | "info";
 
@@ -25,10 +25,15 @@ export default function SectionHeading({
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 
   return (
-    <View style={[padded && size === "page" && styles.pagePadded, styles.row]}>
-      <View style={styles.accent} />
-      <Text style={[styles.sizeStyles[size], style]}>{children}</Text>
-    </View>
+    <Text
+      style={[
+        styles.sizeStyles[size],
+        padded && size === "page" && styles.pagePadded,
+        style,
+      ]}
+    >
+      {children}
+    </Text>
   );
 }
 
@@ -37,29 +42,20 @@ const makeStyles = (colors: any) => ({
     page: {
       color: colors.text,
       fontSize: 18,
-      fontWeight: "700",
+      fontFamily: fonts.display,
       letterSpacing: 0.2,
+      marginTop: spacing.xl,
+      marginBottom: spacing.md,
     },
     info: {
       color: colors.text,
       fontSize: 17,
-      fontWeight: "700",
-    },
-  }),
-  ...StyleSheet.create({
-    row: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: spacing.sm,
+      fontFamily: fonts.display,
       marginTop: spacing.xl,
       marginBottom: spacing.md,
     },
-    accent: {
-      width: 3,
-      height: 18,
-      borderRadius: 2,
-      backgroundColor: colors.primary,
-    },
+  }),
+  ...StyleSheet.create({
     pagePadded: {
       paddingHorizontal: PAGE_PADDING,
     },

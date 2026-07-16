@@ -46,7 +46,7 @@ export const MATH_FIELDS: Record<MathFieldId, MathField> = {
   algebra: {
     label: "Algebra",
     description: "Polynomials, coefficients, and symbolic structure.",
-    color: "#C4B5FD",
+    color: "#56E8FF",
   },
   probability: {
     label: "Probability",
@@ -56,7 +56,7 @@ export const MATH_FIELDS: Record<MathFieldId, MathField> = {
   recreational: {
     label: "Recreational",
     description: "Puzzles and playful rules. Math for the fun of it.",
-    color: "#B44AFF",
+    color: "#2EC4B6",
   },
   fractals: {
     label: "Fractals",

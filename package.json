@@ -24,6 +24,7 @@
     "icons": "node scripts/icons.mjs"
   },
   "dependencies": {
+    "@expo-google-fonts/space-grotesk": "^0.4.1",
     "@expo/metro-runtime": "~6.1.2",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-community/slider": "5.0.1",

@@ -64,7 +64,7 @@ export default function VizCaption({
   let liveText = live;
   if (musicOn && step > 0) {
     const t = termsAtStep(sequence, step);
-    if (t) liveText += `  ·  ♪ ${indexToNoteName(termMod(t.term, 25))}`;
+    if (t) liveText += `  ·  Music ${indexToNoteName(termMod(t.term, 25))}`;
   }
 
   return (
@@ -100,7 +100,7 @@ export default function VizCaption({
             <CaptionLine text={guide} style={styles.guide} />
             {musicOn ? (
               <CaptionLine
-                text="♪ Pitch: $a(n) \bmod 25$ picks a note on a C-pentatonic scale: larger remainder, higher note. Bass follows $a(n) \bmod 15$; the digit voice plays the term's last digits."
+                text="Pitch: $a(n) \bmod 25$ picks a note on a C-pentatonic scale: larger remainder, higher note. Bass follows $a(n) \bmod 15$; the digit voice plays the term's last digits."
                 style={styles.guide}
               />
             ) : null}

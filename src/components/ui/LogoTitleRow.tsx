@@ -3,6 +3,7 @@
 import React from "react";
 import { View, StyleSheet, type StyleProp, type TextStyle } from "react-native";
 import { useThemeColors } from "../../theme";
+import { fonts } from "../../theme/tokens";
 import Logo from "../Logo";
 import PlainText from "../PlainText";
 
@@ -19,9 +20,19 @@ interface Props {
 }
 
 const titleSizes = StyleSheet.create({
-  hero: { fontSize: 32, fontWeight: "800", letterSpacing: -0.5 },
-  page: { fontSize: 28, fontWeight: "800" },
-  inline: { fontSize: 16, fontWeight: "700" },
+  hero: {
+    fontSize: 32,
+    fontFamily: fonts.display,
+    letterSpacing: -0.5,
+  },
+  page: {
+    fontSize: 28,
+    fontFamily: fonts.display,
+  },
+  inline: {
+    fontSize: 16,
+    fontFamily: fonts.displayMedium,
+  },
 });
 
 const defaultLogoSizes: Record<LogoTitleSize, number> = {

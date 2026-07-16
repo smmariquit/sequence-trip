@@ -9,6 +9,12 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native";
 import { useColorScheme } from "react-native";
 import * as Notifications from "expo-notifications";
+import {
+  SpaceGrotesk_500Medium,
+  SpaceGrotesk_700Bold,
+  useFonts,
+} from "@expo-google-fonts/space-grotesk";
+import * as SplashScreen from "expo-splash-screen";
 import NotificationRouter from "../src/notifications/NotificationRouter";
 import ErrorBoundary from "../src/components/ErrorBoundary";
 import WebPageShell from "../src/components/WebPageShell";
@@ -20,6 +26,8 @@ import { loadNotifySettings } from "../src/notifications/notifyStore";
 import { rescheduleDaily } from "../src/notifications/scheduler";
 import { writeWidgetSnapshot } from "../src/widget/snapshot";
 import { loadGameProgress } from "../src/game/progressStore";
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // show a banner when a scheduled notification fires while the app is foregrounded
 if (Platform.OS !== "web") {
@@ -36,6 +44,10 @@ if (Platform.OS !== "web") {
 export default function RootLayout() {
   const colors = useThemeColors();
   const scheme = useColorScheme();
+  const [fontsLoaded] = useFonts({
+    SpaceGrotesk_500Medium,
+    SpaceGrotesk_700Bold,
+  });
 
   React.useEffect(() => {
     void loadVizColorPrefs();
@@ -44,6 +56,10 @@ export default function RootLayout() {
     void loadGameProgress();
     void writeWidgetSnapshot();
   }, []);
+
+  React.useEffect(() => {
+    if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
+  }, [fontsLoaded]);
 
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 
@@ -61,6 +77,8 @@ export default function RootLayout() {
       },
     };
   }, [colors, scheme]);
+
+  if (!fontsLoaded) return null;
 
   return (
     <ErrorBoundary fallbackText="App failed to load">

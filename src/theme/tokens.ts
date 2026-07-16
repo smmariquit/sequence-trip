@@ -30,3 +30,9 @@ export const typography = {
   labelSm: { fontSize: 13, fontWeight: "600" as const },
   caption: { fontSize: 12, fontWeight: "500" as const },
 } as const;
+
+/** Display face for hero / section titles (loaded in app/_layout). */
+export const fonts = {
+  display: "SpaceGrotesk_700Bold",
+  displayMedium: "SpaceGrotesk_500Medium",
+} as const;
