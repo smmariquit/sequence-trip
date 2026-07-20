@@ -23,10 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
@@ -48,16 +48,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
 
       - name: Cache OEIS dumps and database
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             assets/oeis.db
@@ -71,7 +71,7 @@ jobs:
         run: npm run build:db
 
       - name: Upload database artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: oeis-db
           path: assets/oeis.db
@@ -83,16 +83,16 @@ jobs:
     needs: build-db
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
 
       - name: Download OEIS database
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: oeis-db
           path: assets
@@ -114,16 +114,16 @@ jobs:
     needs: build-db
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
 
       - name: Download OEIS database
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: oeis-db
           path: assets
