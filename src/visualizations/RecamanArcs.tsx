@@ -2,12 +2,12 @@
 
 import React, { useMemo } from "react";
 import {
-  Canvas,
   Path as SkiaPath,
   Skia,
   Circle,
   Line,
 } from "@shopify/react-native-skia";
+import VizCanvas from "./VizCanvas";
 import { hslToHex, useThemeColors } from "../theme";
 import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
 import { recaman } from "../sequences/generators";
@@ -78,7 +78,7 @@ export function RecamanArcsPreview({ width, height }: { width: number; height: n
   );
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {arcs.map((arc, i) => (
         <SkiaPath
           key={i}
@@ -91,7 +91,7 @@ export function RecamanArcsPreview({ width, height }: { width: number; height: n
       {head && (
         <Circle cx={head.x} cy={head.y} r={3} color={hslToHex(0, 100, 70)} />
       )}
-    </Canvas>
+    </VizCanvas>
   );
 }
 
@@ -136,7 +136,7 @@ export function RecamanArcsFull({ width, height, count = 64 }: Omit<Props, "prev
   }, [layout]);
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {tickLines.map((t, i) => (
         <Line
           key={`tick-${i}`}
@@ -176,7 +176,7 @@ export function RecamanArcsFull({ width, height, count = 64 }: Omit<Props, "prev
           <Circle cx={head.x} cy={head.y} r={6} color={hslToHex(0, 100, 70)} />
         </>
       )}
-    </Canvas>
+    </VizCanvas>
   );
 }
 

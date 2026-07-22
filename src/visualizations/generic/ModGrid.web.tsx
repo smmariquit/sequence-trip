@@ -25,19 +25,6 @@ export default function ModGrid({ terms, width, height, preview }: GenericVizPro
       const progress = progressRef.current;
       const breathe = 0.9 + 0.1 * Math.sin(time * 2.513);
 
-      if (!preview) {
-        drawBackedLabel(ctx, {
-          text: "one cell per term, reading left → right, row by row ↓ · color = a(n)",
-          x: width / 2,
-          y: 15,
-          fg: colors.textMuted,
-          bg: colors.bg,
-          size: 12,
-          weight: "400",
-          align: "center",
-        });
-      }
-
       let head: (typeof cells)[number] | null = null;
       let headIdx = -1;
       for (let i = 0; i < cells.length; i++) {

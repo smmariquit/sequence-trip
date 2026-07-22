@@ -2,10 +2,10 @@
 
 import React, { useMemo } from "react";
 import {
-  Canvas,
   Circle,
   Group,
 } from "@shopify/react-native-skia";
+import VizCanvas from "./VizCanvas";
 import { ulamSpiralCoords } from "../sequences/generators";
 import { hslToHex } from "../theme";
 import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
@@ -32,7 +32,7 @@ export function UlamSpiralPreview({ width, height }: { width: number; height: nu
   const cellSize = Math.min(width, height) * 0.9 / (maxCoord * 2 + 1);
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {coords.map((c, i) => {
         const px = cx + c.x * cellSize;
         const py = cy + c.y * cellSize;
@@ -59,7 +59,7 @@ export function UlamSpiralPreview({ width, height }: { width: number; height: nu
           />
         );
       })}
-    </Canvas>
+    </VizCanvas>
   );
 }
 
@@ -81,7 +81,7 @@ export function UlamSpiralFull({ width, height, count = 2000 }: Omit<Props, "pre
   const cellSize = Math.min(width, height) * 0.9 / (maxCoord * 2 + 1);
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {coords.slice(0, visible).map((c, i) => {
         if (!c.prime) return null;
         const px = cx + c.x * cellSize;
@@ -116,7 +116,7 @@ export function UlamSpiralFull({ width, height, count = 2000 }: Omit<Props, "pre
           />
         </Group>
       )}
-    </Canvas>
+    </VizCanvas>
   );
 }
 

@@ -7,7 +7,7 @@ import { View, StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { usePlayback } from "../playback/PlaybackContext";
 import { useThemeColors } from "../theme";
-import { radii } from "../theme/tokens";
+import { radii, spacing } from "../theme/tokens";
 
 export default function PlaybackProgressBar() {
   const colors = useThemeColors();
@@ -33,6 +33,8 @@ const makeStyles = (colors: any) => StyleSheet.create({
   wrap: {
     height: 3,
     backgroundColor: colors.borderSubtle,
+    // breathing room above the instrument chip row below
+    marginBottom: spacing.sm,
   },
   bar: {
     height: 3,

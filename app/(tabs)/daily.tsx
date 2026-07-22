@@ -21,10 +21,12 @@ import {
 import {
   GAME_DIFFICULTIES,
   MAX_GUESSES,
+  PUZZLE_COUNT,
   challengeFor,
   dailyPuzzle,
   isCorrectGuess,
   normalizeIntegerGuess,
+  practicePuzzle,
   shareText,
   statsFor,
   type DailyPlay,
@@ -35,9 +37,11 @@ import {
   gameProgressVersion,
   isGameProgressLoaded,
   loadGameProgress,
+  playKey,
   recordDailyPlay,
   subscribeGameProgress,
 } from "../../src/game/progressStore";
+import AppIcon from "../../src/components/ui/AppIcon";
 import { isoDate } from "../../src/oeis/dayPick";
 import { blurbFor } from "../../src/sequences/metadata";
 import { useThemeColors } from "../../src/theme";
@@ -67,6 +71,13 @@ export default function DailyGameScreen() {
   const [difficulty, setDifficulty] = React.useState<GameDifficulty>("easy");
   const [input, setInput] = React.useState("");
   const [feedback, setFeedback] = React.useState("");
+  // practice: local-only attempt at any pool puzzle; never persisted
+  const [practice, setPractice] = React.useState<{
+    index: number;
+    guesses: string[];
+    completed: boolean;
+    won: boolean;
+  } | null>(null);
 
   React.useSyncExternalStore(
     subscribeGameProgress,
@@ -85,19 +96,79 @@ export default function DailyGameScreen() {
     setFeedback("");
   }, [today]);
 
-  const puzzle = React.useMemo(() => dailyPuzzle(today), [today]);
-  const saved = gameProgress().plays[today];
-  const play = saved?.anum === puzzle.anum ? saved : undefined;
-  const activeDifficulty = play?.difficulty ?? difficulty;
+  const todaysPuzzle = React.useMemo(() => dailyPuzzle(today), [today]);
+  const isPractice = practice !== null;
+  const puzzle = isPractice ? practicePuzzle(practice.index) : todaysPuzzle;
+  const saved = gameProgress().plays[playKey(today, difficulty)];
+  const storedPlay = saved?.anum === todaysPuzzle.anum ? saved : undefined;
+  const play: DailyPlay | undefined = isPractice
+    ? practice.guesses.length > 0 || practice.completed
+      ? {
+          date: today,
+          anum: puzzle.anum,
+          difficulty,
+          guesses: practice.guesses,
+          completed: practice.completed,
+          won: practice.won,
+        }
+      : undefined
+    : storedPlay;
+  const activeDifficulty = difficulty;
   const challenge = React.useMemo(
-    () => challengeFor(puzzle, activeDifficulty, today),
-    [activeDifficulty, puzzle, today]
+    () =>
+      challengeFor(
+        puzzle,
+        activeDifficulty,
+        isPractice ? `practice:${practice.index}` : today
+      ),
+    [activeDifficulty, isPractice, practice?.index, puzzle, today]
   );
   const guesses = play?.guesses ?? [];
   const config = GAME_DIFFICULTIES[activeDifficulty];
   const hint = blurbFor(puzzle.anum) ?? "Look at how each term changes.";
   const showHint = play?.completed || guesses.length >= config.hintAfter;
   const stats = statsFor(gameProgress().plays, today);
+
+  const resetAttempt = React.useCallback(() => {
+    setInput("");
+    setFeedback("");
+  }, []);
+
+  const startPractice = React.useCallback(() => {
+    const index = practicePuzzle(0).anum === todaysPuzzle.anum ? 1 : 0;
+    setPractice({ index, guesses: [], completed: false, won: false });
+    resetAttempt();
+  }, [resetAttempt, todaysPuzzle.anum]);
+
+  const nextPractice = React.useCallback(() => {
+    setPractice((prev) => {
+      if (!prev) return prev;
+      let index = (prev.index + 1) % PUZZLE_COUNT;
+      // never hand out today's daily as practice: it would spoil the answer
+      if (practicePuzzle(index).anum === todaysPuzzle.anum) {
+        index = (index + 1) % PUZZLE_COUNT;
+      }
+      return { index, guesses: [], completed: false, won: false };
+    });
+    resetAttempt();
+  }, [resetAttempt, todaysPuzzle.anum]);
+
+  const exitPractice = React.useCallback(() => {
+    setPractice(null);
+    resetAttempt();
+  }, [resetAttempt]);
+
+  const pickDifficulty = React.useCallback(
+    (id: GameDifficulty) => {
+      setDifficulty(id);
+      // practice attempts restart when the rules change mid-puzzle
+      setPractice((prev) =>
+        prev ? { ...prev, guesses: [], completed: false, won: false } : prev
+      );
+      resetAttempt();
+    },
+    [resetAttempt]
+  );
 
   const submitGuess = React.useCallback(
     (raw: string) => {
@@ -115,15 +186,20 @@ export default function DailyGameScreen() {
       const nextGuesses = [...guesses, guess];
       const won = isCorrectGuess(guess, challenge.answer);
       const completed = won || nextGuesses.length >= MAX_GUESSES;
-      const nextPlay: DailyPlay = {
-        date: today,
-        anum: puzzle.anum,
-        difficulty: activeDifficulty,
-        guesses: nextGuesses,
-        completed,
-        won,
-      };
-      recordDailyPlay(nextPlay);
+      if (isPractice) {
+        setPractice((prev) =>
+          prev ? { ...prev, guesses: nextGuesses, completed, won } : prev
+        );
+      } else {
+        recordDailyPlay({
+          date: today,
+          anum: puzzle.anum,
+          difficulty: activeDifficulty,
+          guesses: nextGuesses,
+          completed,
+          won,
+        });
+      }
       setInput("");
       setFeedback(
         won
@@ -141,7 +217,7 @@ export default function DailyGameScreen() {
         );
       }
     },
-    [activeDifficulty, challenge.answer, guesses, play?.completed, puzzle.anum, today]
+    [activeDifficulty, challenge.answer, guesses, isPractice, play?.completed, puzzle.anum, today]
   );
 
   const shareResult = React.useCallback(async () => {
@@ -180,7 +256,11 @@ export default function DailyGameScreen() {
         <View style={styles.hero}>
           <LogoTitleRow
             title="OEISdle"
-            subtitle="One sequence. One puzzle. Every day."
+            subtitle={
+              isPractice
+                ? "Practice mode. No streaks, no pressure."
+                : "One sequence. One puzzle. Every day."
+            }
             size="page"
             titleTestID="daily-game-title"
           />
@@ -211,25 +291,30 @@ export default function DailyGameScreen() {
             <View style={styles.difficultyRow} testID="daily-difficulty">
               {DIFFICULTIES.map((id) => {
                 const selected = activeDifficulty === id;
-                const locked = guesses.length > 0;
+                const done = !isPractice
+                  ? gameProgress().plays[playKey(today, id)]?.completed === true
+                  : false;
                 return (
                   <Pressable
                     key={id}
-                    onPress={() => setDifficulty(id)}
-                    disabled={locked}
+                    onPress={() => pickDifficulty(id)}
                     accessibilityRole="radio"
-                    accessibilityState={{ selected, disabled: locked }}
+                    accessibilityState={{ selected }}
                     testID={`daily-difficulty-${id}`}
                     style={({ pressed }) => [
                       styles.difficulty,
                       selected && styles.difficultySelected,
-                      locked && !selected && styles.disabled,
-                      pressed && !locked && styles.pressed,
+                      pressed && styles.pressed,
                     ]}
                   >
-                    <PlainText style={selected ? styles.difficultyTitleOn : styles.difficultyTitle}>
-                      {GAME_DIFFICULTIES[id].label}
-                    </PlainText>
+                    <View style={styles.difficultyTitleRow}>
+                      <PlainText style={selected ? styles.difficultyTitleOn : styles.difficultyTitle}>
+                        {GAME_DIFFICULTIES[id].label}
+                      </PlainText>
+                      {done ? (
+                        <AppIcon name="checkmark-circle" size={14} color={colors.primary} />
+                      ) : null}
+                    </View>
                     <PlainText style={styles.difficultyDescription}>
                       {GAME_DIFFICULTIES[id].description}
                     </PlainText>
@@ -238,10 +323,50 @@ export default function DailyGameScreen() {
               })}
             </View>
 
+            {isPractice ? (
+              <View style={styles.practiceRow} testID="daily-practice-controls">
+                <PlainText style={styles.practiceMeta}>
+                  {`Puzzle ${(practice.index % PUZZLE_COUNT) + 1} of ${PUZZLE_COUNT}`}
+                </PlainText>
+                <PillButton
+                  variant="action"
+                  icon="play-skip-forward-outline"
+                  onPress={nextPractice}
+                  testID="daily-practice-next"
+                >
+                  Next puzzle
+                </PillButton>
+                <PillButton
+                  variant="action"
+                  icon="close-outline"
+                  onPress={exitPractice}
+                  testID="daily-practice-exit"
+                >
+                  Exit
+                </PillButton>
+              </View>
+            ) : (
+              <View style={styles.practiceRow}>
+                <PillButton
+                  variant="action"
+                  icon="infinite-outline"
+                  onPress={startPractice}
+                  testID="daily-practice-start"
+                >
+                  Practice all puzzles
+                </PillButton>
+                <PlainText style={styles.practiceMeta}>
+                  Streak-free tryouts of the whole pool
+                </PlainText>
+              </View>
+            )}
+
             <CardSurface style={styles.gameCard}>
               <View style={styles.promptRow}>
                 <View>
-                  <PlainText style={styles.eyebrow}>{`${GAME_DIFFICULTIES[activeDifficulty].label} puzzle`}</PlainText>
+                  <PlainText style={styles.eyebrow}>
+                    {`${isPractice ? "Practice · " : ""}${GAME_DIFFICULTIES[activeDifficulty].label} puzzle`}
+                  </PlainText>
                   <PlainText style={styles.prompt}>What comes next?</PlainText>
                 </View>
                 <PlainText style={styles.guessCount}>{`${guesses.length}/${MAX_GUESSES} guesses`}</PlainText>
@@ -335,14 +460,25 @@ export default function DailyGameScreen() {
                   <PlainText style={styles.anum}>{puzzle.anum}</PlainText>
                   <PlainText style={styles.resultHint}>{hint}</PlainText>
                   <View style={styles.resultActions}>
-                    <PillButton
-                      variant="action"
-                      icon="share-outline"
-                      onPress={shareResult}
-                      testID="daily-share"
-                    >
-                      Share
-                    </PillButton>
+                    {isPractice ? (
+                      <PillButton
+                        variant="action"
+                        icon="play-skip-forward-outline"
+                        onPress={nextPractice}
+                        testID="daily-practice-another"
+                      >
+                        Next puzzle
+                      </PillButton>
+                    ) : (
+                      <PillButton
+                        variant="action"
+                        icon="share-outline"
+                        onPress={shareResult}
+                        testID="daily-share"
+                      >
+                        Share
+                      </PillButton>
+                    )}
                     <PillButton
                       variant="primary"
                       icon="play-outline"
@@ -353,7 +489,11 @@ export default function DailyGameScreen() {
                       See visualization
                     </PillButton>
                   </View>
-                  <PlainText style={styles.tomorrow}>New puzzle tomorrow.</PlainText>
+                  <PlainText style={styles.tomorrow}>
+                    {isPractice
+                      ? "Practice rounds never touch your streak."
+                      : "New puzzle tomorrow. Try another difficulty today."}
+                  </PlainText>
                 </CardSurface>
               </View>
             ) : null}
@@ -432,6 +572,24 @@ const makeStyles = (colors: any) => StyleSheet.create({
   difficultySelected: {
     borderColor: colors.primary,
     backgroundColor: colors.primaryDim,
+  },
+  difficultyTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  practiceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    marginTop: -spacing.sm,
+    marginBottom: spacing.xl,
+  },
+  practiceMeta: {
+    color: colors.textMuted,
+    fontSize: 13,
+    flexShrink: 1,
   },
   difficultyTitle: {
     color: colors.textDim,

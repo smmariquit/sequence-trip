@@ -44,16 +44,6 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
         }
         ctx.setLineDash([]);
         ctx.globalAlpha = 1;
-        drawBackedLabel(ctx, {
-          text: "each dot turns 137.5° from the last · farther out = bigger value",
-          x: cx,
-          y: 16,
-          fg: colors.textMuted,
-          bg: colors.bg,
-          size: 11,
-          weight: "400",
-          align: "center",
-        });
       }
 
       let headPos: { x: number; y: number; i: number } | null = null;

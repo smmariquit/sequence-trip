@@ -21,6 +21,18 @@ export const SCALE_LABELS: Record<ScaleId, string> = {
   chromatic: "Chromatic",
 };
 
+/** Plain-language description of the selected scale, shown in settings. */
+export const SCALE_DESCRIPTIONS: Record<ScaleId, string> = {
+  pentatonic:
+    "Five notes per octave, the black-keys-of-a-piano sound. Any two notes sound good together, so even wild sequences stay pleasant.",
+  major:
+    "Seven notes per octave, the bright, happy scale most pop songs use.",
+  minor:
+    "Seven notes per octave, the darker, moodier cousin of major.",
+  chromatic:
+    "All twelve notes, nothing left out. The most faithful to the raw numbers, and the most tense sounding.",
+};
+
 export interface MusicSettings {
   scaleId: ScaleId;
   /** Semitones added to every note, 0-11. Moves the whole piece's key. */

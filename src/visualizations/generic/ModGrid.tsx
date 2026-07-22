@@ -5,7 +5,8 @@
 
 import React, { useMemo, useEffect } from "react";
 import { Platform } from "react-native";
-import { Canvas, Rect, Group, matchFont } from "@shopify/react-native-skia";
+import { Rect, Group, matchFont } from "@shopify/react-native-skia";
+import VizCanvas from "../VizCanvas";
 import {
   useDerivedValue,
   useSharedValue,
@@ -22,10 +23,7 @@ import SkiaLabel from "../SkiaLabel";
 import type { GenericVizProps } from "./types";
 
 const fontFamily = Platform.select({ ios: "Helvetica", default: "sans-serif" });
-const tickFont = matchFont({ fontFamily, fontSize: 11 });
 const labelFont = matchFont({ fontFamily, fontSize: 13, fontWeight: "600" });
-
-const LEGEND = "one cell per term, reading left → right, row by row ↓ · color = a(n)";
 
 function cellColor(m: number): string {
   return m === 0 ? "rgba(40, 35, 70, 0.6)" : hslToHex((m * 360) / 10, 85, 55);
@@ -59,18 +57,7 @@ export default function ModGrid({ terms, width, height, preview }: GenericVizPro
   const headLabelW = headLabel ? labelFont.measureText(headLabel).width : 0;
 
   return (
-    <Canvas style={{ width, height }}>
-      {!preview && (
-        <SkiaLabel
-          x={width / 2}
-          y={15}
-          text={LEGEND}
-          font={tickFont}
-          fg={colors.textMuted}
-          bg={colors.bg}
-          align="center"
-        />
-      )}
+    <VizCanvas width={width} height={height}>
       <Group opacity={opacity}>
         {cells.slice(0, visible).map((c, i) => (
           <Rect key={i} x={c.x} y={c.y} width={c.w} height={c.h} color={cellColor(c.m)} />
@@ -108,6 +95,6 @@ export default function ModGrid({ terms, width, height, preview }: GenericVizPro
           />
         </>
       )}
-    </Canvas>
+    </VizCanvas>
   );
 }

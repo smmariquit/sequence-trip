@@ -3,6 +3,7 @@
 import { useRef, useEffect, useCallback } from "react";
 import { usePlayback } from "../playback/PlaybackContext";
 import { resolveVizColor, vizGlowEnabled, vizMotionEnabled } from "./vizColorStore";
+import { useVizTransform } from "./vizTransform";
 
 type DrawFn = (ctx: CanvasRenderingContext2D, time: number, w: number, h: number) => void;
 
@@ -21,6 +22,7 @@ export function useWebCanvas(
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number>(0);
   const speedRef = useRef(1);
+  const zoomT = useVizTransform();
   const playback = usePlayback();
   if (animated) {
     speedRef.current = playback.speed ?? 1;
@@ -61,8 +63,18 @@ export function useWebCanvas(
       });
     }
 
+    // committed zoom/pan drawn in-canvas (vector) so zooming stays sharp
+    const applyZoomTransform = () => {
+      ctx.translate(
+        zoomT.tx + (width / 2) * (1 - zoomT.scale),
+        zoomT.ty + (height / 2) * (1 - zoomT.scale)
+      );
+      ctx.scale(zoomT.scale, zoomT.scale);
+    };
+
     if (!animated) {
       ctx.clearRect(0, 0, width, height);
+      applyZoomTransform();
       draw(ctx, 0, width, height);
       return;
     }
@@ -78,12 +90,13 @@ export function useWebCanvas(
       last = now;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
+      applyZoomTransform();
       draw(ctx, elapsed, width, height);
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [width, height, draw, animated]);
+  }, [width, height, draw, animated, zoomT]);
 
   return setRef;
 }

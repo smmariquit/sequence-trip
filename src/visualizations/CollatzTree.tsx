@@ -2,10 +2,10 @@
 
 import React, { useMemo } from "react";
 import {
-  Canvas,
   Path as SkiaPath,
   Skia,
 } from "@shopify/react-native-skia";
+import VizCanvas from "./VizCanvas";
 import { hslToHex } from "../theme";
 import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
 import { buildCollatzBranches, fitCollatz } from "./collatzLayout";
@@ -45,7 +45,7 @@ export function CollatzTreePreview({ width, height }: { width: number; height: n
   );
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {branches.map((branch, i) => (
         <SkiaPath
           key={i}
@@ -57,7 +57,7 @@ export function CollatzTreePreview({ width, height }: { width: number; height: n
           strokeJoin="round"
         />
       ))}
-    </Canvas>
+    </VizCanvas>
   );
 }
 
@@ -71,7 +71,7 @@ export function CollatzTreeFull({ width, height, count = 40 }: Omit<Props, "prev
   );
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {branches.slice(0, visible + 1).map((branch, i) => (
         <SkiaPath
           key={i}
@@ -85,7 +85,7 @@ export function CollatzTreeFull({ width, height, count = 40 }: Omit<Props, "prev
           end={i < visible ? 1 : growEnd}
         />
       ))}
-    </Canvas>
+    </VizCanvas>
   );
 }
 

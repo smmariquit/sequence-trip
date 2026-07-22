@@ -3,7 +3,8 @@
 // Signed bars around a midline — negatives dive below. Audio "now playing" view.
 
 import React, { useMemo, useEffect } from "react";
-import { Canvas, Rect, Group } from "@shopify/react-native-skia";
+import { Rect, Group } from "@shopify/react-native-skia";
+import VizCanvas from "../VizCanvas";
 import {
   useDerivedValue,
   useSharedValue,
@@ -55,7 +56,7 @@ export default function BarWaveform({ terms, width, height, preview }: GenericVi
   const opacity = useDerivedValue(() => breathe.value);
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       <Group opacity={opacity}>
         {bars.slice(0, visible).map((b, i) => (
           <Rect
@@ -79,6 +80,6 @@ export default function BarWaveform({ terms, width, height, preview }: GenericVi
           </Group>
         )}
       </Group>
-    </Canvas>
+    </VizCanvas>
   );
 }

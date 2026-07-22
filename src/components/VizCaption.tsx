@@ -134,9 +134,9 @@ const makeStyles = (colors: any) => StyleSheet.create({
   live: {
     flex: 1,
     color: colors.text,
-    fontSize: 15,
-    fontWeight: "600",
-    lineHeight: 20,
+    fontSize: 17,
+    fontWeight: "700",
+    lineHeight: 23,
     fontVariant: ["tabular-nums"],
   },
   guideBtn: {

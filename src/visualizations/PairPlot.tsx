@@ -4,7 +4,8 @@
 // animation: construction order carries no information here (Tversky 2002).
 
 import React, { useMemo } from "react";
-import { Canvas, Path as SkiaPath, Circle } from "@shopify/react-native-skia";
+import { Path as SkiaPath, Circle } from "@shopify/react-native-skia";
+import VizCanvas from "./VizCanvas";
 import { hslToHex } from "../theme";
 import { makePolylinePath } from "../playback/smoothPath";
 import { pairPoints, type PairMode } from "./pairPoints";
@@ -34,7 +35,7 @@ export default function PairPlot({ termsA, termsB, mode, width, height }: Props)
   }, [points]);
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       <SkiaPath
         path={path}
         style="stroke"
@@ -52,6 +53,6 @@ export default function PairPlot({ termsA, termsB, mode, width, height }: Props)
           color={hslToHex((i * 360) / Math.max(dots.length, 1), 90, 62)}
         />
       ))}
-    </Canvas>
+    </VizCanvas>
   );
 }

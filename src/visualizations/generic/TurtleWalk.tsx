@@ -6,13 +6,13 @@
 import React, { useMemo, useEffect } from "react";
 import { Platform } from "react-native";
 import {
-  Canvas,
   Path as SkiaPath,
   BlurMask,
   Group,
   Skia,
   matchFont,
 } from "@shopify/react-native-skia";
+import VizCanvas from "../VizCanvas";
 import {
   useDerivedValue,
   useSharedValue,
@@ -29,11 +29,7 @@ import SkiaLabel from "../SkiaLabel";
 import type { GenericVizProps } from "./types";
 
 const fontFamily = Platform.select({ ios: "Helvetica", default: "sans-serif" });
-const tickFont = matchFont({ fontFamily, fontSize: 11 });
 const labelFont = matchFont({ fontFamily, fontSize: 13, fontWeight: "600" });
-
-const LEGEND =
-  "turn by a(n) mod 4:  0 = hard left · 1 = soft left · 2 = soft right · 3 = hard right";
 
 function arrowPath(): ReturnType<typeof Skia.Path.Make> {
   const p = Skia.Path.Make();
@@ -77,18 +73,7 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
   const headLabelW = headLabel ? labelFont.measureText(headLabel).width : 0;
 
   return (
-    <Canvas style={{ width, height }}>
-      {!preview && (
-        <SkiaLabel
-          x={width / 2}
-          y={18}
-          text={LEGEND}
-          font={tickFont}
-          fg={colors.textMuted}
-          bg={colors.bg}
-          align="center"
-        />
-      )}
+    <VizCanvas width={width} height={height}>
       <SkiaPath
         path={path}
         style="stroke"
@@ -125,6 +110,6 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
           )}
         </>
       )}
-    </Canvas>
+    </VizCanvas>
   );
 }

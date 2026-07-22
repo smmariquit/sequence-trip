@@ -24,18 +24,25 @@ function emit(): void {
   listeners.forEach((listener) => listener());
 }
 
+/** One play per date AND difficulty, so all three modes can be played daily. */
+export function playKey(date: string, difficulty: GameDifficulty): string {
+  return `${date}:${difficulty}`;
+}
+
 function sanitize(raw: any): GameProgress {
   const plays: Record<string, DailyPlay> = {};
   if (!raw?.plays || typeof raw.plays !== "object") return { plays };
 
-  for (const [date, value] of Object.entries(raw.plays as Record<string, any>)) {
+  // keys are `date:difficulty`; bare-date keys are pre-1.5 saves and migrate
+  for (const [key, value] of Object.entries(raw.plays as Record<string, any>)) {
+    const date = key.slice(0, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^A\d{6}$/.test(value?.anum)) continue;
     if (!Object.prototype.hasOwnProperty.call(GAME_DIFFICULTIES, value?.difficulty)) continue;
     const guesses = Array.isArray(value.guesses)
       ? value.guesses.filter((guess: unknown) => typeof guess === "string").slice(0, MAX_GUESSES)
       : [];
     const completed = value.completed === true || guesses.length >= MAX_GUESSES;
-    plays[date] = {
+    plays[playKey(date, value.difficulty)] = {
       date,
       anum: value.anum,
       difficulty: value.difficulty as GameDifficulty,
@@ -68,7 +75,7 @@ export function recordDailyPlay(play: DailyPlay): void {
   state.current = {
     plays: {
       ...state.current.plays,
-      [play.date]: play,
+      [playKey(play.date, play.difficulty)]: play,
     },
   };
   emit();

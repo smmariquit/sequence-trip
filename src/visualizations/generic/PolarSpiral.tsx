@@ -6,13 +6,13 @@
 import React, { useMemo, useEffect } from "react";
 import { Platform } from "react-native";
 import {
-  Canvas,
   Circle,
   Group,
   BlurMask,
   Text as SkiaText,
   matchFont,
 } from "@shopify/react-native-skia";
+import VizCanvas from "../VizCanvas";
 import {
   useDerivedValue,
   useSharedValue,
@@ -62,7 +62,7 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
     !preview && headIdx >= 0 ? `a(${headIdx}) = ${formatTermLabel(stats.terms[headIdx])}` : "";
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {!preview && (
         <>
           {rings.map((ring, i) => (
@@ -85,14 +85,6 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
               />
             </React.Fragment>
           ))}
-          <SkiaText
-            x={cx - tickFont.measureText("each dot turns 137.5° from the last · farther out = bigger value").width / 2}
-            y={14}
-            text="each dot turns 137.5° from the last · farther out = bigger value"
-            font={tickFont}
-            color={colors.textMuted}
-            opacity={0.7}
-          />
           {headLabel !== "" && (
             <SkiaLabel
               x={12}
@@ -130,6 +122,6 @@ export default function PolarSpiral({ terms, width, height, preview }: GenericVi
           </Group>
         )}
       </Group>
-    </Canvas>
+    </VizCanvas>
   );
 }

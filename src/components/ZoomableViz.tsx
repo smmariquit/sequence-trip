@@ -1,3 +1,10 @@
+// src/components/ZoomableViz.tsx
+//
+// Zoom/pan for the viz area. Gestures move the rendered surface transiently
+// (raster, may blur mid-pinch); on release the accumulated transform is
+// committed into VizTransformContext and the view snaps back to identity, so
+// the viz redraws its vectors at full resolution inside the canvas.
+
 import React from "react";
 import { Platform, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -5,12 +12,16 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
 import { useThemeColors } from "../theme";
 import { radii, spacing } from "../theme/tokens";
 import AppIcon from "./ui/AppIcon";
 import PlainText from "./PlainText";
+import {
+  IDENTITY_VIZ_TRANSFORM,
+  VizTransformContext,
+  type VizTransform,
+} from "../visualizations/vizTransform";
 import {
   MAX_VIZ_ZOOM,
   MIN_VIZ_ZOOM,
@@ -31,50 +42,90 @@ interface WebWheelEvent {
   preventDefault?: () => void;
 }
 
+function clampPan(t: VizTransform, width: number, height: number): VizTransform {
+  const limitX = vizPanLimit(width, t.scale);
+  const limitY = vizPanLimit(height, t.scale);
+  return {
+    scale: t.scale,
+    tx: Math.min(limitX, Math.max(-limitX, t.tx)),
+    ty: Math.min(limitY, Math.max(-limitY, t.ty)),
+  };
+}
+
 export default function ZoomableViz({ width, height, children }: Props) {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
   const { width: windowWidth } = useWindowDimensions();
   const narrow = windowWidth < 600;
+
+  // committed transform: rendered inside the canvas, crisp
+  const [committed, setCommitted] = React.useState<VizTransform>(IDENTITY_VIZ_TRANSFORM);
+  const committedRef = React.useRef(committed);
+  committedRef.current = committed;
+
+  // transient gesture transform: view layer, reset on commit
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const gestureScale = useSharedValue(1);
   const gestureX = useSharedValue(0);
   const gestureY = useSharedValue(0);
-  const zoomRef = React.useRef(1);
-  const [zoom, setZoom] = React.useState(1);
+  const committedScaleSV = useSharedValue(1);
+  const committedTxSV = useSharedValue(0);
+  const committedTySV = useSharedValue(0);
 
-  const reportZoom = React.useCallback((value: number) => {
-    zoomRef.current = value;
-    setZoom(value);
-  }, []);
+  React.useEffect(() => {
+    committedScaleSV.value = committed.scale;
+    committedTxSV.value = committed.tx;
+    committedTySV.value = committed.ty;
+  }, [committed, committedScaleSV, committedTxSV, committedTySV]);
+
+  const commitTransform = React.useCallback(
+    (next: VizTransform) => {
+      const clamped = clampPan(
+        { ...next, scale: clampVizZoom(next.scale) },
+        width,
+        height
+      );
+      setCommitted(
+        clamped.scale === 1 ? IDENTITY_VIZ_TRANSFORM : clamped
+      );
+      scale.value = 1;
+      translateX.value = 0;
+      translateY.value = 0;
+    },
+    [height, scale, translateX, translateY, width]
+  );
+
+  // fold the transient view transform into the committed one
+  const commitGesture = React.useCallback(() => {
+    const prev = committedRef.current;
+    const vs = scale.value;
+    const vtx = translateX.value;
+    const vty = translateY.value;
+    if (vs === 1 && vtx === 0 && vty === 0) return;
+    const nextScale = clampVizZoom(vs * prev.scale);
+    const f = nextScale / prev.scale;
+    commitTransform({
+      scale: nextScale,
+      tx: f * prev.tx + vtx,
+      ty: f * prev.ty + vty,
+    });
+  }, [commitTransform, scale, translateX, translateY]);
 
   const applyZoom = React.useCallback(
     (value: number) => {
-      const next = clampVizZoom(value);
-      const limitX = vizPanLimit(width, next);
-      const limitY = vizPanLimit(height, next);
-      scale.value = withTiming(next, { duration: 180 });
-      translateX.value = withTiming(
-        Math.min(limitX, Math.max(-limitX, translateX.value)),
-        { duration: 180 }
-      );
-      translateY.value = withTiming(
-        Math.min(limitY, Math.max(-limitY, translateY.value)),
-        { duration: 180 }
-      );
-      reportZoom(next);
+      const prev = committedRef.current;
+      const nextScale = clampVizZoom(value);
+      const f = nextScale / prev.scale;
+      commitTransform({ scale: nextScale, tx: prev.tx * f, ty: prev.ty * f });
     },
-    [height, reportZoom, scale, translateX, translateY, width]
+    [commitTransform]
   );
 
   const resetZoom = React.useCallback(() => {
-    scale.value = withTiming(1, { duration: 180 });
-    translateX.value = withTiming(0, { duration: 180 });
-    translateY.value = withTiming(0, { duration: 180 });
-    reportZoom(1);
-  }, [reportZoom, scale, translateX, translateY]);
+    commitTransform(IDENTITY_VIZ_TRANSFORM);
+  }, [commitTransform]);
 
   const gesture = React.useMemo(() => {
     const pinch = Gesture.Pinch()
@@ -82,19 +133,14 @@ export default function ZoomableViz({ width, height, children }: Props) {
         gestureScale.value = scale.value;
       })
       .onUpdate((event) => {
+        const cs = committedScaleSV.value;
         scale.value = Math.min(
-          MAX_VIZ_ZOOM,
-          Math.max(MIN_VIZ_ZOOM, gestureScale.value * event.scale)
+          MAX_VIZ_ZOOM / cs,
+          Math.max(MIN_VIZ_ZOOM / cs, gestureScale.value * event.scale)
         );
       })
       .onFinalize(() => {
-        const next = Math.min(MAX_VIZ_ZOOM, Math.max(MIN_VIZ_ZOOM, scale.value));
-        scale.value = withTiming(next, { duration: 120 });
-        if (next === MIN_VIZ_ZOOM) {
-          translateX.value = withTiming(0, { duration: 120 });
-          translateY.value = withTiming(0, { duration: 120 });
-        }
-        runOnJS(reportZoom)(next);
+        runOnJS(commitGesture)();
       });
 
     const pan = Gesture.Pan()
@@ -103,30 +149,47 @@ export default function ZoomableViz({ width, height, children }: Props) {
         gestureY.value = translateY.value;
       })
       .onUpdate((event) => {
-        if (scale.value <= MIN_VIZ_ZOOM) return;
-        const limitX = (width * (scale.value - 1)) / 2;
-        const limitY = (height * (scale.value - 1)) / 2;
+        const total = committedScaleSV.value * scale.value;
+        if (total <= MIN_VIZ_ZOOM) return;
+        const limitX = (width * (total - 1)) / 2;
+        const limitY = (height * (total - 1)) / 2;
+        const baseX = scale.value * committedTxSV.value;
+        const baseY = scale.value * committedTySV.value;
         translateX.value = Math.min(
-          limitX,
-          Math.max(-limitX, gestureX.value + event.translationX)
+          limitX - baseX,
+          Math.max(-limitX - baseX, gestureX.value + event.translationX)
         );
         translateY.value = Math.min(
-          limitY,
-          Math.max(-limitY, gestureY.value + event.translationY)
+          limitY - baseY,
+          Math.max(-limitY - baseY, gestureY.value + event.translationY)
         );
+      })
+      .onFinalize(() => {
+        runOnJS(commitGesture)();
       });
 
     const doubleTap = Gesture.Tap()
       .numberOfTaps(2)
       .onEnd(() => {
-        scale.value = withTiming(1, { duration: 180 });
-        translateX.value = withTiming(0, { duration: 180 });
-        translateY.value = withTiming(0, { duration: 180 });
-        runOnJS(reportZoom)(1);
+        runOnJS(resetZoom)();
       });
 
     return Gesture.Simultaneous(pinch, pan, doubleTap);
-  }, [gestureScale, gestureX, gestureY, height, reportZoom, scale, translateX, translateY, width]);
+  }, [
+    commitGesture,
+    committedScaleSV,
+    committedTxSV,
+    committedTySV,
+    gestureScale,
+    gestureX,
+    gestureY,
+    height,
+    resetZoom,
+    scale,
+    translateX,
+    translateY,
+    width,
+  ]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -141,12 +204,13 @@ export default function ZoomableViz({ width, height, children }: Props) {
       const delta = event?.nativeEvent?.deltaY ?? event?.deltaY ?? 0;
       if (!delta) return;
       event.preventDefault?.();
-      applyZoom(zoomRef.current * (delta < 0 ? 1.15 : 1 / 1.15));
+      applyZoom(committedRef.current.scale * (delta < 0 ? 1.15 : 1 / 1.15));
     },
     [applyZoom]
   );
 
   const webWheelProps = Platform.OS === "web" ? { onWheel: handleWheel } : {};
+  const zoom = committed.scale;
 
   return (
     <View style={styles.container} {...webWheelProps}>
@@ -155,7 +219,9 @@ export default function ZoomableViz({ width, height, children }: Props) {
           style={[styles.surface, { width, height }, animatedStyle]}
           testID="viz-zoom-surface"
         >
-          {children}
+          <VizTransformContext.Provider value={committed}>
+            {children}
+          </VizTransformContext.Provider>
         </Animated.View>
       </GestureDetector>
 
@@ -164,7 +230,7 @@ export default function ZoomableViz({ width, height, children }: Props) {
         testID="viz-zoom-controls"
       >
         <Pressable
-          onPress={() => applyZoom(stepVizZoom(zoomRef.current, -1))}
+          onPress={() => applyZoom(stepVizZoom(committedRef.current.scale, -1))}
           disabled={zoom <= MIN_VIZ_ZOOM}
           accessibilityRole="button"
           accessibilityLabel="Zoom out"
@@ -187,7 +253,7 @@ export default function ZoomableViz({ width, height, children }: Props) {
           <PlainText style={styles.levelText}>{`${Math.round(zoom * 100)}%`}</PlainText>
         </Pressable>
         <Pressable
-          onPress={() => applyZoom(stepVizZoom(zoomRef.current, 1))}
+          onPress={() => applyZoom(stepVizZoom(committedRef.current.scale, 1))}
           disabled={zoom >= MAX_VIZ_ZOOM}
           accessibilityRole="button"
           accessibilityLabel="Zoom in"
@@ -232,16 +298,16 @@ const makeStyles = (colors: any) =>
       flexDirection: "row",
     },
     control: {
-      width: 36,
-      height: 36,
+      width: 40,
+      height: 40,
       borderRadius: radii.pill,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: colors.surface,
     },
     level: {
-      minWidth: 42,
-      height: 36,
+      minWidth: 44,
+      height: 40,
       borderRadius: radii.pill,
       alignItems: "center",
       justifyContent: "center",

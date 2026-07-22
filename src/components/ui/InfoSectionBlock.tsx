@@ -19,7 +19,7 @@ export default function InfoSectionBlock({ section }: Props) {
 
   return (
     <View style={styles.section} testID={`info-section-${section.id}`}>
-      <SectionHeading size="info">{section.title}</SectionHeading>
+      <SectionHeading size="info" style={styles.heading}>{section.title}</SectionHeading>
       {section.body?.map((paragraph) => (
         <BodyText key={paragraph.slice(0, 24)}>{paragraph}</BodyText>
       ))}
@@ -39,5 +39,10 @@ const makeStyles = (colors: any) => StyleSheet.create({
     paddingTop: 20,
     borderTopWidth: 1,
     borderTopColor: colors.border,
+  },
+  // the divider already separates sections; the heading's own top margin
+  // would double the gap above it while content sits tight below
+  heading: {
+    marginTop: 0,
   },
 });

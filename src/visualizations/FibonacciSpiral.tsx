@@ -2,10 +2,10 @@
 
 import React, { useMemo } from "react";
 import {
-  Canvas,
   Circle,
   Group,
 } from "@shopify/react-native-skia";
+import VizCanvas from "./VizCanvas";
 import { hslToHex } from "../theme";
 import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
 
@@ -37,11 +37,11 @@ export function FibonacciSpiralPreview({ width, height }: { width: number; heigh
   }, [cx, cy, maxR, n]);
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {points.map((pt, i) => (
         <Circle key={i} cx={pt.x} cy={pt.y} r={1.5} color={pt.color} />
       ))}
-    </Canvas>
+    </VizCanvas>
   );
 }
 
@@ -65,7 +65,7 @@ export function FibonacciSpiralFull({ width, height, count = 300 }: Omit<Props, 
   }, [count, maxR, cx, cy]);
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {points.slice(0, visible).map((pt, i) => (
         <Circle key={i} cx={pt.x} cy={pt.y} r={3} color={pt.color} />
       ))}
@@ -79,7 +79,7 @@ export function FibonacciSpiralFull({ width, height, count = 300 }: Omit<Props, 
           />
         </Group>
       )}
-    </Canvas>
+    </VizCanvas>
   );
 }
 

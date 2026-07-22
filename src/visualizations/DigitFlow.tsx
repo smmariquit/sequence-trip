@@ -2,11 +2,11 @@
 
 import React, { useMemo, useEffect } from "react";
 import {
-  Canvas,
   Path as SkiaPath,
   Circle,
   BlurMask,
 } from "@shopify/react-native-skia";
+import VizCanvas from "./VizCanvas";
 import {
   useDerivedValue,
   useSharedValue,
@@ -72,7 +72,7 @@ export function DigitFlowPreview({ width, height }: { width: number; height: num
   const path = useMemo(() => makePolylinePath(segments, segments.length - 1), [segments]);
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       <SkiaPath
         path={path}
         style="stroke"
@@ -81,7 +81,7 @@ export function DigitFlowPreview({ width, height }: { width: number; height: num
         strokeCap="round"
         strokeJoin="round"
       />
-    </Canvas>
+    </VizCanvas>
   );
 }
 
@@ -118,7 +118,7 @@ export function DigitFlowFull({ width, height, count = 400 }: Omit<Props, "previ
   const visible = step;
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       <SkiaPath
         path={path}
         style="stroke"
@@ -142,7 +142,7 @@ export function DigitFlowFull({ width, height, count = 400 }: Omit<Props, "previ
             <BlurMask blur={3} style="solid" />
           </Circle>
         ))}
-    </Canvas>
+    </VizCanvas>
   );
 }
 

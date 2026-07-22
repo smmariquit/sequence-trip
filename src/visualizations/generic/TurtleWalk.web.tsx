@@ -23,19 +23,6 @@ export default function TurtleWalk({ terms, width, height, preview }: GenericViz
     (ctx: CanvasRenderingContext2D, time: number) => {
       const progress = progressRef.current;
 
-      if (!preview) {
-        // legend: the rule that steers the walker
-        drawBackedLabel(ctx, {
-          text: "each step turns by a(n) mod 4:   0 = hard left   1 = soft left   2 = soft right   3 = hard right",
-          x: width / 2,
-          y: 18,
-          fg: colors.textMuted,
-          bg: colors.bg,
-          size: 12,
-          weight: "400",
-          align: "center",
-        });
-      }
       if (points.length === 0 || progress <= 0) return;
 
       const hue = (time * 40) % 360;

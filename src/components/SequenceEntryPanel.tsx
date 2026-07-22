@@ -110,9 +110,25 @@ export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            <MetaRow label="A-number" value={entry.anum} />
-            {entry.legacyId ? <MetaRow label="Legacy ID" value={entry.legacyId} /> : null}
-            {entry.offset ? <MetaRow label="Offset" value={entry.offset} /> : null}
+            <MetaRow
+              label="A-number"
+              value={entry.anum}
+              hint="The sequence's permanent ID in the OEIS catalog, like a serial number."
+            />
+            {entry.legacyId ? (
+              <MetaRow
+                label="Legacy ID"
+                value={entry.legacyId}
+                hint="Its number in the printed predecessors of the OEIS (M: 1973 handbook, N: 1995 encyclopedia)."
+              />
+            ) : null}
+            {entry.offset ? (
+              <MetaRow
+                label="Offset"
+                value={entry.offset}
+                hint="Where counting starts: the first number is the index of the first term (0 means the sequence begins at a(0)). The second is OEIS bookkeeping."
+              />
+            ) : null}
             {entry.author ? (
               <Section title="Author">
                 <Body>{stripOeisMarkup(entry.author)}</Body>
@@ -274,13 +290,16 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function MetaRow({ label, value }: { label: string; value: string }) {
+function MetaRow({ label, value, hint }: { label: string; value: string; hint?: string }) {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.metaRow}>
       <Text style={styles.metaLabel}>{label}</Text>
-      <Text style={styles.metaValue}>{value}</Text>
+      <View style={styles.metaBody}>
+        <Text style={styles.metaValue}>{value}</Text>
+        {hint ? <Text style={styles.metaHint}>{hint}</Text> : null}
+      </View>
     </View>
   );
 }
@@ -456,11 +475,19 @@ const makeStyles = (colors: any) => StyleSheet.create({
     fontWeight: "600",
     minWidth: 72,
   },
+  metaBody: {
+    flex: 1,
+  },
   metaValue: {
     color: colors.textDim,
     fontSize: 13,
-    flex: 1,
     fontVariant: ["tabular-nums"],
+  },
+  metaHint: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 1,
   },
   link: {
     marginBottom: spacing.xs,

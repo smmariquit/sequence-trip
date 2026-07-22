@@ -2,10 +2,10 @@
 
 import React, { useMemo } from "react";
 import {
-  Canvas,
   Group,
   Rect,
 } from "@shopify/react-native-skia";
+import VizCanvas from "./VizCanvas";
 import { hslToHex } from "../theme";
 import { useBuildAnimation, useItemFrac } from "../playback/useBuildAnimation";
 
@@ -67,7 +67,7 @@ export function PascalFractalPreview({ width, height }: { width: number; height:
   const cells = useMemo(() => buildCells(32, width, height), [width, height]);
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {cells.map((cell, i) => (
         <Rect
           key={i}
@@ -78,7 +78,7 @@ export function PascalFractalPreview({ width, height }: { width: number; height:
           color={hslToHex((cell.row * 3.5 + cell.col * 7) % 360, 90, 58)}
         />
       ))}
-    </Canvas>
+    </VizCanvas>
   );
 }
 
@@ -99,12 +99,12 @@ export function PascalFractalFull({ width, height, count = 128 }: Omit<Props, "p
   );
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {cells.filter((cell) => cell.row < visible).map(cellRect)}
       <Group opacity={rowFade}>
         {cells.filter((cell) => cell.row === visible).map(cellRect)}
       </Group>
-    </Canvas>
+    </VizCanvas>
   );
 }
 

@@ -7,7 +7,6 @@
 import React, { useMemo, useEffect } from "react";
 import { Platform } from "react-native";
 import {
-  Canvas,
   Path as SkiaPath,
   Circle,
   Line,
@@ -16,6 +15,7 @@ import {
   matchFont,
   vec,
 } from "@shopify/react-native-skia";
+import VizCanvas from "../VizCanvas";
 import {
   useDerivedValue,
   useSharedValue,
@@ -70,7 +70,7 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
   const axisRight = width - pad.right;
 
   return (
-    <Canvas style={{ width, height }}>
+    <VizCanvas width={width} height={height}>
       {!preview && (
         <>
           <Line p1={vec(pad.left, axisBottom)} p2={vec(axisRight, axisBottom)} color={colors.textMuted} strokeWidth={1} />
@@ -155,6 +155,6 @@ export default function LinePlot({ terms, width, height, preview }: GenericVizPr
           />
         </>
       )}
-    </Canvas>
+    </VizCanvas>
   );
 }

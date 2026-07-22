@@ -14,11 +14,14 @@ import PlainText from "../../src/components/PlainText";
 import {
   musicSettings,
   musicSettingsVersion,
+  SCALE_DESCRIPTIONS,
   SCALE_LABELS,
   setMusicSettings,
   subscribeMusicSettings,
   type ScaleId,
 } from "../../src/audio/musicSettings";
+import { MUSIC_ELEMENTS } from "../../src/audio/elements";
+import AppIcon from "../../src/components/ui/AppIcon";
 import { indexToNoteName } from "../../src/audio/scales";
 import {
   notifySettings,
@@ -57,7 +60,7 @@ export default function SettingsScreen() {
         <LogoTitleRow title="Settings" subtitle="Applies everywhere" size="page" />
       </View>
 
-      <SectionHeading>Visualization colors</SectionHeading>
+      <SectionHeading icon="color-palette-outline" padded={false}>Visualization colors</SectionHeading>
       <PlainText style={styles.note}>
         Sets the default for every sequence. To keep special colors for one
         sequence, use the palette button on its visualization screen.
@@ -66,7 +69,7 @@ export default function SettingsScreen() {
         <VizColorControls />
       </View>
 
-      <SectionHeading>Sound</SectionHeading>
+      <SectionHeading icon="musical-notes" padded={false}>Sound</SectionHeading>
       <PlainText style={styles.note}>
         How terms turn into notes. A term picks a step on the chosen scale;
         the key slider moves the whole piece up or down.
@@ -91,6 +94,9 @@ export default function SettingsScreen() {
           );
         })}
       </View>
+      <PlainText style={styles.scaleDescription}>
+        {SCALE_DESCRIPTIONS[music.scaleId]}
+      </PlainText>
       <PlainText style={styles.label}>{`Key: ${NOTE_ROOTS[music.rootShift]} (first note ${indexToNoteName(0)})`}</PlainText>
       <Slider
         style={styles.slider}
@@ -104,6 +110,22 @@ export default function SettingsScreen() {
         thumbTintColor={colors.primary}
         accessibilityLabel="Key root shift"
       />
+      <PlainText style={styles.label}>Instruments</PlainText>
+      <PlainText style={styles.note}>
+        Toggled per sequence on the visualization screen. What each one plays:
+      </PlainText>
+      <View style={styles.instrumentList}>
+        {MUSIC_ELEMENTS.map((el) => (
+          <View key={el.id} style={styles.instrumentRow}>
+            <AppIcon name={el.icon} size={18} color={colors.primary} />
+            <View style={styles.instrumentText}>
+              <PlainText style={styles.instrumentName}>{el.label}</PlainText>
+              <PlainText style={styles.instrumentDescription}>{el.description}</PlainText>
+            </View>
+          </View>
+        ))}
+      </View>
+
       {Platform.OS !== "web" ? (
         <>
           <PlainText style={styles.label}>Ambient sound</PlainText>
@@ -113,7 +135,7 @@ export default function SettingsScreen() {
 
       {Platform.OS !== "web" ? (
         <>
-          <SectionHeading>Notifications</SectionHeading>
+          <SectionHeading icon="notifications-outline" padded={false}>Notifications</SectionHeading>
           <PlainText style={styles.note}>
             A daily reminder naming the sequence of the day, around 9am. Tap it
             to jump straight to that sequence.
@@ -178,6 +200,35 @@ const makeStyles = (colors: any) => StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
+  },
+  scaleDescription: {
+    color: colors.textDim,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: spacing.sm,
+  },
+  instrumentList: {
+    gap: spacing.md,
+    marginTop: spacing.xs,
+  },
+  instrumentRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.sm,
+  },
+  instrumentText: {
+    flex: 1,
+  },
+  instrumentName: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  instrumentDescription: {
+    color: colors.textDim,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 1,
   },
   chip: {
     paddingHorizontal: spacing.md,
