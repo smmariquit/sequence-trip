@@ -16,23 +16,44 @@ import { radii, spacing, touch } from "../../src/theme/tokens";
 
 const MAX_PICKS = 4;
 
-// curated matchups; each opens the N-way compare directly.
-// ponytail: hand-picked seed list, refresh from the research pass when it lands
+// curated matchups; each opens the N-way compare directly. Groups and
+// phrasing verified against oeis.org relationships (deep-research pass,
+// 2026-07-23): shared recurrences, complementary sets, exact ratios.
 const COMPARE_PRESETS: { anums: string[]; label: string; why: string }[] = [
+  {
+    anums: ["A000079", "A000225", "A014551", "A001045"],
+    label: "The powers-of-2 braid",
+    why: "Powers of 2, Mersenne, Jacobsthal-Lucas, and Jacobsthal run parallel at the same log slope, braided by plus or minus one and a factor of three.",
+  },
   {
     anums: ["A000045", "A000032", "A000129"],
     label: "Fibonacci vs Lucas vs Pell",
     why: "Three two-term recurrences racing at different exponential rates.",
   },
   {
-    anums: ["A000045", "A000032"],
-    label: "Fibonacci vs Lucas",
-    why: "Same add-the-last-two rule, different seeds; the ratio settles to a constant.",
+    anums: ["A000201", "A001950"],
+    label: "Lower vs upper Wythoff",
+    why: "Two irrational-slope lines that together hit every positive integer exactly once; their ratio converges to the golden ratio.",
   },
   {
     anums: ["A000108", "A000984"],
     label: "Catalan vs central binomial",
-    why: "Catalan is the central binomial divided by n+1; the ratio plot shows it.",
+    why: "Catalan is the central binomial divided by n+1, so the ratio plot is a perfectly straight climb.",
+  },
+  {
+    anums: ["A001006", "A000108", "A000984"],
+    label: "Lattice-path race",
+    why: "Motzkin grows at base 3 while Catalan and the central binomial run at base 4; log axes turn it into a slope race.",
+  },
+  {
+    anums: ["A001045", "A014551"],
+    label: "Jacobsthal vs Jacobsthal-Lucas",
+    why: "The base-2 cousin of Fibonacci vs Lucas: identical rule, different seeds, seed wobble fading into one shared slope.",
+  },
+  {
+    anums: ["A000069", "A001969"],
+    label: "Odious vs evil numbers",
+    why: "The integers split by the parity of their binary digit sum; the phase plane hugs the diagonal with binary-carry wobble.",
   },
   {
     anums: ["A000217", "A000290", "A000578"],
@@ -40,19 +61,19 @@ const COMPARE_PRESETS: { anums: string[]; label: string; why: string }[] = [
     why: "The figurate ladder: polynomial growth of degree 2, 2, and 3.",
   },
   {
-    anums: ["A000040", "A002808"],
-    label: "Primes vs composites",
-    why: "The whole numbers split in two; watch the prime side thin out.",
-  },
-  {
     anums: ["A000005", "A000010", "A000203"],
     label: "Divisors, totient, sigma",
-    why: "The classic arithmetic-function trio: count, coprimes, and sum of divisors.",
+    why: "The classic arithmetic-function trio: count of divisors, count of coprimes, and sum of divisors.",
   },
   {
     anums: ["A000041", "A000009", "A000110"],
     label: "Partitions three ways",
     why: "Any parts, distinct parts, and labeled set partitions pull apart fast.",
+  },
+  {
+    anums: ["A000040", "A002808"],
+    label: "Primes vs composites",
+    why: "The whole numbers split in two; watch the prime side thin out.",
   },
 ];
 
