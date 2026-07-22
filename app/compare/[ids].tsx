@@ -1,7 +1,8 @@
 // app/compare/[ids].tsx
 //
-// Two-sequence comparison: phase plane + ratio plot (OEIS plot2 modes).
-// URL shape: /compare/A000045-A000108
+// N-sequence comparison. Always: shared symlog growth overlay. For exactly
+// two sequences also phase plane + ratio (OEIS plot2 modes).
+// URL shape: /compare/A000045-A000108 or /compare/A000045-A000032-A000129
 
 import React, { useEffect, useMemo, useState } from "react";
 import { View, ScrollView, Text, StyleSheet, useWindowDimensions } from "react-native";
@@ -9,6 +10,7 @@ import { useLocalSearchParams } from "expo-router";
 import * as oeis from "../../src/oeis/db";
 import type { OEISSequence } from "../../src/sequences/types";
 import PairPlot from "../../src/visualizations/PairPlot";
+import MultiSeriesPlot, { seriesColor } from "../../src/visualizations/MultiSeriesPlot";
 import { useThemeColors } from "../../src/theme";
 import { BackButton, CenteredState, AnumBadge, BodyText } from "../../src/components/ui";
 import { MAX_PAGE_WIDTH, PAGE_PADDING, safeAreaTop } from "../../src/theme/layout";
@@ -21,23 +23,25 @@ export default function CompareScreen() {
   const { width: screenW } = useWindowDimensions();
   const plotW = Math.min(screenW, MAX_PAGE_WIDTH) - PAGE_PADDING * 2;
 
-  const [anumA, anumB] = useMemo(() => {
-    const m = (ids ?? "").toUpperCase().match(/^(A\d{6})-(A\d{6})$/);
-    return m ? [m[1], m[2]] : [null, null];
+  const anums = useMemo(() => {
+    const raw = (ids ?? "").toUpperCase();
+    if (!/^A\d{6}(-A\d{6})+$/.test(raw)) return [];
+    return [...new Set(raw.split("-"))];
   }, [ids]);
 
-  const [pair, setPair] = useState<[OEISSequence, OEISSequence] | null>(null);
+  const [seqs, setSeqs] = useState<OEISSequence[] | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!anumA || !anumB) {
+    if (anums.length < 2) {
       setLoading(false);
       return;
     }
     let cancelled = false;
-    Promise.all([oeis.getById(anumA), oeis.getById(anumB)])
-      .then(([a, b]) => {
-        if (!cancelled && a && b) setPair([a, b]);
+    Promise.all(anums.map((a) => oeis.getById(a)))
+      .then((hits) => {
+        const found = hits.filter((h): h is OEISSequence => h !== null);
+        if (!cancelled && found.length === anums.length) setSeqs(found);
       })
       .catch(() => {})
       .finally(() => {
@@ -46,34 +50,50 @@ export default function CompareScreen() {
     return () => {
       cancelled = true;
     };
-  }, [anumA, anumB]);
+  }, [anums]);
 
   if (loading) return <CenteredState loading />;
-  if (!pair) return <CenteredState message="Sequences not found" />;
+  if (!seqs) return <CenteredState message="Sequences not found" />;
 
-  const [a, b] = pair;
+  const [a, b] = seqs;
+  const isPair = seqs.length === 2;
   return (
     <View style={styles.container} nativeID="main" testID="compare-screen">
       <View style={styles.header}>
         <BackButton />
         <View style={styles.headerText}>
           <Text style={styles.title} numberOfLines={1}>
-            {a.anum} vs {b.anum}
+            {seqs.map((s) => s.anum).join(" vs ")}
           </Text>
         </View>
       </View>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.names}>
-          <View style={styles.nameRow}>
-            <AnumBadge anum={a.anum} size="sm" />
-            <BodyText variant="caption" style={styles.name}>{a.name}</BodyText>
-          </View>
-          <View style={styles.nameRow}>
-            <AnumBadge anum={b.anum} size="sm" />
-            <BodyText variant="caption" style={styles.name}>{b.name}</BodyText>
-          </View>
+          {seqs.map((s, i) => (
+            <View key={s.anum} style={styles.nameRow}>
+              <View style={[styles.seriesDot, { backgroundColor: seriesColor(i) }]} />
+              <AnumBadge anum={s.anum} size="sm" />
+              <BodyText variant="caption" style={styles.name}>{s.name}</BodyText>
+            </View>
+          ))}
         </View>
 
+        <Text style={styles.plotTitle}>Growth — shared log scale over n</Text>
+        <View
+          style={[styles.plotBox, { width: plotW, height: plotW * 0.6 }]}
+          accessible
+          accessibilityRole="image"
+          accessibilityLabel={`Growth of ${seqs.map((s) => s.anum).join(", ")} on a shared log scale`}
+        >
+          <MultiSeriesPlot
+            series={seqs.map((s) => s.terms ?? [])}
+            width={plotW}
+            height={plotW * 0.6}
+          />
+        </View>
+
+        {isPair ? (
+          <>
         <Text style={styles.plotTitle}>Phase plane — {b.anum}(n) vs {a.anum}(n)</Text>
         <View
           style={[styles.plotBox, { width: plotW, height: plotW * 0.8 }]}
@@ -105,6 +125,8 @@ export default function CompareScreen() {
             height={plotW * 0.6}
           />
         </View>
+          </>
+        ) : null}
       </ScrollView>
     </View>
   );
@@ -142,6 +164,11 @@ const makeStyles = (colors: any) => StyleSheet.create({
   names: {
     gap: spacing.xs,
     marginBottom: spacing.sm,
+  },
+  seriesDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
   nameRow: {
     flexDirection: "row",

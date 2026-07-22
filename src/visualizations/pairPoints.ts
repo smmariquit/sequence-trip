@@ -9,6 +9,28 @@ export type PairMode = "phase" | "ratio";
 
 type Point = { x: number; y: number };
 
+/** Overlaid growth lines for N sequences on a shared symlog y-scale. */
+export function multiSeriesLines(
+  seriesTerms: string[][],
+  width: number,
+  height: number,
+  pad: number
+): Point[][] {
+  const logs = seriesTerms.map((t) => signedLogs(t));
+  const all = logs.flat();
+  if (all.length === 0) return logs.map(() => []);
+  const n = Math.max(...logs.map((l) => l.length));
+  const min = Math.min(...all);
+  const max = Math.max(...all);
+  const r = max - min || 1;
+  return logs.map((l) =>
+    l.map((v, i) => ({
+      x: pad + ((width - pad * 2) * i) / Math.max(n - 1, 1),
+      y: height - pad - ((v - min) / r) * (height - pad * 2),
+    }))
+  );
+}
+
 export function pairPoints(
   termsA: string[],
   termsB: string[],
