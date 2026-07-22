@@ -11,7 +11,9 @@ const FORMULA_WORDS = new Set([
   "F", "G", "L", "T", "A", "B", "C", "P", "Q", "S",
   "sum", "product", "prod", "binomial",
   "sqrt", "floor", "ceiling", "ceil", "round", "abs", "gcd", "lcm", "mod",
-  "log", "log_2", "exp", "sin", "cos", "tan", "sinh", "cosh", "sign",
+  "log", "exp", "sin", "cos", "tan", "sinh", "cosh", "tanh", "sign",
+  "arctan", "arcsin", "arccos", "arccot", "cot", "sec", "csc",
+  "zeta", "gamma", "agm", "e", "tau",
   "max", "min", "lim", "pi", "phi", "psi",
   "sigma", "mu", "tau", "omega", "infinity", "if", "for", "with", "where",
   "and", "or", "else", "otherwise", "even", "odd", "prime", "fibonacci",
@@ -21,18 +23,40 @@ const FORMULA_WORDS = new Set([
 /** Strip OEIS attribution tails: ". - Author Name, Mon DD YYYY" (with or
  * without the _underscores_ that stripOeisMarkup may already have removed). */
 function stripAttribution(line: string): { math: string; tail: string } {
-  const underscored = line.match(/^(.*?)\s*(-\s*_[^_]+_.*)$/);
+  // drop year-bearing citation brackets: [Viete, 1593], [Euler, 1748].
+  // Floor-brackets like [n*phi] never carry a 4-digit year.
+  let s = line.replace(/\s*\[[^\]]*\b\d{4}\b[^\]]*\]\.?/g, "");
+  const underscored = s.match(/^(.*?)\s*(-\s*_[^_]+_.*)$/);
   if (underscored) return { math: underscored[1], tail: "" };
-  const dated = line.match(/^(.*?)\s*-\s+[A-Z][\w'. -]*,\s+[A-Z][a-z]{2}\s+\d{1,2}\s+\d{4}.*$/);
+  const dated = s.match(/^(.*?)\s*-\s+[A-Z][\w'. -]*,\s+[A-Z][a-z]{2}\s+\d{1,2}\s+\d{4}.*$/);
   if (dated) return { math: dated[1], tail: "" };
-  return { math: line, tail: "" };
+  return { math: s, tail: "" };
 }
 
-/** True when the text is only math-ish tokens — safe to typeset whole. */
+/** True when the text is only math-ish tokens — safe to typeset whole.
+ * Words are letters-only so `Sum_{k..}` reads as "Sum", not "Sum_". */
 function looksLikeFormula(text: string): boolean {
   if (!/[=<>~]/.test(text)) return false;
-  const words = text.match(/[A-Za-z_][A-Za-z_0-9]*/g) ?? [];
+  const words = text.match(/[A-Za-z][A-Za-z0-9]*/g) ?? [];
   return words.every((w) => FORMULA_WORDS.has(w) || FORMULA_WORDS.has(w.toLowerCase()));
+}
+
+/** Prose line with parenthesized formula fragments, e.g. cross-references:
+ * "A002388 (Pi^2), A019692 (2*Pi=tau)". Typesets only the fragments that are
+ * safely math; returns the original when nothing qualifies. */
+export function typesetInlineFragments(line: string): { text: string; hasMath: boolean } {
+  let hasMath = false;
+  const text = line.replace(/\(([^()]+)\)/g, (whole, inner: string) => {
+    if (!/[=^*/<>]/.test(inner)) return whole;
+    const words = inner.match(/[A-Za-z][A-Za-z0-9]*/g) ?? [];
+    const mathy = words.every(
+      (w) => FORMULA_WORDS.has(w) || FORMULA_WORDS.has(w.toLowerCase())
+    );
+    if (!mathy) return whole;
+    hasMath = true;
+    return `($${oeisAsciiToLatex(inner)}$)`;
+  });
+  return hasMath ? { text, hasMath } : { text: line, hasMath: false };
 }
 
 /** OEIS ASCII math → LaTeX. Only call on text that looksLikeFormula. */

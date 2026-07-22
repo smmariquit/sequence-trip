@@ -21,8 +21,8 @@ import {
   parseOeisLink,
   stripOeisMarkup,
 } from "../oeis/entryText";
-import { tokenizeCode, type CodeLang } from "../oeis/codeTokens";
-import { formatOeisLine } from "../oeis/oeisMath";
+import { splitProgramsByLang, tokenizeCode, type CodeLang } from "../oeis/codeTokens";
+import { formatOeisLine, typesetInlineFragments } from "../oeis/oeisMath";
 import { keywordMeaning } from "../oeis/keywordInfo";
 import MathText from "./MathText";
 import { useThemeColors } from "../theme";
@@ -172,7 +172,12 @@ export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
             ) : null}
             {entry.program.length > 0 ? (
               <Section title="Code">
-                <CodeBlock>{entry.program.join("\n\n")}</CodeBlock>
+                {splitProgramsByLang(entry.program).map((chunk, i) => (
+                  <View key={`${chunk.tag ?? "code"}-${i}`}>
+                    {chunk.tag ? <Text style={styles.codeTag}>{chunk.tag}</Text> : null}
+                    <CodeBlock lang={chunk.lang}>{chunk.code}</CodeBlock>
+                  </View>
+                ))}
               </Section>
             ) : null}
             {entry.maple.length > 0 ? (
@@ -218,9 +223,15 @@ export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
             ) : null}
             {entry.xref.length > 0 ? (
               <Section title="Cross-references">
-                {entry.xref.map((line) => (
+                {entry.xref.map((line) => {
+                  const frag = typesetInlineFragments(stripOeisMarkup(line));
+                  return (
                   <View key={line.slice(0, 48)} style={styles.xrefBlock}>
-                    <Body>{stripOeisMarkup(line)}</Body>
+                    {frag.hasMath ? (
+                      <MathText style={styles.body}>{frag.text}</MathText>
+                    ) : (
+                      <Body>{frag.text}</Body>
+                    )}
                     <View style={styles.xrefChips}>
                       {extractAnums(line).map((a) => (
                         <View key={a} style={styles.xrefPair}>
@@ -250,7 +261,8 @@ export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
                       ))}
                     </View>
                   </View>
-                ))}
+                  );
+                })}
               </Section>
             ) : null}
             {entry.ext.length > 0 ? (
@@ -282,10 +294,24 @@ export default function SequenceEntryPanel({ anum, visible, onClose }: Props) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
+  const [open, setOpen] = useState(true);
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {children}
+      <Pressable
+        onPress={() => setOpen((o) => !o)}
+        style={styles.sectionHeader}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        accessibilityLabel={`${open ? "Collapse" : "Expand"} ${title}`}
+      >
+        <Text style={styles.sectionTitle}>{title}</Text>
+        <AppIcon
+          name={open ? "chevron-up" : "chevron-down"}
+          size={16}
+          color={colors.textMuted}
+        />
+      </Pressable>
+      {open ? children : null}
     </View>
   );
 }
@@ -413,10 +439,22 @@ const makeStyles = (colors: any) => StyleSheet.create({
   section: {
     gap: spacing.sm,
   },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: 32,
+  },
   sectionTitle: {
     color: colors.text,
     fontSize: 16,
     fontWeight: "700",
+  },
+  codeTag: {
+    color: colors.textMuted,
+    fontSize: 12,
+    fontWeight: "700",
+    marginBottom: 2,
   },
   body: {
     color: colors.textDim,

@@ -47,6 +47,30 @@ const LANG_KEYWORDS: Record<CodeLang, Set<string>> = {
   ]),
 };
 
+export interface ProgramChunk {
+  lang: CodeLang;
+  tag: string | null;
+  code: string;
+}
+
+/** Split OEIS program lines into per-language chunks: a "(PARI)" style tag
+ * opens a chunk, untagged lines continue the current one. */
+export function splitProgramsByLang(lines: string[]): ProgramChunk[] {
+  const chunks: ProgramChunk[] = [];
+  for (const line of lines) {
+    const m = line.match(/^\(([A-Za-z][^)]{0,23})\)\s*(.*)$/);
+    if (m) {
+      chunks.push({ lang: langFromTag(m[1]), tag: m[1], code: m[2] });
+    } else if (chunks.length === 0) {
+      chunks.push({ lang: "other", tag: null, code: line });
+    } else {
+      const current = chunks[chunks.length - 1];
+      current.code += (current.code ? "\n" : "") + line;
+    }
+  }
+  return chunks;
+}
+
 /** Map an OEIS language tag like "(PARI)" to a keyword set. */
 export function langFromTag(tag: string): CodeLang {
   const t = tag.toLowerCase();

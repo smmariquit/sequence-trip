@@ -38,4 +38,33 @@ describe("formatOeisLine", () => {
     const r = formatOeisLine("a(n) = weird_thing(n) unless frobnicated.");
     expect(r.isMath).toBe(false);
   });
+
+  it("strips year-bearing citations and Sum_ subscripts before judging", () => {
+    const r = formatOeisLine(
+      "Pi = 4*Sum_{k>=0} (-1)^k/(2*k+1) [Madhava-Gregory-Leibniz, 1450-1671]."
+    );
+    expect(r.isMath).toBe(true);
+    expect(r.text).not.toContain("Madhava");
+  });
+
+  it("mathifies arctan formulas", () => {
+    expect(formatOeisLine("Pi/4 = 4*arctan(1/5) - arctan(1/239). [Machin, 1706]").isMath).toBe(true);
+  });
+});
+
+describe("typesetInlineFragments", () => {
+  it("typesets parenthesized formula fragments inside prose", () => {
+    const { typesetInlineFragments } = require("../../../src/oeis/oeisMath");
+    const r = typesetInlineFragments("A002388 (Pi^2), A019692 (2*Pi=tau).");
+    expect(r.hasMath).toBe(true);
+    expect(r.text).toContain("$");
+    expect(r.text).toContain("A002388");
+  });
+
+  it("leaves plain parentheticals alone", () => {
+    const { typesetInlineFragments } = require("../../../src/oeis/oeisMath");
+    const r = typesetInlineFragments("Cf. A001203 (continued fraction).");
+    expect(r.hasMath).toBe(false);
+    expect(r.text).toBe("Cf. A001203 (continued fraction).");
+  });
 });

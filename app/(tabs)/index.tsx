@@ -168,6 +168,14 @@ export default function HomeScreen() {
               <PillButton variant="action" icon="shuffle" onPress={goRandom}>
                 Random
               </PillButton>
+              <PillButton
+                variant="action"
+                icon="git-compare-outline"
+                onPress={() => router.push("/compare")}
+                testID="home-compare"
+              >
+                Compare
+              </PillButton>
               {sotd && (
                 <PillButton
                   variant="primary"
