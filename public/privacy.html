@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Privacy Policy — Sequence Trip</title>
+<title>Sequence Trip Privacy Policy</title>
 <style>
   :root { color-scheme: light dark; }
   body { max-width: 42rem; margin: 2rem auto; padding: 0 1.25rem;
          font: 16px/1.6 system-ui, sans-serif; }
-  h1 { font-size: 1.6rem; }
-  h2 { font-size: 1.15rem; margin-top: 2rem; }
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.25rem; margin-top: 2rem; }
   code { font-family: ui-monospace, monospace; }
   footer { margin-top: 3rem; font-size: .85rem; opacity: .7; }
 </style>
 </head>
 <body>
-<h1>Privacy Policy — Sequence Trip</h1>
-<p><em>Last updated: 7 July 2026</em></p>
+<h1>Sequence Trip Privacy Policy</h1>
+<p><em>Last updated: 22 July 2026</em></p>
 
 <p>Sequence Trip (package <code>dev.stimmie.oeisvisualizations</code>) is an app for
 exploring and animating integer sequences from the On-Line Encyclopedia of Integer
@@ -33,17 +33,26 @@ browsing run entirely offline on your device. Nothing about your activity leaves
 device for our servers, because we do not operate any.</p>
 
 <h2>Network requests</h2>
-<p>The only network requests the app makes are direct fetches to the public OEIS website
-(<code>oeis.org</code>) when you open a sequence that needs additional terms
-(b-files). These requests contain the sequence identifier you are viewing and standard
-technical information (such as your IP address, which any web request necessarily
-includes). They are handled by OEIS under
+<p>The app makes two kinds of network requests, neither of which identifies you:</p>
+<p><strong>OEIS fetches.</strong> When you open a sequence that needs additional terms
+(b-files) or the full entry, the app fetches them from the public OEIS website
+(<code>oeis.org</code>). These requests contain the sequence identifier you are viewing
+and standard technical information (such as your IP address, which any web request
+necessarily includes). They are handled by OEIS under
 <a href="https://oeis.org/wiki/The_OEIS_End-User_License_Agreement">their own terms</a>;
 we neither see nor log them.</p>
+<p><strong>App update checks.</strong> On launch, the app contacts Expo's update service
+(EAS Update) to check for and download bug fixes to the app's JavaScript code that we
+have published. These requests include the app's version, runtime, and platform; they
+contain no user identifiers, no account information, and nothing about your activity in
+the app. Expo's handling of these requests is described in the
+<a href="https://expo.dev/privacy">Expo privacy policy</a>.</p>
 
 <h2>Permissions</h2>
-<p>The app requests only internet access, used solely for the OEIS requests described
-above.</p>
+<p>The app requests internet access, used solely for the requests described above. If
+you turn on the daily sequence reminder, it also asks for permission to show
+notifications; reminders are scheduled entirely on your device and send nothing to
+anyone.</p>
 
 <h2>Children</h2>
 <p>The app collects no data from anyone, including children.</p>
