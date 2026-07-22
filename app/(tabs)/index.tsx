@@ -269,6 +269,9 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   actionsRow: {
     flexDirection: "row",
+    // four actions no longer fit one row on phones; Today wraps to its own
+    // line instead of squeezing into vertical text
+    flexWrap: "wrap",
     paddingHorizontal: PAGE_PADDING,
     gap: spacing.sm,
     marginBottom: spacing.sm,
