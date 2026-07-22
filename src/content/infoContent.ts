@@ -172,6 +172,262 @@ export const WIKI_ARTICLES: WikiArticle[] = [
     ],
   },
   {
+    id: "fibonacci",
+    title: "Fibonacci in the wild",
+    summary: "A two-number rule that reaches flowers, algorithms, and an unanswered question.",
+    icon: "leaf-outline",
+    sections: [
+      {
+        id: "fibonacci-rule",
+        title: "Add the last two",
+        body: [
+          "Start with 0 and 1, then add the previous two numbers: 0, 1, 1, 2, 3, 5, 8, …. That is the Fibonacci sequence. Its neighboring ratios settle toward the golden ratio, $\\varphi = (1 + \\sqrt{5}) / 2$.",
+          "The same count appears when you ask how many ways there are to climb n steps using one-step and two-step moves. It is a reminder that a sequence is often a counting machine in disguise.",
+        ],
+        anums: ["A000045", "A000032"],
+      },
+      {
+        id: "fibonacci-see",
+        title: "See it",
+        body: [
+          "Open Fibonacci in the polar spiral view. The points turn by the golden angle, so nearby points keep filling the gaps instead of lining up into spokes. Many flowers and seed heads show spiral counts that are adjacent Fibonacci numbers.",
+        ],
+        image: WIKI_IMAGES.sunflower,
+      },
+      {
+        id: "fibonacci-real-world",
+        title: "In the real world",
+        body: [
+          "The one-step-or-two-step question is a tiny version of dynamic programming: break a large counting problem into smaller ones, remember their answers, and build upward. The recurrence is also used in models of branching and plant spirals.",
+        ],
+      },
+      {
+        id: "fibonacci-open-door",
+        title: "An open door",
+        body: [
+          "Some Fibonacci numbers are prime. No one knows whether there are infinitely many Fibonacci primes. A rule this short can still hide questions far beyond brute-force calculation.",
+        ],
+        links: [
+          { label: "Fibonacci numbers, OEIS A000045", url: "https://oeis.org/A000045" },
+          { label: "Fibonacci primes, OEIS A001605", url: "https://oeis.org/A001605" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "catalan",
+    title: "Counting without counting",
+    summary: "Catalan numbers count brackets, paths, trees, and many surprisingly similar things.",
+    icon: "git-branch-outline",
+    sections: [
+      {
+        id: "catalan-rule",
+        title: "One answer, many questions",
+        body: [
+          "The Catalan numbers begin 1, 1, 2, 5, 14, 42, …. The fifth term can count five ways to parenthesize four objects, five mountain walks that never dip below ground, or five ways to split a polygon into triangles.",
+          "That is not a coincidence. A bijection is a reversible translation between two kinds of objects. Finding one explains why two different-looking problems share the same answer.",
+        ],
+        anums: ["A000108", "A000984", "A001006"],
+      },
+      {
+        id: "catalan-see",
+        title: "See it",
+        body: [
+          "Compare Catalan numbers with the central binomial coefficients. On the ratio view, Catalan is exactly the central binomial coefficient divided by n + 1. The shared log-scale view makes their common base-4 growth visible.",
+        ],
+        image: WIKI_IMAGES.yanghui,
+      },
+      {
+        id: "catalan-real-world",
+        title: "In the real world",
+        body: [
+          "Compilers must recognize correctly nested parentheses, brackets, and blocks. The same tree-shaped structures appear in expression parsers, version-control histories, and ways to split a problem into subproblems.",
+        ],
+      },
+      {
+        id: "catalan-open-door",
+        title: "An open door",
+        body: [
+          "Catalan numbers have hundreds of known interpretations, and new ones still appear. A good challenge is to take a counting problem you care about and look for the hidden tree or path that turns it into a Catalan problem.",
+        ],
+        links: [
+          { label: "Catalan numbers, OEIS A000108", url: "https://oeis.org/A000108" },
+          { label: "Richard Stanley, Catalan Numbers", url: "https://doi.org/10.1017/CBO9781107420206" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "simple-mysteries",
+    title: "Simple rules, deep mysteries",
+    summary: "Three rules you can run by hand, with questions nobody has settled.",
+    icon: "help-circle-outline",
+    sections: [
+      {
+        id: "mystery-rules",
+        title: "Rules small enough to play",
+        body: [
+          "Recamán tries to step backward by n, but steps forward whenever that would go below zero or revisit a number. Kolakoski writes down the lengths of its own runs. Collatz halves an even number and triples an odd one before adding one.",
+          "Each rule is easy to state. The sequences they create are hard because every new term remembers, directly or indirectly, the whole path before it.",
+        ],
+        anums: ["A005132", "A000002", "A006577"],
+      },
+      {
+        id: "mystery-see-hear",
+        title: "See it and hear it",
+        body: [
+          "Recamán's arc view turns jumps into a map. Its sound is especially revealing because the rule repeatedly changes direction. Kolakoski is best tried with the mod grid or the rhythm instrument: its only values are 1 and 2, but their runs keep reorganizing themselves.",
+        ],
+      },
+      {
+        id: "mystery-real-world",
+        title: "In the real world",
+        body: [
+          "Run-length descriptions are practical data-compression ideas. These sequences are not compression formats, but they teach the same lesson: local rules can encode long, structured behavior without storing a long script.",
+        ],
+      },
+      {
+        id: "mystery-open-door",
+        title: "An open door",
+        body: [
+          "Nobody knows whether Recamán eventually visits every nonnegative integer. Nobody has proved that Kolakoski has equally many 1s and 2s in the long run. And the Collatz conjecture asks whether every positive start eventually reaches 1.",
+        ],
+        links: [
+          { label: "Recamán's sequence, OEIS A005132", url: "https://oeis.org/A005132" },
+          { label: "Kolakoski sequence, OEIS A000002", url: "https://oeis.org/A000002" },
+          { label: "Tao, Almost all orbits of the Collatz map", url: "https://arxiv.org/abs/1909.03562" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "digits-and-bases",
+    title: "Digits make patterns",
+    summary: "Binary digits can build a sequence that is regular, musical, and never repeating.",
+    icon: "keypad-outline",
+    sections: [
+      {
+        id: "thue-morse-rule",
+        title: "Count the 1s",
+        body: [
+          "The Thue-Morse sequence writes 0 when a number has an even number of 1s in binary, and 1 when it has an odd number: 0, 1, 1, 0, 1, 0, 0, 1, …. It is built by copying a block and then flipping every bit.",
+          "It never settles into a repeating loop, yet it is generated by a tiny machine that only reads binary digits. That makes it an automatic sequence.",
+        ],
+        anums: ["A010060", "A000069", "A001969"],
+      },
+      {
+        id: "thue-morse-see-hear",
+        title: "See it and hear it",
+        body: [
+          "Use a mod grid or turtle walk. In the grid, the copied-and-flipped blocks make the recursion obvious. With rhythm enabled, the 0s and 1s form a recognizable binary pulse rather than a simple repeated beat.",
+        ],
+      },
+      {
+        id: "thue-morse-real-world",
+        title: "In the real world",
+        body: [
+          "Thue-Morse gives a fair-looking way to alternate two choices. Prouhet's construction uses it to split consecutive numbers into two teams whose sums, squares, and higher powers balance exactly over carefully chosen blocks.",
+        ],
+      },
+      {
+        id: "thue-morse-open-door",
+        title: "An open door",
+        body: [
+          "Automatic sequences sit between repetition and randomness. They are simple enough to generate from digits, but rich enough to raise hard questions about patterns, frequencies, and what a small machine can create.",
+        ],
+        links: [
+          { label: "Thue-Morse sequence, OEIS A010060", url: "https://oeis.org/A010060" },
+          { label: "Allouche and Shallit, Automatic Sequences", url: "https://doi.org/10.1017/CBO9780511546563" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "partitions",
+    title: "Making sums",
+    summary: "How many ways can a number be broken into parts, and why the answer grows so fast?",
+    icon: "layers-outline",
+    sections: [
+      {
+        id: "partition-rule",
+        title: "Seven ways to make five",
+        body: [
+          "A partition of a number is a sum where order does not matter. There are seven partitions of 5: 5; 4 + 1; 3 + 2; 3 + 1 + 1; 2 + 2 + 1; 2 + 1 + 1 + 1; and five 1s.",
+          "The partition numbers begin 1, 1, 2, 3, 5, 7, 11, 15, …. Small inputs give modest answers, then the count rises much faster than any polynomial.",
+        ],
+        anums: ["A000041", "A000009", "A000110"],
+      },
+      {
+        id: "partition-see",
+        title: "See it",
+        body: [
+          "Overlay ordinary partitions, partitions into distinct parts, and Bell numbers. A shared log scale turns three kinds of counting question into three visibly different growth stories.",
+        ],
+      },
+      {
+        id: "partition-real-world",
+        title: "In the real world",
+        body: [
+          "Partitions count ways to distribute a total. That is why their generating functions appear in statistical mechanics, where a fixed amount of energy can be split among many possible states.",
+        ],
+      },
+      {
+        id: "partition-open-door",
+        title: "An open door",
+        body: [
+          "Ramanujan found startling divisibility patterns in partition numbers, such as p(5k + 4) always being divisible by 5. Researchers still look for new congruences and explanations of how these arithmetic patterns fit together.",
+        ],
+        links: [
+          { label: "Partition numbers, OEIS A000041", url: "https://oeis.org/A000041" },
+          { label: "Ramanujan's partition congruences", url: "https://doi.org/10.1017/S0305004100010095" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "primes",
+    title: "The primes keep surprising us",
+    summary: "The building blocks of multiplication still hide their most basic patterns.",
+    icon: "lock-closed-outline",
+    sections: [
+      {
+        id: "prime-rule",
+        title: "Atoms of multiplication",
+        body: [
+          "A prime is a whole number greater than 1 with exactly two positive divisors: 1 and itself. Every whole number above 1 has one unique factorization into primes, which is why primes are the basic pieces of arithmetic.",
+          "Their positions look irregular, but they are not random. The prime number theorem says the nth prime is about n log n, so gaps slowly widen on average while still making dramatic local surprises.",
+        ],
+        anums: ["A000040", "A001359", "A000720"],
+      },
+      {
+        id: "prime-see",
+        title: "See it",
+        body: [
+          "Open the prime sequence in the mod grid or compare primes with composites. The grid reveals which remainders can contain primes, while the comparison shows the prime side thinning out without ever disappearing.",
+        ],
+      },
+      {
+        id: "prime-real-world",
+        title: "In the real world",
+        body: [
+          "Public-key cryptography depends on problems involving very large primes. Your device can publish a key for others to use without publishing the private information that makes its security work.",
+        ],
+      },
+      {
+        id: "prime-open-door",
+        title: "An open door",
+        body: [
+          "Twin primes differ by two, like 11 and 13. We know there are infinitely many pairs of primes that are not too far apart, but nobody has proved that infinitely many twin-prime pairs exist.",
+        ],
+        links: [
+          { label: "Prime numbers, OEIS A000040", url: "https://oeis.org/A000040" },
+          { label: "Twin primes, OEIS A001359", url: "https://oeis.org/A001359" },
+          { label: "NIST Digital Signature Standard", url: "https://csrc.nist.gov/pubs/fips/186-5/final" },
+        ],
+      },
+    ],
+  },
+  {
     id: "seeing",
     title: "Ways to see a sequence",
     summary: "What each visualization reveals, and when to compare instead.",

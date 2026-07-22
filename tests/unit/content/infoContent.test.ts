@@ -1,4 +1,9 @@
-import { INFO_SECTIONS, WIKI_ARTICLES, getArticle, getInfoSection } from "../../../src/content/infoContent";
+import {
+  INFO_SECTIONS,
+  WIKI_ARTICLES,
+  getArticle,
+  getInfoSection,
+} from "../../../src/content/infoContent";
 
 describe("infoContent", () => {
   it("defines the wiki articles", () => {
@@ -6,6 +11,12 @@ describe("infoContent", () => {
       "getting-started",
       "oeis-guide",
       "famous",
+      "fibonacci",
+      "catalan",
+      "simple-mysteries",
+      "digits-and-bases",
+      "partitions",
+      "primes",
       "seeing",
       "hearing",
       "deep-end",
@@ -35,10 +46,39 @@ describe("infoContent", () => {
     expect(seq?.bullets?.some((b) => /a\(n\)/i.test(b))).toBe(true);
   });
 
+  it("includes the research-backed Learn articles", () => {
+    for (const id of [
+      "fibonacci",
+      "catalan",
+      "simple-mysteries",
+      "digits-and-bases",
+      "partitions",
+      "primes",
+    ]) {
+      const article = getArticle(id);
+      expect(article?.sections).toHaveLength(4);
+      expect(
+        article?.sections.some(
+          (section) => section.title === "In the real world",
+        ),
+      ).toBe(true);
+      expect(
+        article?.sections.some((section) => section.title === "An open door"),
+      ).toBe(true);
+      expect(article?.sections.some((section) => section.links?.length)).toBe(
+        true,
+      );
+    }
+  });
+
   it("explains OEIS for newcomers", () => {
     const oeis = getInfoSection("oeis");
     expect(oeis?.body?.some((p) => /A-number/i.test(p))).toBe(true);
-    expect(oeis?.body?.some((p) => /N\.?\s*J\.?\s*A\.?\s*Sloane|Neil J\. A\. Sloane/i.test(p))).toBe(true);
+    expect(
+      oeis?.body?.some((p) =>
+        /N\.?\s*J\.?\s*A\.?\s*Sloane|Neil J\. A\. Sloane/i.test(p),
+      ),
+    ).toBe(true);
     expect(oeis?.links?.some((l) => l.url.includes("oeis.org"))).toBe(true);
   });
 
