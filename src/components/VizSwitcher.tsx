@@ -13,6 +13,10 @@ import MathText from "./MathText";
 import { containsLatexDelimiters } from "../math/latexDelimiters";
 import type { GenericVizChoice, GenericVizKey } from "../visualizations/generic/select";
 
+// chips stay visually compact; vertical slop brings the touch target to ~44dp
+// without horizontal overlap between neighbors
+const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
+
 export default function VizSwitcher({
   choices,
   active,
@@ -42,6 +46,7 @@ export default function VizSwitcher({
             <Pressable
               key={c.key}
               onPress={() => onSelect(c.key)}
+              hitSlop={CHIP_HIT_SLOP}
               style={({ pressed }) => [
                 styles.chip,
                 selected && styles.chipActive,
@@ -60,6 +65,7 @@ export default function VizSwitcher({
         })}
         <Pressable
           onPress={() => setInfoOpen((o) => !o)}
+          hitSlop={CHIP_HIT_SLOP}
           style={({ pressed }) => [
             styles.chip,
             infoOpen && styles.chipActive,
@@ -119,8 +125,8 @@ const makeStyles = (colors: any) => StyleSheet.create({
     lineHeight: 22,
   },
   chip: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 8,
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,

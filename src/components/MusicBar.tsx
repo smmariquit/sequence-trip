@@ -12,9 +12,11 @@ import AppIcon from "./ui/AppIcon";
 interface Props {
   /** When false, only the element chip row renders (toggle lives in Controls). */
   showHeader?: boolean;
+  /** Render as a flex child sharing a row (no own padding). */
+  inline?: boolean;
 }
 
-export default function MusicBar({ showHeader = true }: Props) {
+export default function MusicBar({ showHeader = true, inline = false }: Props) {
   const colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(colors), [colors]);
 
@@ -23,7 +25,7 @@ export default function MusicBar({ showHeader = true }: Props) {
   if (!enabled) return null;
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, inline && styles.wrapInline]}>
       {showHeader ? (
         <View style={styles.header}>
           <View style={styles.labelRow}>
@@ -111,6 +113,12 @@ const makeStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.sm,
     gap: spacing.sm,
+  },
+  wrapInline: {
+    flex: 1,
+    minWidth: 0,
+    paddingHorizontal: 0,
+    paddingBottom: 0,
   },
   header: {
     flexDirection: "row",

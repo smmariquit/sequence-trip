@@ -95,16 +95,18 @@ export default function Controls({
         <BackButton compact testID="controls-back" />
         <View style={styles.titleBlock}>
           {containsLatexDelimiters(title) ? (
-            <MathText style={styles.title} numberOfLines={2} inline>
+            <MathText style={styles.title} numberOfLines={1} inline>
               {title}
             </MathText>
           ) : (
-            <PlainText style={styles.title} numberOfLines={2}>
+            <PlainText style={styles.title} numberOfLines={1}>
               {title}
             </PlainText>
           )}
-          <ExternalLink url={`https://oeis.org/${oeis}`} label={oeis} inline />
-          <MetaChips anum={oeis} name={title} compact />
+          <View style={styles.titleMetaRow}>
+            <ExternalLink url={`https://oeis.org/${oeis}`} label={oeis} inline />
+            <MetaChips anum={oeis} name={title} compact />
+          </View>
         </View>
         <View style={styles.navActions}>
           <PillButton
@@ -195,12 +197,16 @@ export default function Controls({
         </PillButton>
       </View>
 
-      {termCount != null ? (
-        <View style={styles.metaRow}>
-          <BodyText variant="caption" style={styles.termMeta}>
-            {`${termCount.toLocaleString()} terms`}
-            {termCount >= 500 ? "  ·  large counts may lag this device" : ""}
-          </BodyText>
+      {maxSteps > 0 ? <PlaybackProgressBar /> : null}
+
+      {termCount != null || musicOn ? (
+        <View style={styles.bottomRow}>
+          {termCount != null ? (
+            <BodyText variant="caption" style={styles.termMeta} numberOfLines={1}>
+              {`${termCount.toLocaleString()} terms`}
+              {termCount >= 500 ? " · may lag" : ""}
+            </BodyText>
+          ) : null}
           {showLoadMore ? (
             <PillButton
               variant="action"
@@ -214,14 +220,12 @@ export default function Controls({
               accessibilityLabel="Load more terms"
               style={styles.loadMoreBtn}
             >
-              {loadingMore ? "…" : "More terms"}
+              {loadingMore ? "…" : "More"}
             </PillButton>
           ) : null}
+          <MusicBar showHeader={false} inline />
         </View>
       ) : null}
-
-      {maxSteps > 0 ? <PlaybackProgressBar /> : null}
-      <MusicBar showHeader={false} />
       <VizColorSheet anum={oeis} visible={colorsOpen} onClose={() => setColorsOpen(false)} />
 
       <Modal visible={moreOpen} transparent animationType="fade" onRequestClose={() => setMoreOpen(false)}>
@@ -269,6 +273,11 @@ const makeStyles = (colors: any) => StyleSheet.create({
     gap: 2,
     paddingTop: 2,
   },
+  titleMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
   title: {
     color: colors.text,
     fontSize: 18,
@@ -291,10 +300,9 @@ const makeStyles = (colors: any) => StyleSheet.create({
     flex: 1,
     minHeight: 48,
   },
-  metaRow: {
+  bottomRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.sm,
     gap: spacing.sm,
@@ -305,7 +313,7 @@ const makeStyles = (colors: any) => StyleSheet.create({
   termMeta: {
     fontVariant: ["tabular-nums"],
     marginBottom: 0,
-    flexShrink: 1,
+    flexShrink: 0,
   },
   sheetBackdrop: {
     flex: 1,
