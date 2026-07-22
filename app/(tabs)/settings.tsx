@@ -48,6 +48,16 @@ export default function SettingsScreen() {
   useSyncExternalStore(subscribeNotify, notifyVersion, notifyVersion);
   const music = musicSettings();
   const notify = notifySettings();
+  const [widgetCount, setWidgetCount] = React.useState(0);
+
+  React.useEffect(() => {
+    if (Platform.OS !== "android") return;
+    // native module exists only on Android; same guarded require as index.js
+    const { getWidgetInfo } = require("react-native-android-widget");
+    getWidgetInfo("SequenceOfDay")
+      .then((widgets: unknown[]) => setWidgetCount(widgets.length))
+      .catch(() => setWidgetCount(0));
+  }, []);
 
   return (
     <ScrollView
@@ -153,6 +163,17 @@ export default function SettingsScreen() {
               accessibilityLabel="Daily sequence notification"
             />
           </View>
+        </>
+      ) : null}
+
+      {Platform.OS === "android" ? (
+        <>
+          <SectionHeading icon="grid-outline" padded={false}>Home screen widget</SectionHeading>
+          <PlainText style={styles.note} testID="widget-hint">
+            {widgetCount > 0
+              ? "The Sequence of the Day widget is on your home screen. It updates itself a few times a day."
+              : 'Sequence Trip ships a "Sequence of the Day" home screen widget. To add it: long-press an empty spot on your home screen, tap Widgets, find Sequence Trip, and drag the widget out.'}
+          </PlainText>
         </>
       ) : null}
     </ScrollView>
