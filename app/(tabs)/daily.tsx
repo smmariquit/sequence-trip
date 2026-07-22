@@ -280,6 +280,10 @@ export default function DailyGameScreen() {
             <PlainText style={styles.statValue}>{`${stats.wins}/${stats.played}`}</PlainText>
           </CardSurface>
         </View>
+        <PlainText style={styles.statsHint}>
+          Solve any difficulty to keep the streak going, one day at a time.
+          Progress is saved on this device only.
+        </PlainText>
 
         {!isGameProgressLoaded() ? (
           <View style={styles.loading}>
@@ -355,9 +359,6 @@ export default function DailyGameScreen() {
                 >
                   Practice all puzzles
                 </PillButton>
-                <PlainText style={styles.practiceMeta}>
-                  Streak-free tryouts of the whole pool
-                </PlainText>
               </View>
             )}
 
@@ -525,6 +526,12 @@ const makeStyles = (colors: any) => StyleSheet.create({
   statsRow: {
     flexDirection: "row",
     gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  statsHint: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
     marginBottom: spacing.xl,
   },
   statChip: {

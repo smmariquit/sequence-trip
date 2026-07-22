@@ -284,6 +284,7 @@ const makeStyles = (colors: any) =>
       top: spacing.sm,
       left: spacing.sm,
       zIndex: 2,
+      alignItems: "center",
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: radii.pill,

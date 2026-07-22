@@ -34,6 +34,13 @@ export default function ExternalLink({ url, label, style, inline }: Props) {
       accessibilityRole="link"
     >
       <View style={styles.row}>
+        {url.includes("github.com") ? (
+          <AppIcon
+            name="logo-github"
+            size={inline ? 14 : 16}
+            color={colors.interactive}
+          />
+        ) : null}
         <Text style={[styles.link, inline && styles.inline, style]}>{label}</Text>
         <AppIcon
           name="open-outline"

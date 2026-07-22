@@ -101,7 +101,9 @@ const makeStyles = (colors: any) => StyleSheet.create({
     top: spacing.sm,
     right: spacing.sm,
     alignItems: "flex-end",
-    zIndex: 1,
+    // above the zoom controls (zIndex 2): the open guide popup must read
+    // over them, not slide underneath
+    zIndex: 3,
     maxWidth: 420,
   },
   row: {

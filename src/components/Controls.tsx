@@ -7,6 +7,7 @@ import * as Haptics from "expo-haptics";
 import { usePlayback } from "../playback/PlaybackContext";
 import { useMusic } from "../audio/MusicContext";
 import { containsLatexDelimiters } from "../math/latexDelimiters";
+import { formatOeisLine } from "../oeis/oeisMath";
 import { SPEEDS } from "./controlsConfig";
 import { safeAreaTop } from "../theme/layout";
 import { spacing, radii } from "../theme/tokens";
@@ -94,15 +95,22 @@ export default function Controls({
       <View style={styles.navRow}>
         <BackButton compact testID="controls-back" />
         <View style={styles.titleBlock}>
-          {containsLatexDelimiters(title) ? (
-            <MathText style={styles.title} numberOfLines={1} inline>
-              {title}
-            </MathText>
-          ) : (
-            <PlainText style={styles.title} numberOfLines={1}>
-              {title}
-            </PlainText>
-          )}
+          {(() => {
+            // OEIS names carry ASCII math ("a(n)=Sum{...}"), not $-delimited
+            // LaTeX; formatOeisLine converts when the name is a formula
+            const formatted = containsLatexDelimiters(title)
+              ? { text: title, isMath: true }
+              : formatOeisLine(title);
+            return formatted.isMath ? (
+              <MathText style={styles.title} numberOfLines={1} inline>
+                {formatted.text}
+              </MathText>
+            ) : (
+              <PlainText style={styles.title} numberOfLines={1}>
+                {title}
+              </PlainText>
+            );
+          })()}
           <View style={styles.titleMetaRow}>
             <ExternalLink url={`https://oeis.org/${oeis}`} label={oeis} inline />
             <MetaChips anum={oeis} name={title} compact />
