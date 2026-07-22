@@ -15,7 +15,7 @@ import type { GenericVizChoice, GenericVizKey } from "../visualizations/generic/
 
 // chips stay visually compact; vertical slop brings the touch target to ~44dp
 // without horizontal overlap between neighbors
-const CHIP_HIT_SLOP = { top: 6, bottom: 6 };
+const CHIP_HIT_SLOP = { top: 8, bottom: 8 };
 
 export default function VizSwitcher({
   choices,
@@ -126,7 +126,7 @@ const makeStyles = (colors: any) => StyleSheet.create({
   },
   chip: {
     paddingHorizontal: spacing.md,
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,
