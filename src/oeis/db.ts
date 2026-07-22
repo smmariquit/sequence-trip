@@ -86,6 +86,17 @@ export async function searchTerms(terms: string, limit = 30): Promise<OEISSequen
   return rows.map(toSequence);
 }
 
+let cachedCount: number | null = null;
+
+/** Total sequences in the bundled database (memoized; fixed per binary). */
+export async function sequenceCount(): Promise<number> {
+  if (cachedCount != null) return cachedCount;
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ n: number }>("SELECT COUNT(*) AS n FROM seq");
+  cachedCount = row?.n ?? 0;
+  return cachedCount;
+}
+
 export async function random(): Promise<OEISSequence> {
   const db = await getDb();
   const row = await db.getFirstAsync<Row>(

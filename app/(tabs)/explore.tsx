@@ -143,7 +143,7 @@ export default function ExploreScreen() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Endless</Text>
             <BodyText variant="caption" style={styles.sectionDesc}>
-              Random draws from all 397,167 sequences. Keep scrolling.
+              Random draws from the whole database. Keep scrolling.
             </BodyText>
           </View>
           <View style={styles.feed} testID="explore-endless">

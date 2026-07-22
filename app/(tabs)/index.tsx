@@ -54,6 +54,11 @@ export default function HomeScreen() {
   const [results, setResults] = useState<OEISSequence[] | null>(null);
   const [searching, setSearching] = useState(false);
   const [sotd, setSotd] = useState<OEISSequence | null>(null);
+  const [seqCount, setSeqCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    oeis.sequenceCount().then(setSeqCount).catch(() => {});
+  }, []);
   // field filter: tags come from the sequence NAME (see fieldsFromName), which
   // covers every sequence in the db. Difficulty is NOT a filter here: it can
   // only be honestly assigned to the ~26 curated sequences, so a difficulty
@@ -119,7 +124,11 @@ export default function HomeScreen() {
         <View style={styles.heroSection}>
           <LogoTitleRow
             title="Sequence Trip"
-            subtitle={APP_TAGLINE}
+            subtitle={
+              seqCount
+                ? `Visualizations of all ${seqCount.toLocaleString()} OEIS integer sequences`
+                : APP_TAGLINE
+            }
             size="hero"
             titleTestID="home-title"
           />
@@ -181,7 +190,9 @@ export default function HomeScreen() {
                   variant="primary"
                   icon="today-outline"
                   onPress={() => router.push(`/visualize/${sotd.anum}`)}
-                  flex
+                  // no `flex`: flex-basis 0 lets it squeeze into vertical
+                  // text instead of wrapping; grow only after wrapping
+                  style={styles.todayBtn}
                 >
                   {`Today: ${sotd.anum}`}
                 </PillButton>
@@ -275,6 +286,9 @@ const makeStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: PAGE_PADDING,
     gap: spacing.sm,
     marginBottom: spacing.sm,
+  },
+  todayBtn: {
+    flexGrow: 1,
   },
   volumeWrap: {
     paddingHorizontal: PAGE_PADDING,

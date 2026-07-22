@@ -11,7 +11,7 @@ import type { OEISSequence } from "../../src/sequences/types";
 import { useThemeColors } from "../../src/theme";
 import { BackButton, PillButton, SearchField, SectionHeading } from "../../src/components/ui";
 import PlainText from "../../src/components/PlainText";
-import { MAX_INFO_WIDTH, PAGE_PADDING, safeAreaTop, webContentColumn } from "../../src/theme/layout";
+import { MAX_INFO_WIDTH, PAGE_PADDING, safeAreaTop } from "../../src/theme/layout";
 import { radii, spacing, touch } from "../../src/theme/tokens";
 
 export default function ComparePickerScreen() {
@@ -138,7 +138,10 @@ const makeStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: PAGE_PADDING,
     paddingBottom: spacing.xxl,
     gap: spacing.sm,
-    ...webContentColumn(MAX_INFO_WIDTH),
+    // centered column on every platform, not just web
+    maxWidth: MAX_INFO_WIDTH,
+    width: "100%",
+    alignSelf: "center",
   },
   topRow: {
     flexDirection: "row",
