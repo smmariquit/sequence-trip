@@ -1,23 +1,32 @@
-import { INFO_SECTIONS, getInfoSection } from "../../../src/content/infoContent";
+import { INFO_SECTIONS, WIKI_ARTICLES, getArticle, getInfoSection } from "../../../src/content/infoContent";
 
 describe("infoContent", () => {
-  it("defines core sections", () => {
-    const ids = INFO_SECTIONS.map((s) => s.id);
-    expect(ids).toEqual([
-      "about",
-      "sequences",
-      "try",
-      "oeis",
-      "reading",
+  it("defines the wiki articles", () => {
+    expect(WIKI_ARTICLES.map((a) => a.id)).toEqual([
+      "getting-started",
+      "oeis-guide",
       "famous",
-      "deep",
-      "help",
-      "viz",
-      "glossary",
-      "offline",
-      "credits",
-      "source",
+      "seeing",
+      "hearing",
+      "deep-end",
+      "app-manual",
     ]);
+    for (const article of WIKI_ARTICLES) {
+      expect(article.summary.length).toBeGreaterThan(10);
+      expect(article.sections.length).toBeGreaterThan(0);
+      expect(getArticle(article.id)).toBe(article);
+    }
+    // section ids stay unique across the whole wiki
+    const ids = INFO_SECTIONS.map((s) => s.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("keeps sequence chips pointing at valid A-numbers", () => {
+    for (const section of INFO_SECTIONS) {
+      for (const anum of section.anums ?? []) {
+        expect(anum).toMatch(/^A\d{6}$/);
+      }
+    }
   });
 
   it("includes beginner-friendly sequence intro", () => {

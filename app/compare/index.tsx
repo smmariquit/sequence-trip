@@ -8,6 +8,31 @@ import { View, ScrollView, Pressable, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import * as oeis from "../../src/oeis/db";
 import type { OEISSequence } from "../../src/sequences/types";
+import MultiSeriesPlot from "../../src/visualizations/MultiSeriesPlot";
+
+const THUMB_W = 104;
+const THUMB_H = 64;
+
+/** Mini growth overlay for a preset card; loads terms staggered by index. */
+function PresetThumb({ anums, index }: { anums: string[]; index: number }) {
+  const [series, setSeries] = useState<string[][] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const t = setTimeout(() => {
+      Promise.all(anums.map((a) => oeis.getById(a)))
+        .then((hits) => {
+          if (!cancelled) setSeries(hits.map((h) => h?.terms ?? []));
+        })
+        .catch(() => {});
+    }, 120 * index);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [anums, index]);
+  if (!series) return <View style={{ width: THUMB_W, height: THUMB_H }} />;
+  return <MultiSeriesPlot series={series} width={THUMB_W} height={THUMB_H} />;
+}
 import { useThemeColors } from "../../src/theme";
 import { BackButton, PillButton, SearchField, SectionHeading } from "../../src/components/ui";
 import PlainText from "../../src/components/PlainText";
@@ -196,7 +221,7 @@ export default function ComparePickerScreen() {
       {picks.length === 0 && !query ? (
         <>
           <PlainText style={styles.presetHeading}>Classic matchups</PlainText>
-          {COMPARE_PRESETS.map((preset) => (
+          {COMPARE_PRESETS.map((preset, i) => (
             <Pressable
               key={preset.anums.join("-")}
               onPress={() => router.push(`/compare/${preset.anums.join("-")}`)}
@@ -205,8 +230,13 @@ export default function ComparePickerScreen() {
               accessibilityLabel={`Compare ${preset.label}`}
               testID={`compare-preset-${preset.anums[0]}`}
             >
-              <PlainText style={styles.presetLabel}>{preset.label}</PlainText>
-              <PlainText style={styles.presetWhy}>{preset.why}</PlainText>
+              <View style={styles.presetText}>
+                <PlainText style={styles.presetLabel}>{preset.label}</PlainText>
+                <PlainText style={styles.presetWhy}>{preset.why}</PlainText>
+              </View>
+              <View style={styles.presetThumb}>
+                <PresetThumb anums={preset.anums} index={i} />
+              </View>
             </Pressable>
           ))}
         </>
@@ -270,12 +300,26 @@ const makeStyles = (colors: any) => StyleSheet.create({
     marginTop: spacing.md,
   },
   preset: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radii.md,
     backgroundColor: colors.surface,
     padding: spacing.md,
     minHeight: touch.minHeight,
+  },
+  presetText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  presetThumb: {
+    width: THUMB_W,
+    height: THUMB_H,
+    borderRadius: radii.sm,
+    overflow: "hidden",
+    backgroundColor: colors.bg,
   },
   presetLabel: {
     color: colors.text,

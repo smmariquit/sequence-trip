@@ -10,6 +10,7 @@ import SectionHeading from "./SectionHeading";
 import BodyText from "./BodyText";
 import BulletRow from "./BulletRow";
 import ExternalLink from "./ExternalLink";
+import SequenceChip from "./SequenceChip";
 
 interface Props {
   section: InfoSection;
@@ -34,6 +35,13 @@ export default function InfoSectionBlock({ section }: Props) {
       {section.bullets?.map((item) => (
         <BulletRow key={item.slice(0, 24)}>{item}</BulletRow>
       ))}
+      {section.anums?.length ? (
+        <View style={styles.chipRow}>
+          {section.anums.map((anum) => (
+            <SequenceChip key={anum} anum={anum} />
+          ))}
+        </View>
+      ) : null}
       {section.links?.map((link) => (
         <ExternalLink key={link.url} url={link.url} label={link.label} />
       ))}
@@ -58,5 +66,12 @@ const makeStyles = (colors: any) => StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     marginBottom: 8,
+  },
+  chipRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 4,
+    marginBottom: 4,
   },
 });

@@ -1,11 +1,14 @@
 // src/components/InfoScreen.tsx
+//
+// The wiki index: one card per article, opening /wiki/[id].
 
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import { router } from "expo-router";
 import Constants from "expo-constants";
 import { useThemeColors } from "../theme";
 import { APP_NAME } from "../constants/brand";
-import { INFO_SECTIONS } from "../content/infoContent";
+import { WIKI_ARTICLES } from "../content/infoContent";
 import {
   MAX_INFO_WIDTH,
   PAGE_PADDING,
@@ -13,8 +16,9 @@ import {
   tabBarScrollPadding,
   webContentColumn,
 } from "../theme/layout";
-import { spacing } from "../theme/tokens";
-import { AppFooter, InfoSectionBlock, LogoTitleRow } from "./ui";
+import { radii, spacing } from "../theme/tokens";
+import { AppFooter, AppIcon, LogoTitleRow } from "./ui";
+import type { AppIconName } from "./ui/AppIcon";
 
 export default function InfoScreen() {
   const colors = useThemeColors();
@@ -30,12 +34,32 @@ export default function InfoScreen() {
       nativeID="main"
     >
       <View style={styles.topRow}>
-        <LogoTitleRow title="About" subtitle={APP_NAME} size="page" />
+        <LogoTitleRow
+          title="Wiki"
+          subtitle={`Everything about integer sequences, and about ${APP_NAME}`}
+          size="page"
+        />
         <Text style={styles.version}>v{version}</Text>
       </View>
 
-      {INFO_SECTIONS.map((section) => (
-        <InfoSectionBlock key={section.id} section={section} />
+      {WIKI_ARTICLES.map((article) => (
+        <Pressable
+          key={article.id}
+          onPress={() => router.push(`/wiki/${article.id}`)}
+          style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+          accessibilityRole="button"
+          accessibilityLabel={`Open article ${article.title}`}
+          testID={`wiki-card-${article.id}`}
+        >
+          <View style={styles.cardIcon}>
+            <AppIcon name={article.icon as AppIconName} size={22} color={colors.primary} />
+          </View>
+          <View style={styles.cardText}>
+            <Text style={styles.cardTitle}>{article.title}</Text>
+            <Text style={styles.cardSummary}>{article.summary}</Text>
+          </View>
+          <AppIcon name="chevron-forward" size={18} color={colors.textMuted} />
+        </Pressable>
       ))}
 
       <AppFooter variant="info" />
@@ -52,10 +76,11 @@ const makeStyles = (colors: any) => StyleSheet.create({
     paddingTop: safeAreaTop("home"),
     paddingHorizontal: PAGE_PADDING,
     paddingBottom: tabBarScrollPadding(),
+    gap: spacing.sm,
     ...webContentColumn(MAX_INFO_WIDTH),
   },
   topRow: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
     gap: spacing.sm,
   },
   version: {
@@ -63,5 +88,42 @@ const makeStyles = (colors: any) => StyleSheet.create({
     fontSize: 13,
     fontVariant: ["tabular-nums"],
     alignSelf: "flex-end",
+  },
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.lg,
+    backgroundColor: colors.bgCard,
+    padding: spacing.lg,
+    minHeight: 72,
+  },
+  cardPressed: {
+    opacity: 0.85,
+  },
+  cardIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: radii.pill,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.primaryDim,
+  },
+  cardText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  cardTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  cardSummary: {
+    color: colors.textDim,
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 2,
   },
 });
