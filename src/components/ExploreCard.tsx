@@ -6,10 +6,9 @@ import { router } from "expo-router";
 import type { OEISSequence } from "../sequences/types";
 import { useThemeColors, hslToHex } from "../theme";
 import { radii, spacing } from "../theme/tokens";
-import { containsLatexDelimiters } from "../math/latexDelimiters";
 import ErrorBoundary from "./ErrorBoundary";
-import MathText from "./MathText";
 import PlainText from "./PlainText";
+import SequenceName from "./SequenceName";
 import VizPreview from "./VizPreview";
 import { AnumBadge, BodyText, CardSurface, PressableCard, AppIcon } from "./ui";
 import { blurbFor } from "../sequences/metadata";
@@ -61,15 +60,7 @@ function ExploreCard({ sequence }: Props) {
         </View>
         <View style={styles.info}>
           <AnumBadge anum={sequence.anum} size="sm" />
-          {containsLatexDelimiters(sequence.name) ? (
-            <MathText style={styles.name} numberOfLines={2} inline>
-              {sequence.name}
-            </MathText>
-          ) : (
-            <PlainText style={styles.name} numberOfLines={2}>
-              {sequence.name}
-            </PlainText>
-          )}
+          <SequenceName name={sequence.name} style={styles.name} numberOfLines={2} />
           {blurb ? (
             <PlainText style={styles.blurb} numberOfLines={3}>
               {blurb}

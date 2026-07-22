@@ -8,6 +8,7 @@ import { useThemeColors } from "../theme";
 import ErrorBoundary from "./ErrorBoundary";
 import MathText from "./MathText";
 import PlainText from "./PlainText";
+import SequenceName from "./SequenceName";
 import { containsLatexDelimiters } from "../math/latexDelimiters";
 import VizPreview from "./VizPreview";
 import { AnumBadge, CardSurface, PressableCard, cardBorderStyles } from "./ui";
@@ -52,15 +53,7 @@ function SequenceCard({ sequence, cardWidth }: Props) {
         </View>
         <View style={styles.info}>
           <View style={styles.header}>
-            {containsLatexDelimiters(sequence.name) ? (
-              <MathText style={styles.name} inline>
-                {sequence.name}
-              </MathText>
-            ) : (
-              <PlainText style={styles.name} numberOfLines={2}>
-                {sequence.name}
-              </PlainText>
-            )}
+            <SequenceName name={sequence.name} style={styles.name} numberOfLines={2} />
             <AnumBadge anum={sequence.anum} />
           </View>
           {sequence.description ? (

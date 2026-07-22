@@ -20,21 +20,31 @@ export const INFO_SECTIONS: InfoSection[] = [
     body: [
       "Sequence Trip lets you watch integer sequences grow: as pictures, animations, and optional music.",
       "It is built on the On-Line Encyclopedia of Integer Sequences (OEIS), the catalog Neil J. A. Sloane (N. J. A. Sloane) started in 1964 and that thousands of contributors have expanded since.",
-      "No math background required. If you've ever noticed a pattern in a list of numbers, you're already exploring sequences.",
+      "This page is a small field guide. Start at the top if numbers are new territory; jump to the deep end if you already dream in generating functions.",
     ],
   },
   {
     id: "sequences",
-    title: "What is an integer sequence?",
+    title: "Start here: what is a sequence?",
     body: [
       "An integer sequence is an ordered list of whole numbers (…, −2, −1, 0, 1, 2, 3, …) that follows a rule. Each number in the list is called a term.",
       "You already know several. Counting is 1, 2, 3, 4, 5, … Even numbers are 0, 2, 4, 6, 8, … The Fibonacci sequence 0, 1, 1, 2, 3, 5, 8, … adds the previous two terms to get the next one.",
-      "Some rules are simple (add 1 each time). Others are strange or still unsolved, like Collatz, where every starting number is believed to eventually reach 1, but nobody has proved it for all numbers.",
+      "Sequences hide everywhere. Count the petals on flowers, the spirals in a pinecone, or the ways you can climb stairs taking 1 or 2 steps at a time. All of those lists are in the OEIS.",
+      "Some rules are simple (add 1 each time). Others are strange or still unsolved, like Collatz, where every starting number is believed to eventually reach 1, but nobody has proved it for all numbers. A kid can play with the same list an expert has studied for decades; that is the charm.",
     ],
     bullets: [
-      "Term index n starts at 0 or 1 depending on the sequence. The caption shows you which.",
       "a(n) means \"the nth term\". E.g. in 1, 2, 3, … we have a(1) = 1, a(2) = 2.",
+      "Term index n starts at 0 or 1 depending on the sequence. The caption shows you which.",
       "Search this app by name (\"fibonacci\"), by A-number (A000045), or by typing the first few terms (1,1,2,3,5).",
+    ],
+  },
+  {
+    id: "try",
+    title: "Try it yourself",
+    body: [
+      "Cover the next number and guess it before it appears. The daily OEISdle tab is exactly this game, with a new sequence every day and three difficulty levels you can all play today.",
+      "Pick a small rule of your own (double and subtract one, add the digits, anything) and write out ten terms. Then type them into the search box. If the OEIS knows your list, you have rediscovered something; if it does not, you may have found something genuinely new. People submit new sequences this way every week.",
+      "Watch the same sequence with different visualizations (the chips on the top right of a visualization) and with sound on. A pattern your eyes miss, your ears often catch.",
     ],
   },
   {
@@ -50,6 +60,50 @@ export const INFO_SECTIONS: InfoSection[] = [
       { label: "Browse oeis.org", url: "https://oeis.org" },
       { label: "N. J. A. Sloane (OEIS founder)", url: "https://oeis.org/wiki/User:N._J._A._Sloane" },
       { label: "OEIS for beginners (wiki)", url: "https://oeis.org/wiki/Welcome" },
+    ],
+  },
+  {
+    id: "reading",
+    title: "Reading an OEIS entry",
+    body: [
+      "Open any sequence here and tap the document icon to see its full OEIS entry. The parts, top to bottom:",
+    ],
+    bullets: [
+      "A-number: the permanent catalog ID, like a serial number.",
+      "Offset: the index of the first term. Offset 0 means the list starts at a(0).",
+      "Keywords: short tags from OEIS editors. \"core\" marks foundational sequences, \"nice\" especially elegant ones, \"hard\" ones where computing more terms is an open problem, \"hear\" ones worth listening to.",
+      "Data: the stored terms. Long sequences continue in a b-file, which this app fetches when you ask for more terms.",
+      "Formula: exact and asymptotic expressions, recurrences, and generating functions contributed over the years, each signed and dated.",
+      "Code: programs in PARI, Mathematica, Maple, Python, Haskell, and more that compute the sequence.",
+      "Cross-references: relatives worth visiting next. The compare button next to each one plots the two sequences against each other.",
+    ],
+  },
+  {
+    id: "famous",
+    title: "Sequences worth meeting",
+    bullets: [
+      "Fibonacci (A000045): each term is the sum of the previous two; the spiral in sunflower heads and the ratio that approaches the golden number.",
+      "Primes (A000040): the atoms of multiplication. Every whole number above 1 is built from them in exactly one way.",
+      "Recamán (A005132): hop backward when you can, forward when you must. Nobody knows whether every number is eventually visited.",
+      "Collatz stopping times (A006577): halve if even, triple and add one if odd. The most famous unsolved problem a child can state.",
+      "Catalan numbers (A000108): the answer to dozens of different counting questions at once, from balanced brackets to mountain ranges.",
+      "Kolakoski (A000002): the sequence that describes its own run lengths. Reading it IS generating it.",
+    ],
+  },
+  {
+    id: "deep",
+    title: "The deep end",
+    body: [
+      "For readers who want the real machinery, the OEIS is a working research instrument, not just a curiosity cabinet.",
+      "Generating functions compress a whole sequence into one object: Fibonacci is $x/(1-x-x^2)$, and the Formula section of most entries records such closed forms alongside recurrences and asymptotics like $F(n) \\sim \\varphi^n/\\sqrt{5}$.",
+      "Entries are connected by transforms (binomial, Euler, Möbius, and friends), so a sequence you meet in one problem is often a known transform of another; the cross-references map that web.",
+      "Empirically the OEIS even has structure of its own: plot how often each integer appears across the database and a thin band of under-represented numbers emerges, known as Sloane's gap.",
+      "In practice: compute the first 8 or 10 terms of whatever your research produces and search them before proving anything. A hit hands you formulas, references, and fifty years of prior art; a miss is an invitation to submit.",
+    ],
+    links: [
+      { label: "Superseeker (deep search)", url: "https://oeis.org/ol.html" },
+      { label: "OEIS transforms", url: "https://oeis.org/transforms.html" },
+      { label: "Sloane's gap (paper)", url: "https://arxiv.org/abs/1101.4470" },
     ],
   },
   {

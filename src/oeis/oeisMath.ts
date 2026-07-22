@@ -95,6 +95,32 @@ export function oeisAsciiToLatex(text: string): string {
   return s;
 }
 
+const MATHY_TOKEN = /^[A-Za-z0-9^_{}()+\-*/=<>.,!]+$/;
+
+/** Sequence names mix prose and math: "Expansion of Product_{m>=1} (1-x^m)^24".
+ * Typesets individual tokens that carry ^ or _{ and only formula words;
+ * everything else stays prose. */
+export function typesetNameFragments(line: string): { text: string; hasMath: boolean } {
+  let hasMath = false;
+  const text = line
+    .split(/(\s+)/)
+    .map((tok) => {
+      if (/\s/.test(tok) || tok === "") return tok;
+      if (!/\^|_\{/.test(tok) || !MATHY_TOKEN.test(tok)) return tok;
+      const words = tok.match(/[A-Za-z][A-Za-z0-9]*/g) ?? [];
+      const ok = words.every(
+        (w) => FORMULA_WORDS.has(w) || FORMULA_WORDS.has(w.toLowerCase())
+      );
+      if (!ok) return tok;
+      hasMath = true;
+      const trailing = /[.,]$/.test(tok) ? tok.slice(-1) : "";
+      const core = trailing ? tok.slice(0, -1) : tok;
+      return `$${oeisAsciiToLatex(core)}$${trailing}`;
+    })
+    .join("");
+  return hasMath ? { text, hasMath } : { text: line, hasMath: false };
+}
+
 /** Render an OEIS entry line: LaTeX-wrapped when it is safely a formula,
  * the original text otherwise. */
 export function formatOeisLine(line: string): { text: string; isMath: boolean } {

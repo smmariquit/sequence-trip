@@ -6,7 +6,11 @@ describe("infoContent", () => {
     expect(ids).toEqual([
       "about",
       "sequences",
+      "try",
       "oeis",
+      "reading",
+      "famous",
+      "deep",
       "help",
       "viz",
       "glossary",

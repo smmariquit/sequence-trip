@@ -281,8 +281,6 @@ const makeStyles = (colors: any) =>
     },
     controls: {
       position: "absolute",
-      top: spacing.sm,
-      left: spacing.sm,
       zIndex: 2,
       alignItems: "center",
       borderWidth: 1,
@@ -292,11 +290,17 @@ const makeStyles = (colors: any) =>
       padding: 3,
       gap: 2,
     },
+    // narrow: right edge below the viz switcher; the left edge belongs to
+    // the y-axis labels, which the old top-left placement covered
     controlsNarrow: {
       flexDirection: "column-reverse",
+      top: 64,
+      right: spacing.sm,
     },
     controlsWide: {
       flexDirection: "row",
+      top: spacing.sm,
+      left: spacing.sm,
     },
     control: {
       width: 40,

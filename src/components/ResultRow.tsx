@@ -9,7 +9,7 @@ import { radii, spacing } from "../theme/tokens";
 import ErrorBoundary from "./ErrorBoundary";
 import VizPreview from "./VizPreview";
 import { AnumBadge, BodyText, CardSurface, PressableCard, AppIcon, LoadingSpinner } from "./ui";
-import PlainText from "./PlainText";
+import SequenceName from "./SequenceName";
 import MetaChips from "./MetaChips";
 
 const PREVIEW_W = Platform.OS === "web" ? 120 : 80;
@@ -44,9 +44,7 @@ function ResultRow({ sequence, showPreview = true, index = 0 }: Props) {
       <CardSurface variant="card" style={styles.row}>
         <AnumBadge anum={sequence.anum} size="sm" />
         <View style={styles.body}>
-          <PlainText style={styles.name} numberOfLines={2}>
-            {sequence.name}
-          </PlainText>
+          <SequenceName name={sequence.name} style={styles.name} numberOfLines={2} />
           {sequence.terms && (
             <BodyText variant="caption" style={styles.terms} numberOfLines={1}>
               {sequence.terms.slice(0, 12).join(", ")}...
