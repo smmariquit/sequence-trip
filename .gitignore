@@ -23,3 +23,4 @@ playwright/.cache/
 logcat.txt
 interaction.log
 play-service-account.json
+dist-release/
