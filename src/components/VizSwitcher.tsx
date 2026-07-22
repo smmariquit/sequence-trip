@@ -10,6 +10,7 @@ import { useThemeColors } from "../theme";
 import { spacing, radii } from "../theme/tokens";
 import PlainText from "./PlainText";
 import MathText from "./MathText";
+import AppIcon from "./ui/AppIcon";
 import { containsLatexDelimiters } from "../math/latexDelimiters";
 import type { GenericVizChoice, GenericVizKey } from "../visualizations/generic/select";
 
@@ -78,7 +79,11 @@ export default function VizSwitcher({
           accessibilityState={{ expanded: infoOpen }}
           testID="viz-switcher-info"
         >
-          <PlainText style={infoOpen ? styles.labelActive : styles.label}>?</PlainText>
+          <AppIcon
+            name="help-circle-outline"
+            size={16}
+            color={infoOpen ? colors.primary : colors.textMuted}
+          />
         </Pressable>
       </View>
       {infoOpen ? (
