@@ -1,7 +1,7 @@
 // src/components/ui/InfoSectionBlock.tsx
 
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, Image, StyleSheet } from "react-native";
 import { useThemeColors } from "../../theme";
 import type { InfoSection } from "../../content/infoContent";
 import { containsLatexDelimiters } from "../../math/latexDelimiters";
@@ -23,6 +23,24 @@ export default function InfoSectionBlock({ section }: Props) {
   return (
     <View style={styles.section} testID={`info-section-${section.id}`}>
       <SectionHeading size="info" style={styles.heading}>{section.title}</SectionHeading>
+      {section.image ? (
+        <View style={styles.figure}>
+          <Image
+            source={section.image.source}
+            style={[styles.image, { aspectRatio: section.image.aspectRatio }]}
+            resizeMode="cover"
+            accessible
+            accessibilityRole="image"
+            accessibilityLabel={section.image.caption}
+          />
+          <BodyText variant="caption">{section.image.caption}</BodyText>
+          <ExternalLink
+            url={section.image.creditUrl}
+            label={section.image.credit}
+            inline
+          />
+        </View>
+      ) : null}
       {section.body?.map((paragraph) =>
         containsLatexDelimiters(paragraph) ? (
           <MathText key={paragraph.slice(0, 24)} style={styles.mathBody}>
@@ -73,5 +91,14 @@ const makeStyles = (colors: any) => StyleSheet.create({
     gap: 8,
     marginTop: 4,
     marginBottom: 4,
+  },
+  figure: {
+    gap: 6,
+    marginBottom: 8,
+  },
+  image: {
+    width: "100%",
+    borderRadius: 12,
+    backgroundColor: colors.surface,
   },
 });
