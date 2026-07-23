@@ -19,7 +19,13 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#07060E"
       },
-      "versionCode": 15
+      "versionCode": 15,
+      "edgeToEdgeEnabled": true,
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "ios": {
       "bundleIdentifier": "dev.stimmie.oeisvisualizations",
@@ -37,6 +43,7 @@
       "lang": "en"
     },
     "plugins": [
+      "./plugins/withRemoveAudioServices.js",
       "expo-router",
       "expo-font",
       "expo-asset",
